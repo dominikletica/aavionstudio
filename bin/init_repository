@@ -9,7 +9,7 @@ echo ">>> Running composer install"
 composer install --no-interaction --prefer-dist
 
 echo ">>> Installing importmap assets"
-php bin/console importmap:install --download=always
+php bin/console importmap:install
 
 echo ">>> Building Tailwind assets"
 php bin/console tailwind:build
@@ -18,7 +18,7 @@ echo ">>> Compiling asset map"
 php bin/console asset-map:compile
 
 echo ">>> Creating SQLite database (if needed)"
-php bin/console doctrine:database:create --if-not-exists
+php bin/console doctrine:database:create
 
 echo ">>> Ensuring Messenger transports exist"
 php bin/console messenger:setup-transports
