@@ -1,5 +1,12 @@
 @import "tailwindcss";
+@import "./codemirror.css";
 
-body {
-    background-color: skyblue;
+@layer components {
+    .cm-wrapper {
+        @apply border border-slate-300 rounded-md bg-white;
+    }
+
+    .cm-editor {
+        @apply text-sm;
+    }
 }

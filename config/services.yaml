@@ -4,6 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.user_database_path: '%kernel.project_dir%/var/user.brain'
 
 services:
     # default configuration for services in *this* file
@@ -15,6 +16,12 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+
+    App\Doctrine\Listener\AttachUserDatabaseListener:
+        arguments:
+            $userDatabasePath: '%app.user_database_path%'
+        tags:
+            - { name: doctrine.event_listener, event: postConnect }
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
