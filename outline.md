@@ -111,6 +111,7 @@ Relationen werden über Entities vom Typ "relation" gelöst.
 - `[query {@entity?} select field[,field…] where field <op> value|@entity.field {and/or …} {sort} {order} {mode} {template …}]…[/query]`
   - `<op>` kann folgendes sein: ==, !=, <, >, <=, >=, ~ (contains), in (array, commalist)
   - `where` `<field>` kann mehrere Felder abgleichen (`<field1>|<field2>`).
+  - `value` kann `@entity.field` vergleichen.
 
 **Verhalten:**
 - Shortcodes bleiben als Marker im gespeicherten Content (nicht „eingebacken“), "mode array" überschreibt dieses Verhalten für Auswertungen.
@@ -119,6 +120,7 @@ Relationen werden über Entities vom Typ "relation" gelöst.
 
 💬 Kommentar: Parser als Twig‑Tag/TokenParser (stabiler als reine Regex); Stripping der aufgelösten Inhalte bei erneutem Speichern, damit Inhalte dynamisch bleiben.
 Fieldsets (Json-Schema) kann Aggregat-Felder beinhalten (hidden, read-only, enthält einen Query und liefert ein Array zurück für weitere Abfragen.
+@(self).field referenziert ein Feld der aktuellen Entity.
 
 ---
 
