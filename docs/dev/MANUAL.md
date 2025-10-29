@@ -4,7 +4,7 @@ This manual is the entry point for development workflows. Additional deep dives 
 
 ## Environment Bootstrap
 
-- Run `bin/init_repository.sh` after cloning. It installs Composer dependencies, refreshes importmap/Tailwind assets, prepares SQLite databases, ensures Messenger transports, and rebuilds caches.
+- Run `bin/init_repository` after cloning. It installs Composer dependencies, refreshes importmap/Tailwind assets, prepares SQLite databases, ensures Messenger transports, and rebuilds caches.
 - Environment variables: `APP_ENV=dev`, `APP_DEBUG=1`, `DATABASE_URL=sqlite:///%kernel.project_dir%/var/system.brain`. Place project-specific overrides in `.env.local`.
 
 ## Project References
