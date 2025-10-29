@@ -118,8 +118,8 @@ Relationen werden über Entities vom Typ "relation" gelöst.
 - Beim Publish werden Ergebnisse inline ergänzt (für deterministische Nachvollziehbarkeit) und im Snapshot persistiert.
 - Fehler als Codes (übersetzbar): `ERR_REF_ENTITY_NOT_FOUND`, `ERR_QUERY_UNRESOLVABLE`, `ERR_QUERY_NO_RESULTS`.
 
-💬 Kommentar: Parser als Twig‑Tag/TokenParser (stabiler als reine Regex); Stripping der aufgelösten Inhalte bei erneutem Speichern, damit Inhalte dynamisch bleiben.
-Fieldsets (Json-Schema) kann Aggregat-Felder beinhalten (hidden, read-only, enthält einen Query und liefert ein Array zurück für weitere Abfragen.
+💬 Kommentar: Parser als Twig‑Tag/TokenParser (stabiler als reine Regex); Stripping der aufgelösten Inhalte bei erneutem Speichern, damit Inhalte dynamisch bleiben.  
+Fieldsets (Json-Schema) kann Aggregat-Felder beinhalten (hidden, read-only, enthält einen Query und liefert ein Array zurück für weitere Abfragen).  
 @(self).field referenziert ein Feld der aktuellen Entity.
 
 ---
