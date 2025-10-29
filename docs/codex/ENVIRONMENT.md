@@ -19,9 +19,9 @@ Repository root: /Users/letica/Library/Mobile Documents/com~apple~CloudDocs/Repo
 ## References
 - Composer dependencies: composer.json / composer.lock (if present)
 - Node dependencies: package.json / package-lock.json (if present)
-- Worklog & notes: .codex/WIRKLOG.md
-- Additional notes: .codex/notes/*.md
+- Worklog & notes: docs/codex/WORKLOG.md
+- Additional notes: docs/codex/notes/*.md
 - Documentation: docs/ (always keep aligned with codebase - both user and developer docs)
 
 ## Toolbox
-Reusable scripts should live in `.codex/toolbox/`. Add helpers here to avoid re-writing shell snippets.
+Reusable scripts should live directly under `.codex/` (e.g. `.codex/scripts/` or `.codex/snippets/`). Add helpers here to avoid re-writing shell snippets.
