@@ -18,6 +18,7 @@ Leichtgewichtiges Full‑Stack CMS mit:
 - Resolver für `[ref]`/`[query]` Shortcodes (Querverweise, Abfragen),
 - deterministischem „Published Snapshot“ je Projekt als SoT für Frontend, API, Export,
 - optionalen LLM‑Exporten (JSON/JSONL, optional TOON als Extra-Flavor).
+- optionalem Inline/OnSite-Context für die Zusammenarbeit in KI-gestützten Browser-Umgebungen (wie ChatGPT Atlas).
 
 💬 Kommentar: Der „Published Snapshot“ ist die eine, klare Wahrheit. Draft/Versionierung leben in SQLite, aber ausgeliefert werden nur veröffentlichte, bereits aufgelöste Daten.
 
