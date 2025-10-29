@@ -42,6 +42,7 @@
 - After each feature/refactor, cross-check code vs. docs; update docs on the spot or record the discrepancy with owner and next steps.
 - When closing a session, read relevant Markdown files end-to-end to catch drift, document outcomes in the worklog, and note pending actions.
 - Prefer non-throwing flows in production code: handle errors, log context-rich messages, and surface recoverable issues gracefully.
+- Follow the documentation style guide (`docs/STYLEGUIDE.md`). Use templates from `docs/templates/` when creating new guides. Place screenshots under `docs/assets/` and update `docs/dev/classmap.md` with new callables.
 
 ## Compatibility & Refactoring Policy
 - Until the first public major release (1.0.0), backwards compatibility is not required. Favour clean refactors over legacy shims and remove obsolete code; update callers and documentation immediately when behaviour changes.
@@ -58,3 +59,14 @@
 - Environment recap: `docs/codex/ENVIRONMENT.md`
 - README entry point: `README.md`
 - Helper scripts & snippets: store under `.codex/`
+- Style guide: `docs/STYLEGUIDE.md`
+- Templates: `docs/templates/`
+
+## Review Guidelines
+- Ensure `docs/codex/WORKLOG.md` session notes and TODOs reflect the change set.
+- Check documentation updates adhere to `docs/STYLEGUIDE.md` (headings, tone, status tags) and leverage templates when applicable.
+- Verify class map entries (`docs/dev/classmap.md`) for new/modified callables; include test references.
+- Confirm PR checklist items are addressed (testing, documentation, screenshots, security notes).
+- Flag any drift between code and feature drafts (`docs/codex/notes/*.md`) and update or log follow-ups.
+- Review tests (unit/integration/UI) for completeness and determinism; ensure coverage for new logic.
+- Run or schedule Markdown link checks; report broken references and update docs during review when possible.
