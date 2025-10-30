@@ -8,7 +8,7 @@
 #### Hosting & Installer
 - [x] Finalise rewrite-first vs root fallback handling, including installer warnings and documentation hooks
 - [x] Build installer wizard steps (diagnostics → environment → storage/db → admin account → summary) with `.env.local.php` generator
-- [ ] Implement health checks for PHP extensions, writable `var/*` directories, and SQLite availability with actionable remediation hints
+- [x] Implement health checks for PHP extensions, writable `var/*` directories, and SQLite availability with actionable remediation hints
 - [x] Deliver root-level `index.php` compatibility loader plus hardening (`Options -Indexes`, deny sensitive paths) and banner logic
 
 #### Module System
@@ -132,7 +132,7 @@
 
 ## Roadmap To Next Release
 - [x] **Step 1:** Discuss open questions & confirm hosting/security decisions
-- [ ] **Step 2:** Implement Core Platform & architecture foundation
+- [x] **Step 2:** Implement Core Platform & architecture foundation
 - [ ] **Step 3:** Implement User Management & Access Control
 - [ ] **Step 4:** Build Admin Studio UI shell & navigation
 - [ ] **Step 5:** Deliver Schema/Template system & Draft/Commit workflow
@@ -203,3 +203,4 @@
 - Introduced filesystem-based module discovery/registry with repository metadata for future `.aavmodule` update scans, updating docs and tests accordingly
 - Synced module metadata with `app_module_state`, exposed aggregated capabilities/parameters, and scaffolded the browser setup wizard (`/setup`) with diagnostics-friendly Twig template and functional test
 - Added root compatibility loader with rewrite diagnostics and installer warnings, shipped Apache/IIS fallback configs, nginx guidance, and corresponding unit/functional tests plus documentation updates
+- Expanded installer diagnostics with actionable extension and filesystem checks (hints for `var/*` and `public/assets/`), keeping tests/docs in sync

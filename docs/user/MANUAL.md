@@ -14,6 +14,7 @@ Welcome! This manual will guide administrators, editors, and integrators through
 - **Web Server Configuration** – See [detailed hosting recipes](sections/getting-started/web-server-configuration.md) for Apache, nginx, and IIS.
 - **Quick Installation** – Using the browser installer vs. manual configuration.
   - Visit `/setup` after uploading the release archive; follow the on-screen steps for diagnostics, environment, storage, admin, and summary.
+  - The diagnostics panel highlights missing PHP extensions and writable directory issues with remediation hints.
 - **Post-Install Checklist** – Create first admin, configure email, set up backups, enable modules.
 
 ---

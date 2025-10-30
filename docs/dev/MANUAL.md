@@ -40,7 +40,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 | `assets/` | Tailwind styles, Stimulus controllers, JS modules |
 | `public/` | Webroot (front controller, built assets) |
 | `config/app/` | Default seeds for system settings, projects, modules |
-| `var/` | Cache, logs, SQLite databases (`var/system.brain`, `var/user.brain`), snapshots, uploads, backups |
+| `var/` | Cache, logs, SQLite databases (`var/system.brain`, `var/user.brain`), snapshots, uploads, backups (installer diagnostics flag missing/writable directories) |
 | `docs/` | Documentation (developer, user, codex notes) |
 | `modules/` | Drop-in feature modules discovered via `module.php` manifests (no Composer autoload required, support `.aavmodule` bundles) |
 

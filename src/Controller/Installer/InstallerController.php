@@ -40,21 +40,7 @@ final class InstallerController extends AbstractController
      */
     private function gatherDiagnostics(): array
     {
-        $extensions = [
-            'ext-intl',
-            'ext-sqlite3',
-            'ext-fileinfo',
-            'ext-json',
-            'ext-mbstring',
-            'ext-ctype',
-        ];
-
-        $extensionStatuses = [];
-
-        foreach ($extensions as $extension) {
-            $extensionName = str_starts_with($extension, 'ext-') ? substr($extension, 4) : $extension;
-            $extensionStatuses[$extension] = \extension_loaded($extensionName);
-        }
+        $extensions = $this->gatherExtensionDiagnostics();
 
         $projectDir = \dirname(__DIR__, 3);
         $databaseUrl = $_ENV['DATABASE_URL'] ?? $_SERVER['DATABASE_URL'] ?? sprintf('sqlite:///%s/var/system.brain', $projectDir);
@@ -80,9 +66,10 @@ final class InstallerController extends AbstractController
 
         return [
             'php_version' => PHP_VERSION,
-            'extensions' => $extensionStatuses,
+            'extensions' => $extensions,
             'sqlite' => $sqliteReport,
             'rewrite' => $this->gatherRewriteDiagnostics(),
+            'filesystem' => $this->gatherFilesystemDiagnostics($projectDir),
         ];
     }
 
@@ -140,5 +127,126 @@ final class InstallerController extends AbstractController
         $value = $_SERVER[$key] ?? $_ENV[$key] ?? getenv($key);
 
         return \is_string($value) && $value !== '' ? $value : $fallback;
+    }
+
+    /**
+     * @return list<array{code:string,label:string,available:bool,required:bool,hint:string}>
+     */
+    private function gatherExtensionDiagnostics(): array
+    {
+        $requirements = [
+            'ext-intl' => [
+                'label' => 'intl',
+                'hint' => 'Install/enable the Intl extension (`php-intl`) to provide locale, date, and number formatting.',
+                'required' => true,
+            ],
+            'ext-sqlite3' => [
+                'label' => 'sqlite3',
+                'hint' => 'Enable the SQLite3 extension to power the system and user data stores.',
+                'required' => true,
+            ],
+            'ext-fileinfo' => [
+                'label' => 'fileinfo',
+                'hint' => 'Enable the Fileinfo extension for media uploads and MIME detection.',
+                'required' => true,
+            ],
+            'ext-json' => [
+                'label' => 'json',
+                'hint' => 'Enable the JSON extension. Most PHP distributions ship it by default.',
+                'required' => true,
+            ],
+            'ext-mbstring' => [
+                'label' => 'mbstring',
+                'hint' => 'Enable mbstring for multibyte string handling (content editing & localisation).',
+                'required' => true,
+            ],
+            'ext-ctype' => [
+                'label' => 'ctype',
+                'hint' => 'Enable the ctype extension for validation helpers.',
+                'required' => true,
+            ],
+        ];
+
+        $extensions = [];
+
+        foreach ($requirements as $code => $meta) {
+            $extensionName = str_starts_with($code, 'ext-') ? substr($code, 4) : $code;
+            $available = \extension_loaded($extensionName);
+
+            $extensions[] = [
+                'code' => $code,
+                'label' => $meta['label'],
+                'available' => $available,
+                'required' => (bool) $meta['required'],
+                'hint' => $meta['hint'],
+            ];
+        }
+
+        return $extensions;
+    }
+
+    /**
+     * @return list<array{code:string,label:string,path:string,exists:bool,writable:bool,parent_writable:bool,hint:string}>
+     */
+    private function gatherFilesystemDiagnostics(string $projectDir): array
+    {
+        $paths = [
+            'var_root' => [
+                'label' => 'var/ directory',
+                'path' => $projectDir.'/var',
+                'hint' => 'Ensure the web user can write to var/ for cache, logs, and databases.',
+            ],
+            'var_cache' => [
+                'label' => 'var/cache',
+                'path' => $projectDir.'/var/cache',
+                'hint' => 'Symfony stores runtime cache here; make sure it exists and is writable.',
+            ],
+            'var_log' => [
+                'label' => 'var/log',
+                'path' => $projectDir.'/var/log',
+                'hint' => 'Application logs are written here; grant write access.',
+            ],
+            'var_snapshots' => [
+                'label' => 'var/snapshots',
+                'path' => $projectDir.'/var/snapshots',
+                'hint' => 'Published site snapshots live here; create the directory if missing.',
+            ],
+            'var_uploads' => [
+                'label' => 'var/uploads',
+                'path' => $projectDir.'/var/uploads',
+                'hint' => 'Uploads and temporary media storage; ensure the directory exists and is writable.',
+            ],
+            'var_themes' => [
+                'label' => 'var/themes',
+                'path' => $projectDir.'/var/themes',
+                'hint' => 'Theme bundles unpack here; create and grant write permissions.',
+            ],
+            'public_assets' => [
+                'label' => 'public/assets',
+                'path' => $projectDir.'/public/assets',
+                'hint' => 'AssetMapper builds JS/CSS here; make sure deploy user can write.',
+            ],
+        ];
+
+        $reports = [];
+
+        foreach ($paths as $code => $details) {
+            $path = $details['path'];
+            $exists = is_dir($path);
+            $writable = $exists && is_writable($path);
+            $parentWritable = is_writable(\dirname($path));
+
+            $reports[] = [
+                'code' => $code,
+                'label' => $details['label'],
+                'path' => $path,
+                'exists' => $exists,
+                'writable' => $writable,
+                'parent_writable' => $parentWritable,
+                'hint' => $details['hint'],
+            ];
+        }
+
+        return $reports;
     }
 }

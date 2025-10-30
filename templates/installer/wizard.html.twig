@@ -54,18 +54,26 @@
                 </dl>
 
                 <h3>Required extensions</h3>
-                <table>
+                <table data-testid="diagnostics-extensions">
                     <thead>
                     <tr>
                         <th scope="col">Extension</th>
                         <th scope="col">Status</th>
+                        <th scope="col">Hint</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for extension, available in diagnostics.extensions %}
+                    {% for extension in diagnostics.extensions %}
                         <tr>
-                            <td>{{ extension }}</td>
-                            <td>{{ available ? 'available' : 'missing' }}</td>
+                            <td>{{ extension.label }}</td>
+                            <td>{{ extension.available ? 'available' : 'missing' }}</td>
+                            <td>
+                                {% if not extension.available %}
+                                    {{ extension.hint }}
+                                {% else %}
+                                    &mdash;
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -86,6 +94,46 @@
                     <dt>busy_timeout (ms)</dt>
                     <dd>{{ diagnostics.sqlite.busy_timeout_ms }}</dd>
                 </dl>
+
+                <h3>Filesystem checks</h3>
+                <table data-testid="diagnostics-filesystem">
+                    <thead>
+                    <tr>
+                        <th scope="col">Directory</th>
+                        <th scope="col">Exists</th>
+                        <th scope="col">Writable</th>
+                        <th scope="col">Hint</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for directory in diagnostics.filesystem %}
+                        <tr>
+                            <td><code>{{ directory.path }}</code></td>
+                            <td>{{ directory.exists ? 'yes' : 'no' }}</td>
+                            <td>
+                                {% if directory.writable %}
+                                    yes
+                                {% elseif directory.exists %}
+                                    no
+                                {% else %}
+                                    {% if directory.parent_writable %}
+                                        parent writable
+                                    {% else %}
+                                        no
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if directory.writable %}
+                                    &mdash;
+                                {% else %}
+                                    {{ directory.hint }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </section>
         {% elseif current_step == 'environment' %}
             <section>

@@ -24,6 +24,8 @@ final class InstallerControllerTest extends WebTestCase
         $this->assertSelectorTextContains('nav[aria-label="Wizard Steps"] ol li:first-child', 'Diagnostics');
         $this->assertSelectorTextContains('main h2', 'Environment diagnostics');
         $this->assertSelectorTextContains('main', 'Docroot & rewrite status');
+        $this->assertSelectorExists('table[data-testid="diagnostics-extensions"]');
+        $this->assertSelectorExists('table[data-testid="diagnostics-filesystem"]');
     }
 
     public function testSetupWizardShowsCompatibilityWarningWhenRootEntryActive(): void
