@@ -170,3 +170,6 @@
 - Added release automation (`bin/release`) creating environment/version/channel-specific packages with metadata
 - Clarified documentation portals, manuals, and release workflow references; added user/dev section skeletons and class map
 - Generated dummy `release.json` for tooling; release script now cleans Tailwind binaries and rewrites metadata ahead of staging
+
+### 2025-10-30 (Session 2)
+- Adjusted release script to generate metadata inside the build directory and atomically refresh the tracked `release.json`, plus aligned the release workflow guide
