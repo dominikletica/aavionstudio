@@ -25,14 +25,16 @@ BUILD_DIR="$ROOT_DIR/build"
 STAGE_DIR="$BUILD_DIR/${APP_ENV}-${VERSION}-${CHANNEL}"
 ZIP_NAME="aavionstudio-${VERSION}-${CHANNEL}.zip"
 ZIP_PATH="$BUILD_DIR/$ZIP_NAME"
+RELEASE_METADATA_PATH="$BUILD_DIR/release.json"
+RELEASE_METADATA_TMP="$ROOT_DIR/release.json.tmp"
 COMMIT_SHA="$(git -C "$ROOT_DIR" rev-parse --short HEAD)"
 GENERATED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
 echo ">>> Preparing release $VERSION ($CHANNEL) for environment '$APP_ENV'"
 
-rm -f "$ROOT_DIR/release.json"
+mkdir -p "$BUILD_DIR"
 
-cat > "$ROOT_DIR/release.json" <<JSON
+cat > "$RELEASE_METADATA_PATH" <<JSON
 {
   "version": "$VERSION",
   "channel": "$CHANNEL",
@@ -42,7 +44,10 @@ cat > "$ROOT_DIR/release.json" <<JSON
 }
 JSON
 
-mkdir -p "$BUILD_DIR"
+rm -f "$RELEASE_METADATA_TMP"
+cp "$RELEASE_METADATA_PATH" "$RELEASE_METADATA_TMP"
+mv "$RELEASE_METADATA_TMP" "$ROOT_DIR/release.json"
+
 rm -rf "$STAGE_DIR"
 
 EXCLUDES=(

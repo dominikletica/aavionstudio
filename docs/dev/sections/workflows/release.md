@@ -31,7 +31,7 @@ Note: The repository may ship with a placeholder `release.json` for tooling/test
    - Refresh importmap assets, build Tailwind CSS, and remove downloaded Tailwind binaries
    - Warm the Symfony cache for the chosen environment
    - Stage a clean copy in `build/<env>-<version>-<channel>/`
-   - Write `RELEASE.json` containing version metadata (commit, timestamp, channel)
+   - Generate release metadata in `build/release.json` and atomically update the repository `release.json`
    - Package the archive at `build/aavionstudio-<version>-<channel>.zip`
 5. Distribute the generated ZIP. The installer will generate real secrets (`APP_SECRET`, etc.) on first run.
 
