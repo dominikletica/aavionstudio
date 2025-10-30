@@ -76,7 +76,7 @@ $signedUrl = sprintf('%s?expires=%d&sig=%s', $canonicalUrl, $expiresAt, $signatu
 - Canonical URL always resolves (either direct file response for public assets or redirect to signed URL when protection required).
 - Option to force download vs. inline based on metadata.
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - Implement optional per-project storage quotas enforced during upload with warning thresholds and hard limits when configured.
 - Provide a pluggable virus-scan hook (ClamAV/HTTP) that operators can enable; when unconfigured it is safely skipped.
 - Document CDN integration via `ASSET_BASE_URL`/signed URL configuration so public assets can be fronted without custom code.

@@ -125,7 +125,7 @@
 - Depends on: Doctrine ORM, Messenger (later phases), Symfony Cache/Lock, Installer UI templates.
 - Provides: Module loader service, configuration registry, event dispatcher hooks for other features.
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - Deploy rewrite-first with root compatibility loader only for hosts lacking docroot control; installer blocks progression until operator acknowledges the risk banner.
 - Installer produces `.env.local.php` and stores system settings in `system.brain`, ensuring drop-in packages stay CLI-free for operators.
 - Module registry acts as the single source of truth for navigation, theme slots, scheduler hooks, and capability declarations to keep feature enablement deterministic.

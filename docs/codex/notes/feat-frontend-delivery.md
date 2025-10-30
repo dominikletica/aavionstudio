@@ -56,7 +56,7 @@ graph TD
 - Unassigned 500 template → display minimal HTML with reference ID and log entry.
 - Maintenance mode flag (from system settings) forces 503 responses with customizable body.
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - Route resolution stays schema/slug driven; exotic routes rely on alias tables rather than custom controllers.
 - Preview mode requires authenticated users with the `content.preview` capability; share links use short-lived signed tokens layered on top.
 - JSON-LD helpers are opt-in per schema so templates decide when to emit structured data.

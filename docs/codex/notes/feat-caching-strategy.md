@@ -65,7 +65,7 @@ final class CacheInvalidator
 3. Add HTTP caching headers to API + frontend controllers.
 4. Instrument logging to observe cache behaviour.
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - Redis remains optional; default installs use filesystem-backed Symfony cache with docs outlining how to enable Redis via `.env`.
 - Baseline TTLs ship at 5 minutes for public snapshot responses and 1 minute for admin/draft routes, with environment overrides for bespoke tuning.
 - Cache tuning stays environment-driven; the admin UI exposes cache stats/clear actions but does not modify adapters or TTLs.

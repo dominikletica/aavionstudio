@@ -69,7 +69,7 @@
 - JS SDK targets Node + browser (fetch-based) with TypeScript definitions.
 - CLI tool (optional) consumes SDK but remains developer-only; production admins rely on UI.
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - Initial scope relies on project-level capabilities; schema-specific permissions are deferred until required.
 - Webhooks carry per-endpoint signing secrets with rotation support to satisfy security audits.
 - GraphQL remains out of scope for launch; reassess once REST usage matures.

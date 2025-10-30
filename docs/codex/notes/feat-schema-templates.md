@@ -138,7 +138,7 @@
 - Forbidden functions: `dump`, `source`, any PHP extension functions.
 - Sandbox context injects helper functions `schema_field`, `schema_children`, `asset` (restricted to theme-provided assets).
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - Initial release skips schema inheritance/composition; revisit after baseline authoring flow stabilises.
 - Third-party packs can be delivered either as Composer packages exposing pack paths or as admin-uploaded `.aavpack` archives that feed the same registrar.
 - Templates render inside a locked-down Twig sandbox profile to guard against heavy or unsafe logic while preserving required tags and filters.

@@ -79,7 +79,7 @@ my-theme.aavtheme
 - Admin-initiated rebuild allowed for custom themes uploaded post-release; runs via background job with progress notifications.
 - Rebuild executed via PHP service (`ThemeBuildService`) invoking Tailwind bundle compiler programmatically—no shell access required. Fallback to cached CSS when rebuild queue running to avoid downtime.
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - `app:theme:build` processes themes sequentially and caches artefacts so unchanged packs skip rebuilds.
 - Runtime CSS-variable overrides are supported for quick tweaks stored in the database, reducing rebuild pressure.
 - The theme loader enforces optional capability/version constraints declared in `theme.yaml` and surfaces warnings during activation.

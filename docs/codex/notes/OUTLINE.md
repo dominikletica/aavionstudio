@@ -217,7 +217,8 @@ IDs use ULIDs or UUIDs through `symfony/uid`. Soft delete occurs via flags/versi
 3. **Materialized Path Format:** Finalise path serialisation (`/parent/child`) and bulk reindex strategy for mass moves.  
 4. **Export Presets:** Define default packs (Blog, Docs, Storytelling) with field lists and metadata.  
 5. **Queue Adoption:** Determine thresholds for introducing Messenger workers (commit volume, export size, resolver load).  
-6. **Hosting Strategy:** ✅ Rewrite-first deployment confirmed; root loader stays compatibility-only with installer warnings and hardening checklist (2025-10-31).
+6. **Hosting Strategy:** ✅ Rewrite-first deployment confirmed; root loader stays compatibility-only with installer warnings and hardening checklist (2025-10-30).  
+7. **Roadmap Step 1:** ✅ Open questions answered and documented across feature outlines (2025-10-30).
 
 ---
 

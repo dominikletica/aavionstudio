@@ -52,7 +52,7 @@
 - API endpoint supports `?locale=` and `?preview_token=` for draft preview.
 - Sitemap generator respects visibility rules and outputs `lastmod` from snapshot metadata.
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - Menu updates reuse the shared Draft/Commit workflow for consistency with content publishing.
 - Module-supplied menu items register through manifest hooks with priority/merge rules to avoid collisions.
 - Personalised menus stay deferred behind a future feature flag; launch focuses on shared navigation.

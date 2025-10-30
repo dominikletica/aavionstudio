@@ -75,7 +75,7 @@
 4. Add search palette + quick actions.
 5. Bake in help drawer and context docs hooks.
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - Extensions stick to Stimulus-compatible ES modules; revisit heavier frameworks only if a first-party module justifies the cost.
 - Theme distribution standardises on zipped packs (`.aavtheme`) or Composer packages exposing `theme.yaml` manifests so operators can install via the admin UI.
 - Support instance-level branding plus per-project accent settings (logo/colour); full multi-tenant theming remains out of scope for launch.

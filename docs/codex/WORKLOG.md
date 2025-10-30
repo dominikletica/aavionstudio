@@ -116,7 +116,7 @@
 - [ ] Cover diff edge cases (large payloads, markdown comparison) with tests
 
 ## Roadmap To Next Release
-- [ ] **Step 1:** Discuss open questions & confirm hosting/security decisions
+- [x] **Step 1:** Discuss open questions & confirm hosting/security decisions
 - [ ] **Step 2:** Implement Core Platform & architecture foundation
 - [ ] **Step 3:** Implement User Management & Access Control
 - [ ] **Step 4:** Build Admin Studio UI shell & navigation
@@ -175,7 +175,7 @@
 - Adjusted release script to generate metadata inside the build directory and atomically refresh the tracked `release.json`, plus aligned the release workflow guide
 - Revamped init-script to initialize the repository and configure environment (install dependencies, run neccessary commands like compiling assets and setup .env.local to get started) 
 
-### 2025-10-31
+### 2025-10-30 (Session 3)
 - Reviewed roadmap step for hosting/security decisions; confirmed rewrite-first deployment with root loader flagged as compatibility fallback only
 - Locked in requirement that all operational flows (theme management, backups, installs) remain browser-driven so end users never need CLI access
 - Captured answers to open questions across core outlines (caching, schemas, access control, frontend delivery, themes, media, backups, API) to unblock implementation backlog

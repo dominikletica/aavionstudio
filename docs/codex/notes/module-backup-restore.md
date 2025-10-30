@@ -45,7 +45,7 @@
   ```json
   {
     "version": "1.0.0",
-    "generatedAt": "2025-10-31T12:00:00Z",
+    "generatedAt": "2025-10-30T12:00:00Z",
     "includes": ["system.brain", "user.brain", "snapshots", "uploads"],
     "hash": "sha256:...",
     "encryption": {
@@ -62,7 +62,7 @@
 - Retention job deletes oldest archives beyond limit, respecting locked backups (flag set by admin).
 - Read-only mode hides scheduling UI and displays tooltip explaining restriction.
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - Read-only hosting falls back to streaming archives directly to the requester and disables scheduled jobs/retention that require persistent writes.
 - Upload payloads become optional with a default-on toggle to shrink archives when storage is tight.
 - Offer passphrase-protected archives (AES-256 Zip); strongly recommended in docs but not enforced by software.

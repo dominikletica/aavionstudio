@@ -76,7 +76,7 @@
 4. ACL voters and unit tests covering project/content access scenarios.
 5. Optional enhancements: 2FA, account lockout, session revocation.
 
-## Decisions (2025-10-31)
+## Decisions (2025-10-30)
 - Add project memberships (`app_project_user`) layered over global roles so editors can be scoped per project without duplicating accounts.
 - All role, capability, and API-key changes append to the audit log to guarantee traceability.
 - SSO/OAuth ships later as pluggable authenticators; core release relies on password login with optional 2FA.
