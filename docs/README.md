@@ -14,13 +14,13 @@ Welcome to the documentation hub. Use the links below to jump to the manual that
 
 ## Templates & Resources
 - Documentation templates: [`docs/templates/`](templates/)
-- Assets (screenshots, diagrams): `docs/assets/` *(create as needed)*
+- Assets (screenshots, diagrams): [`docs/assets/`](assets/) *(create as needed)*
 - Contributor guide: [`AGENTS.md`](../AGENTS.md)
 
 ## Navigation Tips
-- Developer guides live under `docs/dev/sections/`.
-- User-facing guides live under `docs/user/sections/`.
-- Feature/module drafts live under `docs/codex/notes/`.
+- Developer guides live under [`docs/dev/sections/`](dev/sections/).
+- User-facing guides live under [`docs/user/sections/`](user/sections/).
+- Feature/module drafts live under [`docs/codex/notes/`](codex/notes/).
 - Update the worklog and relevant manuals whenever code or behaviour changes.
 
 Happy documenting!
