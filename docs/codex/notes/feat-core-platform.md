@@ -40,6 +40,7 @@
 - Table naming convention: `app_<domain>` (`app_project`, `app_entity`, `app_entity_version`, `app_draft`, `app_schema`, `app_template`, `app_relation`, `app_api_key`, `app_user`, `app_log`).
 - Doctrine type overrides: register `ulid`, `uuid`, JSON column helper.
 - Migrations must include triggers or checks for materialized path integrity.
+- Default seeds live under `config/app/` (`system_settings.php`, `projects.php`) so baseline data can evolve without rewriting migrations.
 
 ## Installer UX Flow
 1. **Welcome & Diagnostics**

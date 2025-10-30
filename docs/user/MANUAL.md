@@ -1,7 +1,7 @@
 # aavion Studio – User Manual
 
 Status: Draft  
-Updated: 2025-10-29
+Updated: 2025-10-30
 
 Welcome! This manual will guide administrators, editors, and integrators through installing, configuring, and using aavion Studio. The content below provides an overview of the documentation structure; detailed guides live under `docs/user/sections/`.
 

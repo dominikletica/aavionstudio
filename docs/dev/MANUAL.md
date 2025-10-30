@@ -1,7 +1,7 @@
 # Developer Manual
 
 Status: Draft  
-Updated: 2025-10-29
+Updated: 2025-10-30
 
 Welcome to the technical companion for aavion Studio. This manual outlines the development workflow, architecture conventions, and references to subsystem guides under `docs/dev/sections/`.
 
@@ -36,8 +36,8 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 | `modules/` | Optional feature modules (service manifests, assets, templates) |
 | `assets/` | Tailwind styles, Stimulus controllers, JS modules |
 | `public/` | Webroot (front controller, built assets) |
-| `data/` | Snapshots, uploads, backups |
-| `var/` | Cache, logs, SQLite databases (`system.brain`, `user.brain`) |
+| `config/app/` | Default seeds for system settings, projects, modules |
+| `var/` | Cache, logs, SQLite databases (`var/system.brain`, `var/user.brain`), snapshots, uploads, backups |
 | `docs/` | Documentation (developer, user, codex notes) |
 
 ---

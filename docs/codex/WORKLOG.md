@@ -195,3 +195,9 @@
 - Locked in requirement that all operational flows (theme management, backups, installs) remain browser-driven so end users never need CLI access
 - Captured answers to open questions across core outlines (caching, schemas, access control, frontend delivery, themes, media, backups, API) to unblock implementation backlog
 - Expanded feature/module outlines with detailed data models, UI flows, and pseudocode to make upcoming implementation phases deterministic
+
+### 2025-10-30 (Session 4)
+- Kicked off Core Platform implementation (Step 2) focusing on database foundations and shared defaults
+- Added SQLite busy-timeout/foreign-key pragmas, attachment health checks, and PHPUnit coverage for the connection listener
+- Seeded initial Doctrine migration with core tables (system vs user DB split) plus config-driven defaults (`config/app/system_settings.php`, `config/app/projects.php`)
+- Updated developer/user manuals and class map to reflect the new storage layout and services
