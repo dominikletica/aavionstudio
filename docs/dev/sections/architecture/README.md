@@ -6,6 +6,7 @@ Updated: 2025-10-29
 Use this section to document high-level architecture concerns.
 
 Suggested topics:
+- [Core platform overview](core-platform.md)
 - Module system & manifest loader
 - Persistence layer (Doctrine, SQLite dual DB setup)
 - Snapshot pipeline architecture
