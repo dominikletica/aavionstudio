@@ -5,7 +5,7 @@
 
 ## Snapshot Writer
 - Triggered post-commit or manual rebuild.
-- Writes to `data/snapshots/<project>/<slug>.json` (configurable segmentation by entity type).
+- Writes to `var/snapshots/<project>/<slug>.json` (configurable segmentation by entity type).
 - Uses temp file + atomic rename to avoid partial writes.
 - Stores metadata (hash, generated_at, generator_version) in `system.brain`.
 - Supports per-project delivery mode (public file vs controller streaming).
@@ -42,6 +42,6 @@
 5. Add CLI commands: `snapshot:rebuild`, `snapshot:prune`.
 
 ## Considerations
-- Shared hosting: ensure `data/snapshots` writable; document fallback when using root loader.
+- Shared hosting: ensure `var/snapshots` writable; document fallback when using root loader.
 - Large snapshots: consider chunking or streaming; implement incremental diffs later.
 - Security: guard controller route when `public delivery` disabled; log snapshot rebuilds.

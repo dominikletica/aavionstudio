@@ -19,9 +19,45 @@
 - Busy shared hosting: provide toggle to limit cache size & eviction policy.
 - Support `.env` overrides for cache TTL per component.
 
+## Default TTL Profiles
+| Cache Namespace              | Purpose                              | Default TTL | Notes                              |
+|------------------------------|--------------------------------------|-------------|------------------------------------|
+| `http.snapshot`              | Public snapshot responses             | 300s        | Serves CDN-friendly headers        |
+| `http.admin`                 | Admin/API draft endpoints             | 60s         | Short to avoid stale UX            |
+| `app.resolver`               | Resolver outputs                      | 900s        | Cleared on draft commit            |
+| `app.navigation`             | Navigation trees                      | 300s        | Cleared on menu publish            |
+| `app.schema_validation`      | JSON schema compile cache             | 3600s       | Invalidated on schema version bump |
+| `doctrine.snapshot_metadata` | Doctrine result cache                 | 300s        | Disabled when adapter not available|
+
+Environment overrides rely on env vars (e.g., `CACHE_TTL_HTTP_SNAPSHOT=120`) with installer exposing human-friendly sliders.
+
 ## Tooling
 - Commands: `app:cache:prune`, `app:cache:stats`.
 - Monitoring hooks for cache hit/miss metrics (hook into Monolog or dedicated table).
+
+### Admin UX
+- Maintenance UI lists cache namespaces with current adapter, size estimate, hit/miss ratio.
+- Buttons: `Warm up`, `Clear`, `Download metrics (JSON)`.
+- Shared hosting toggle reduces filesystem cache size by cleaning oldest entries when threshold exceeded (`CACHE_SIZE_LIMIT_MB`).
+
+### Invalidations Pseudocode
+```php
+final class CacheInvalidator
+{
+    public function onSnapshotPublished(SnapshotPublishedEvent $event): void
+    {
+        $this->cachePool->invalidateTags(['snapshot:' . $event->projectId]);
+        $this->cachePool->invalidateTags(['navigation:' . $event->projectId]);
+    }
+
+    public function onDraftCommitted(DraftCommittedEvent $event): void
+    {
+        foreach ($event->affectedEntityIds as $entityId) {
+            $this->cachePool->delete('resolver:' . $entityId);
+        }
+    }
+}
+```
 
 ## Implementation Steps
 1. Define cache namespaces and adapters in `config/packages/cache.yaml`.
@@ -29,7 +65,7 @@
 3. Add HTTP caching headers to API + frontend controllers.
 4. Instrument logging to observe cache behaviour.
 
-## Open Questions
-- Do we require Redis support out-of-the-box or provide as optional module?
-- How aggressive should default TTLs be for shared hosting vs dedicated environments?
-- Should we expose cache configuration to admins via UI or keep .env-driven?
+## Decisions (2025-10-30)
+- Redis remains optional; default installs use filesystem-backed Symfony cache with docs outlining how to enable Redis via `.env`.
+- Baseline TTLs ship at 5 minutes for public snapshot responses and 1 minute for admin/draft routes, with environment overrides for bespoke tuning.
+- Cache tuning stays environment-driven; the admin UI exposes cache stats/clear actions but does not modify adapters or TTLs.
