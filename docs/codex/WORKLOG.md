@@ -224,3 +224,4 @@
 
 ### 2025-10-31
 - Kick-off: Roadmap Step 3 (User Management & Access Control) – audited feature outline, captured schema/auth updates, and expanded TODOs into implementation phases covering migrations, security wiring, admin UI, API keys, and testing.
+- Added initial user/access schema migration scaffolding (roles, project memberships, credential tokens, audit log) ready for implementation
