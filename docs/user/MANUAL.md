@@ -19,6 +19,7 @@ Welcome! This manual will guide administrators, editors, and integrators through
 ## 2. Administration guide
 
 - **Dashboard Overview** – Navigating the Admin Studio UI, notifications, search palette.
+- **Modules** – Drop-in features live under `modules/` as `.aavmodule` bundles with update metadata; UI activation & update checks arrive with installer enhancements.
 - **Projects & Settings** – Managing projects, locales, error-page entities (default project provides fallback Twig templates).
 - **User & Access Management** – Creating users, assigning roles/permissions, managing API keys.
 - **Maintenance Tools** – Cache, snapshot rebuild, queue monitoring, health checks.

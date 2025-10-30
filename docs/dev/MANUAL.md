@@ -39,6 +39,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 | `config/app/` | Default seeds for system settings, projects, modules |
 | `var/` | Cache, logs, SQLite databases (`var/system.brain`, `var/user.brain`), snapshots, uploads, backups |
 | `docs/` | Documentation (developer, user, codex notes) |
+| `modules/` | Drop-in feature modules discovered via `module.php` manifests (no Composer autoload required, support `.aavmodule` bundles) |
 
 ---
 
@@ -58,6 +59,10 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
   - Update module/feature drafts in `docs/codex/notes/` as behaviour changes.
   - Keep class map (`docs/dev/classmap.md`) in sync with new services/commands/components.
   - Log session progress in `docs/codex/WORKLOG.md`.
+- **Module Packaging**
+  - Each module ships a `module.php` manifest (returning `ModuleManifest`) and optional config/assets under the same directory.
+  - Release bundles use the `.aavmodule` extension and include a `repository` URL for update scans (mirrors theme update behaviour).
+  - Drop modules into `/modules/<slug>/` and clear cache; discovery works without Composer autoload.
 - **Release Packaging**
   - Generate deployable archives with `bin/release <env> <version> <channel>`.
   - See [`docs/dev/sections/workflows/release.md`](sections/workflows/release.md) for details.

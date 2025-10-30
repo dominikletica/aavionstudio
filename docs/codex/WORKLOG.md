@@ -200,4 +200,4 @@
 - Kicked off Core Platform implementation (Step 2) focusing on database foundations and shared defaults
 - Added SQLite busy-timeout/foreign-key pragmas, attachment health checks, and PHPUnit coverage for the connection listener
 - Seeded initial Doctrine migration with core tables (system vs user DB split) plus config-driven defaults (`config/app/system_settings.php`, `config/app/projects.php`)
-- Updated developer/user manuals and class map to reflect the new storage layout and services
+- Introduced filesystem-based module discovery/registry with repository metadata for future `.aavmodule` update scans, updating docs and tests accordingly

@@ -72,6 +72,7 @@
 - Admin UI nav composed from module manifests (sorted by priority).
 - Routes isolated per module under `/admin/<module-slug>`; fallback to catch-all for modules without UI.
 - AssetMapper pipeline loads Stimulus controllers from `modules/*/assets/controllers`.
+- Manifests declare optional `repository` URL so the updater can fetch `.aavmodule` releases alongside theme packs.
 
 ### Module Manifest Contract
 - Required fields: `name`, `priority`, `services`, `routes`, `capabilities`.
