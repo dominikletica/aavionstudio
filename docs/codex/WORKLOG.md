@@ -28,8 +28,8 @@
 
 ### Feat: User Management & Access Control (P0 | L)
 #### Authentication & Core Entities
-- [ ] Add migration(s) to extend `app_user` (rename `password` → `password_hash`, add status/last login) and create supporting tables (`app_role`, `app_user_role`, `app_project_user`, `app_password_reset_token`, `app_remember_me_token`, `app_audit_log`).
-- [ ] Implement DB-backed user provider, user model, password hasher config, login/logout/rememeber-me controllers, and rate limiting for authentication attempts.
+- [x] Add migration(s) to extend `app_user` (rename `password` → `password_hash`, add status/last login) and create supporting tables (`app_role`, `app_user_role`, `app_project_user`, `app_password_reset_token`, `app_remember_me_token`, `app_audit_log`).
+- [x] Implement DB-backed user provider, user model, password hasher config, login/logout/remember-me controllers, and rate limiting for authentication attempts.
 - [ ] Wire password reset + invitation flow (token storage, signed links, controllers, mailer stubs) and record audit events for every credential change.
 
 #### Roles, Capabilities & Project Memberships
@@ -225,3 +225,4 @@
 ### 2025-10-31
 - Kick-off: Roadmap Step 3 (User Management & Access Control) – audited feature outline, captured schema/auth updates, and expanded TODOs into implementation phases covering migrations, security wiring, admin UI, API keys, and testing.
 - Added initial user/access schema migration scaffolding (roles, project memberships, credential tokens, audit log) ready for implementation
+- Implemented core authentication stack (DB user provider, status checker, login/logout with remember-me, rate limiting) with Twig login template and unit coverage (`tests/Security/AppUserProviderTest.php`), refreshed architecture docs.

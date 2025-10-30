@@ -48,9 +48,16 @@ This guide summarises the core Symfony platform put in place during Roadmap Step
 - `bin/release` stages a clean copy of the repository (excluding build artifacts, vendor, tests, docs), runs `bin/init` inside the staging area, removes caches/temporary Tailwind outputs, zips the contents (flattened), and drops the archive in `build/`. A `release.json` metadata file is generated for runtime version introspection during packaging.
 - Documentation for operator workflows lives under `docs/dev/sections/workflows/release.md`; this guide focuses on how the release script ties into the core architecture.
 
+## Security & Access Control Notes (Step 3 kick-off)
+
+- Security configuration now uses `App\Security\User\AppUserProvider` + `AppUserStatusChecker` with form login, remember-me tokens stored in `app_remember_me_token`, and sliding-window throttling.
+- Login UI lives in `templates/security/login.html.twig`; controllers in `src/Controller/Security/LoginController.php`.
+- Database schema additions (roles, project memberships, audit log, password reset tokens) are introduced in `migrations/Version20251031000100.php` and tested via `tests/Security/AppUserProviderTest.php`.
+- Capability registry integration, per-project voters, admin UI, and API key flows will build upon this foundation in subsequent milestones.
+
 ## Next Steps
 
-- Roadmap Step 3 (User Management & Access Control) will extend this foundation with user entities, authentication flows, and capability enforcement.
+- Roadmap Step 3 continues with capability seeding, project access voters, admin user management interfaces, and API key enforcement.
 - When new subsystems land (resolver, snapshot manager, etc.), add dedicated guides within `docs/dev/sections/architecture/` and cross-link from this overview.
 
 Keep this document aligned with code changes—anything impacting installer behaviour, module discovery, or release tooling should be reflected here to keep onboarding smooth for contributors.

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Sign in · aavion Studio</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 2rem; background: #f8fafc; }
+        .login-card { max-width: 420px; margin: 3rem auto; padding: 2.5rem; background: #fff; border-radius: 12px; box-shadow: 0 24px 48px rgba(15,23,42,.08); }
+        h1 { margin-top: 0; font-size: 1.75rem; color: #0f172a; }
+        label { display: block; margin-bottom: .5rem; font-weight: 600; color: #0f172a; }
+        input[type="email"], input[type="password"] { width: 100%; padding: .75rem 1rem; border: 1px solid #cbd5f5; border-radius: 10px; font-size: 1rem; transition: border-color .2s, box-shadow .2s; }
+        input[type="email"]:focus, input[type="password"]:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 4px rgba(59,130,246,.15); }
+        button { width: 100%; margin-top: 1.5rem; padding: .85rem 1rem; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 10px; color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 10px 20px rgba(37,99,235,.25); transition: transform .15s, box-shadow .15s; }
+        button:hover { transform: translateY(-1px); box-shadow: 0 16px 30px rgba(37,99,235,.28); }
+        .error { margin-bottom: 1rem; padding: .75rem 1rem; border-radius: 10px; background: rgba(239,68,68,.1); color: #b91c1c; }
+        .footer { margin-top: 2rem; text-align: center; font-size: .875rem; color: #64748b; }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <h1>Welcome back</h1>
+    {% if error %}
+        <div class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    <form action="{{ path('app_login') }}" method="post" novalidate>
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" value="{{ last_username }}" autocomplete="email" required autofocus>
+
+        <label for="password" style="margin-top:1.25rem;">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+
+        <div style="margin-top:1rem;">
+            <label style="display:flex; align-items:center; gap: .5rem; font-weight:500;">
+                <input type="checkbox" name="_remember_me" value="1" style="width:16px;height:16px;">
+                Remember this device
+            </label>
+        </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <button type="submit">Sign in</button>
+    </form>
+    <div class="footer">
+        Need access? Contact an administrator.
+    </div>
+</div>
+</body>
+</html>

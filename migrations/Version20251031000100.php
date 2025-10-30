@@ -20,6 +20,7 @@ final class Version20251031000100 extends AbstractMigration
         $this->addSql('ALTER TABLE app_user RENAME COLUMN password TO password_hash');
         $this->addSql('ALTER TABLE app_user ADD status VARCHAR(16) NOT NULL DEFAULT \'active\'');
         $this->addSql('ALTER TABLE app_user ADD last_login_at DATETIME DEFAULT NULL');
+        $this->addSql("UPDATE app_user SET status = 'active' WHERE status IS NULL");
 
         // Roles and role assignments.
         $this->addSql('CREATE TABLE IF NOT EXISTS app_role (

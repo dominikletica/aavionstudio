@@ -45,5 +45,11 @@ services:
         autoconfigure: true
         public: true
 
+    app.security.remember_me_token_provider:
+        class: Symfony\Bridge\Doctrine\Security\RememberMe\DoctrineTokenProvider
+        arguments:
+            - '@doctrine.dbal.default_connection'
+            - 'app_remember_me_token'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
