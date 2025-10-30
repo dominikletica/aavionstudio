@@ -15,6 +15,7 @@ Welcome! This manual will guide administrators, editors, and integrators through
 - **Quick Installation** – Using the browser installer vs. manual configuration.
   - Visit `/setup` after uploading the release archive; follow the on-screen steps for diagnostics, environment, storage, admin, and summary.
   - The diagnostics panel highlights missing PHP extensions and writable directory issues with remediation hints.
+- **Access & Login** – Sign in at `/login` with the administrator created during setup; accounts can be disabled or flagged for activation by other admins.
 - **Post-Install Checklist** – Create first admin, configure email, set up backups, enable modules.
 
 ---

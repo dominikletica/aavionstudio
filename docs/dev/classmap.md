@@ -18,6 +18,9 @@
 | `App\Module\ModuleRegistry` | `src/Module/ModuleRegistry.php` | Provides module manifest lookup/capability aggregation | Hydrated from `app.modules` parameter during boot |
 | `App\Module\ModuleStateRepository` | `src/Module/ModuleStateRepository.php` | Reads persisted module enable/metadata flags from database | Optional helper for future enable/disable UI |
 | `App\Module\ModuleStateSynchronizer` | `src/Module/ModuleStateSynchronizer.php` | Syncs manifest metadata with `app_module_state` table during kernel boot | Keeps repository URLs/locks up to date |
+| `App\Security\User\AppUserProvider` | `src/Security/User/AppUserProvider.php` | Doctrine-backed user provider for authentication | Handles status checks, password upgrades, role loading |
+| `App\Security\Capability\CapabilityRegistry` | `src/Security/Capability/CapabilityRegistry.php` | Aggregates module-declared capabilities for lookup | Feeds synchronizer and future ACL tooling |
+| `App\Security\Capability\CapabilitySynchronizer` | `src/Security/Capability/CapabilitySynchronizer.php` | Persists capability defaults into `app_role_capability` and logs seeding | Invoked during kernel boot |
 
 ### Suggested Structure
 - **Core Services:** Module loader, schema registry, draft manager, snapshot manager, resolver engine, media storage.

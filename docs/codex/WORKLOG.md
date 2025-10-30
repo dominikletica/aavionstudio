@@ -33,7 +33,7 @@
 - [ ] Wire password reset + invitation flow (token storage, signed links, controllers, mailer stubs) and record audit events for every credential change.
 
 #### Roles, Capabilities & Project Memberships
-- [ ] Materialise global role hierarchy + default seeds; expose capability registry service that hydrates from module manifests and persists defaults in the database.
+- [x] Materialise global role hierarchy + default seeds; expose capability registry service that hydrates from module manifests and persists defaults in the database.
 - [ ] Implement project membership repository (`app_project_user`) and access voters that combine global roles, project overrides, and capability requirements.
 
 #### Admin UI & API Keys
@@ -226,3 +226,4 @@
 - Kick-off: Roadmap Step 3 (User Management & Access Control) – audited feature outline, captured schema/auth updates, and expanded TODOs into implementation phases covering migrations, security wiring, admin UI, API keys, and testing.
 - Added initial user/access schema migration scaffolding (roles, project memberships, credential tokens, audit log) ready for implementation
 - Implemented core authentication stack (DB user provider, status checker, login/logout with remember-me, rate limiting) with Twig login template and unit coverage (`tests/Security/AppUserProviderTest.php`), refreshed architecture docs.
+- Added capability registry + synchronizer to seed `app_role_capability` from module manifests with audit trail, including unit coverage (`tests/Security/CapabilitySynchronizerTest.php`) and role hierarchy wiring.

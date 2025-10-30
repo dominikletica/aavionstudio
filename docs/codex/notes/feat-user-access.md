@@ -23,7 +23,7 @@
 
 ## Architecture Overview
 - Security bundle configured with user provider backed by `app_user` table (ULID id, email, password hash, profile JSON, locale).
-- Permission registry: modules register capabilities (`content.publish`, `export.run`) via manifest; installer seeds roles with defaults.
+- Permission registry: modules register capabilities (`content.publish`, `export.run`) via manifest; installer seeds roles with defaults while the runtime `CapabilityRegistry` + `CapabilitySynchronizer` hydrate and persist mappings into `app_role_capability` (with audit log entries).
 - Middleware:
   - Voters for entity-level access (draft ownership, project membership).
   - Route attributes/attributes for capability checks (`#[IsGranted('export.run')]`, custom `#[RequiresCapability('content.publish')]`).

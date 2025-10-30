@@ -38,6 +38,11 @@ security:
                 max_attempts: 5
                 interval: '1 minute'
 
+    role_hierarchy:
+        ROLE_EDITOR: ['ROLE_VIEWER']
+        ROLE_ADMIN: ['ROLE_EDITOR']
+        ROLE_SUPER_ADMIN: ['ROLE_ADMIN', 'ROLE_ALLOWED_TO_SWITCH']
+
     access_control:
         - { path: ^/login$, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_VIEWER }

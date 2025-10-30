@@ -40,6 +40,10 @@ services:
             $manifestsData: '%app.modules%'
         public: true
 
+    App\Security\Capability\CapabilityRegistry: ~
+
+    App\Security\Capability\CapabilitySynchronizer: ~
+
     App\Controller\Installer\InstallerController:
         autowire: true
         autoconfigure: true
