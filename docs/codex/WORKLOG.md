@@ -173,3 +173,4 @@
 
 ### 2025-10-30 (Session 2)
 - Adjusted release script to generate metadata inside the build directory and atomically refresh the tracked `release.json`, plus aligned the release workflow guide
+- Revamped init-script to initialize the repository and configure environment (install dependencies, run neccessary commands like compiling assets and setup .env.local to get started) 

@@ -22,11 +22,11 @@
 ```bash
 git clone https://github.com/dominikletica/aavionstudio.git
 cd aavionstudio
-bin/init_repository
+bin/init dev
 symfony serve # or php -S localhost:8000 -t public
 ```
 
-The init script installs Composer dependencies, refreshes importmap assets, builds Tailwind CSS, prepares SQLite databases, ensures Messenger transports, and warms up caches.
+The init script installs Composer dependencies, refreshes importmap assets, builds Tailwind CSS, prepares SQLite databases, ensures Messenger transports, warms caches, and writes `.env.local` for the chosen environment. Rerun `bin/init prod` (or `bin/init test`) whenever you need to switch contexts.
 
 ## Contribution Guidelines
 - External contributions are not yet open. Please use Issues to share feedback or questions.

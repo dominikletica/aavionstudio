@@ -13,14 +13,14 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
    ```bash
    git clone https://github.com/dominikletica/aavionstudio.git
    cd aavionstudio
-   bin/init_repository
+   bin/init dev
    ```
-   The script installs Composer dependencies, refreshes importmap assets, compiles Tailwind CSS, prepares SQLite databases, ensures Messenger transports, and warms caches.
+   The script installs Composer dependencies, refreshes importmap assets, compiles Tailwind CSS, prepares SQLite databases, ensures Messenger transports, warms caches, and generates `.env.local` for the selected environment. Switch contexts later with `bin/init prod` or `bin/init test`.
 
 2. **Environment Variables**
-   - Default dev config via `.env` / `.env.dev` (`APP_ENV=dev`, `APP_DEBUG=1`, `DATABASE_URL=sqlite:///%kernel.project_dir%/var/system.brain`).
-   - `APP_SECRET` ships with a dummy value for local development and tests. The installer will generate a secure secret in `.env.local.php` for production deployments automatically. If you expose dev/test environments publicly, replace the dummy in `.env.*` with your own values.
-   - Additional overrides belong in `.env.local` or `.env.local.php`.
+   - `.env` holds shared defaults. The init script regenerates `.env.local` with `APP_ENV`, `APP_DEBUG`, and `APP_SECRET` tailored to the chosen environment (prod receives a random secret by default).
+   - Rerun `bin/init <env>` whenever you need to switch contexts; existing secrets in `.env.local` are preserved unless you export a new `APP_SECRET` before running the script.
+   - Additional overrides still belong in `.env.local` / `.env.local.php`. PHPUnit forces `APP_ENV=test` at runtime, so dev installs retain test coverage.
 
 3. **Local Web Server**
    - `symfony serve` or `php -S localhost:8000 -t public`
