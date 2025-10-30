@@ -12,6 +12,7 @@ Welcome! This manual will guide administrators, editors, and integrators through
 - **Introduction & Concepts** – What makes aavion Studio different (schema-driven content, draft → commit, snapshots).
 - **System Requirements** – PHP 8.2+, SQLite support, web server configuration (Apache/nginx/IIS) with rewrite or root loader fallback.
 - **Quick Installation** – Using the browser installer vs. manual configuration.
+  - Visit `/setup` after uploading the release archive; follow the on-screen steps for diagnostics, environment, storage, admin, and summary.
 - **Post-Install Checklist** – Create first admin, configure email, set up backups, enable modules.
 
 ---

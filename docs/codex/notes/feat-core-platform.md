@@ -59,6 +59,7 @@
 5. **Summary & Finalisation**
    - Present checklist of performed actions, surface warnings (e.g., running in root compatibility mode) with links to hardening docs.
    - Trigger cache warmup + module manifest compilation before redirecting to `/admin/login`.
+   - Plain Twig template (`templates/installer/wizard.html.twig`) renders the wizard navigation/sections; styling layers can be added later.
 
 ## Diagnostics Reference
 - `extends_php_version`: warn when below 8.3 and link to upgrade guide.

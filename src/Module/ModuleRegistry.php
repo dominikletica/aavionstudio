@@ -42,11 +42,22 @@ final class ModuleRegistry
     /**
      * @return array<string, array<string, mixed>>
      */
+    public function enabled(): array
+    {
+        return array_values(array_filter(
+            $this->manifests,
+            static fn (ModuleManifest $manifest): bool => $manifest->enabled,
+        ));
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     public function capabilities(): array
     {
         $capabilities = [];
 
-        foreach ($this->manifests as $manifest) {
+        foreach ($this->enabled() as $manifest) {
             foreach ($manifest->capabilities as $capability) {
                 $key = (string) ($capability['key'] ?? null);
 

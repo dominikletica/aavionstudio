@@ -34,8 +34,13 @@ final class KernelModuleIntegrationTest extends KernelTestCase
 
         self::assertInstanceOf(ModuleManifest::class, $manifest);
         self::assertSame('Core Platform', $manifest->name);
+        self::assertTrue($manifest->enabled);
+        self::assertSame('https://github.com/dominikletica/aavionstudio', $manifest->repository);
 
         $parameter = $container->getParameter('app.module.core.name');
         self::assertSame('Core Platform', $parameter);
+
+        $capabilities = $container->getParameter('app.capabilities');
+        self::assertIsArray($capabilities);
     }
 }

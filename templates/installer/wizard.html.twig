@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>aavion Studio Setup Wizard</title>
+</head>
+<body>
+    <header>
+        <h1>aavion Studio • Setup Wizard</h1>
+        <p>This guided flow prepares the core platform. Styling is intentionally minimal so instance-specific themes can extend it later.</p>
+    </header>
+
+    <nav aria-label="Wizard Steps">
+        <ol>
+            {% for step in steps %}
+                <li{% if step == current_step %} aria-current="step"{% endif %}>
+                    <a href="{{ path('app_installer', { step: step }) }}">{{ step|title }}</a>
+                </li>
+            {% endfor %}
+        </ol>
+    </nav>
+
+    <main>
+        {% if current_step == 'diagnostics' %}
+            <section>
+                <h2>Environment diagnostics</h2>
+                <h3>PHP Runtime</h3>
+                <p>Version detected: <strong>{{ diagnostics.php_version }}</strong></p>
+
+                <h3>Required extensions</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th scope="col">Extension</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for extension, available in diagnostics.extensions %}
+                        <tr>
+                            <td>{{ extension }}</td>
+                            <td>{{ available ? 'available' : 'missing' }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <h3>SQLite health</h3>
+                <dl>
+                    <dt>Primary path</dt>
+                    <dd>{{ diagnostics.sqlite.primary_path ?: 'n/a' }}</dd>
+                    <dt>Secondary path</dt>
+                    <dd>{{ diagnostics.sqlite.secondary_path ?: 'n/a' }}</dd>
+                    <dt>Primary exists</dt>
+                    <dd>{{ diagnostics.sqlite.primary_exists ? 'yes' : 'no' }}</dd>
+                    <dt>Secondary exists</dt>
+                    <dd>{{ diagnostics.sqlite.secondary_exists ? 'yes' : 'no' }}</dd>
+                    <dt>Secondary attached</dt>
+                    <dd>{{ diagnostics.sqlite.secondary_attached ? 'yes' : 'no' }}</dd>
+                    <dt>busy_timeout (ms)</dt>
+                    <dd>{{ diagnostics.sqlite.busy_timeout_ms }}</dd>
+                </dl>
+            </section>
+        {% elseif current_step == 'environment' %}
+            <section>
+                <h2>Environment defaults</h2>
+                <p>The installer will generate <code>.env.local.php</code> using these defaults. Adjust values before proceeding.</p>
+                <table>
+                    <thead>
+                    <tr>
+                        <th scope="col">Key</th>
+                        <th scope="col">Value</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for key, value in default_settings %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td>{{ value is iterable ? value|json_encode(constant('JSON_PRETTY_PRINT')) : value }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        {% elseif current_step == 'storage' %}
+            <section>
+                <h2>Projects & storage overview</h2>
+                <p>Detected default projects and storage metadata.</p>
+                {% for project in default_projects %}
+                    <article>
+                        <h3>{{ project.name }} ({{ project.slug }})</h3>
+                        <ul>
+                            <li>Locale: {{ project.locale }}</li>
+                            <li>Timezone: {{ project.timezone }}</li>
+                            <li>Settings: <code>{{ project.settings|json_encode(constant('JSON_PRETTY_PRINT')) }}</code></li>
+                        </ul>
+                    </article>
+                {% endfor %}
+            </section>
+        {% elseif current_step == 'admin' %}
+            <section>
+                <h2>Administrator account</h2>
+                <p>Form handling will be plugged in during implementation. For now, this placeholder documents required fields.</p>
+                <ul>
+                    <li>Email address</li>
+                    <li>Password (strength meter, confirmation)</li>
+                    <li>Display name</li>
+                    <li>Locale / timezone</li>
+                </ul>
+            </section>
+        {% elseif current_step == 'summary' %}
+            <section>
+                <h2>Summary</h2>
+                <p>Final confirmation step. Display a diff of chosen settings, health results, and project seeds before applying changes.</p>
+            </section>
+        {% endif %}
+    </main>
+
+    <footer>
+        <p>Need help? See the <a href="{{ path('app_installer', { step: 'diagnostics' }) }}">diagnostics step</a> for troubleshooting tips or consult the admin manual.</p>
+    </footer>
+</body>
+</html>

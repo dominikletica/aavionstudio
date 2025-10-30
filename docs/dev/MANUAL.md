@@ -25,6 +25,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 3. **Local Web Server**
    - `symfony serve` or `php -S localhost:8000 -t public`
    - For root fallback testing, set `APP_FORCE_ROOT_ENTRY=1` and hit `index.php`.
+   - Access the setup wizard at `http://localhost:8000/setup` to iterate through diagnostics and seed configuration (plain layout for now).
 
 ---
 
@@ -63,6 +64,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
   - Each module ships a `module.php` manifest (returning `ModuleManifest`) and optional config/assets under the same directory.
   - Release bundles use the `.aavmodule` extension and include a `repository` URL for update scans (mirrors theme update behaviour).
   - Drop modules into `/modules/<slug>/` and clear cache; discovery works without Composer autoload.
+  - Aggregated capability metadata is exposed via the `app.capabilities` container parameter (derived from enabled module manifests).
 - **Release Packaging**
   - Generate deployable archives with `bin/release <env> <version> <channel>`.
   - See [`docs/dev/sections/workflows/release.md`](sections/workflows/release.md) for details.

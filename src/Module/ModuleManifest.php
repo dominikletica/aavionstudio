@@ -22,6 +22,7 @@ final class ModuleManifest
         public readonly array $navigation = [],
         public readonly array $capabilities = [],
         public readonly array $metadata = [],
+        public readonly bool $enabled = true,
     ) {
     }
 
@@ -41,6 +42,7 @@ final class ModuleManifest
             navigation: isset($data['navigation']) ? (array) $data['navigation'] : [],
             capabilities: isset($data['capabilities']) ? (array) $data['capabilities'] : [],
             metadata: isset($data['metadata']) ? (array) $data['metadata'] : [],
+            enabled: isset($data['enabled']) ? (bool) $data['enabled'] : true,
         );
     }
 
@@ -62,6 +64,7 @@ final class ModuleManifest
             navigation: isset($data['navigation']) ? (array) $data['navigation'] : [],
             capabilities: isset($data['capabilities']) ? (array) $data['capabilities'] : [],
             metadata: isset($data['metadata']) ? (array) $data['metadata'] : [],
+            enabled: isset($data['enabled']) ? (bool) $data['enabled'] : true,
         );
     }
 
@@ -81,7 +84,28 @@ final class ModuleManifest
             'navigation' => $this->navigation,
             'capabilities' => $this->capabilities,
             'metadata' => $this->metadata,
+            'enabled' => $this->enabled,
         ];
+    }
+
+    /**
+     * @param array<string, mixed> $metadata
+     */
+    public function withState(bool $enabled, array $metadata): self
+    {
+        return new self(
+            slug: $this->slug,
+            name: $this->name,
+            basePath: $this->basePath,
+            priority: $this->priority,
+            services: $this->services,
+            routes: $this->routes,
+            repository: $this->repository,
+            navigation: $this->navigation,
+            capabilities: $this->capabilities,
+            metadata: $metadata,
+            enabled: $enabled,
+        );
     }
 
     public function servicesPath(): ?string
