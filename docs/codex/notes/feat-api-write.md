@@ -8,6 +8,22 @@
 - Automation triggers committing changes instantly or staging drafts.
 - Integration with partner platforms via webhooks or polling.
 
+## Request/Response Schemas
+- `POST /projects/{project}/entities`
+  ```json
+  {
+    "slug": "about",
+    "schema": "page",
+    "payload": { "...": "..." },
+    "meta": {
+      "commitMessage": "Create about page",
+      "publish": false
+    }
+  }
+  ```
+  - Returns `201 Created` with body `{ "entityId": "...", "draftId": "...", "status": "draft" }`.
+- Validation errors return `422` with machine-readable codes (`PAYLOAD_INVALID`, `SCHEMA_NOT_FOUND`).
+
 ## API Design
 - REST endpoints under `/api/v1/admin/...` requiring API key with `write` scope.
 - Core routes:
@@ -21,6 +37,11 @@
 - HMAC request signing (optional) to prevent tampering.
 - Rate limits separate from read API; configurable burst/steady tokens.
 - Fine-grained scopes (`content.write`, `snapshot.manage`, `export.run`).
+
+### Rate Limiting
+- Default: 60 write requests/minute per API key, configurable via admin UI.
+- Burst limiter resets after 10 seconds; informative `429` responses include `Retry-After`.
+- Admin UI displays usage graphs and top endpoints.
 
 ## Webhooks
 - Deliver events (`entity.committed`, `snapshot.published`, `export.completed`) to configured URLs.
@@ -36,6 +57,17 @@
 3. Build controllers delegating to existing services (DraftManager, SnapshotManager).
 4. Add webhook dispatcher + delivery queue (Messenger).
 5. Publish API reference (OpenAPI spec) and developer quickstart docs.
+
+## Error Catalogue
+- `AUTH_SCOPE_MISSING`: API key lacks required scope.
+- `PROJECT_NOT_FOUND`: Provided project slug invalid.
+- `ENTITY_LOCKED`: Draft locked by another user/process.
+- `SNAPSHOT_BUSY`: Snapshot regeneration already queued; returns existing job ID.
+
+## SDK Considerations
+- PHP SDK wraps endpoints with strongly typed DTOs, includes middleware for HMAC signing.
+- JS SDK targets Node + browser (fetch-based) with TypeScript definitions.
+- CLI tool (optional) consumes SDK but remains developer-only; production admins rely on UI.
 
 ## Decisions (2025-10-31)
 - Initial scope relies on project-level capabilities; schema-specific permissions are deferred until required.

@@ -179,3 +179,4 @@
 - Reviewed roadmap step for hosting/security decisions; confirmed rewrite-first deployment with root loader flagged as compatibility fallback only
 - Locked in requirement that all operational flows (theme management, backups, installs) remain browser-driven so end users never need CLI access
 - Captured answers to open questions across core outlines (caching, schemas, access control, frontend delivery, themes, media, backups, API) to unblock implementation backlog
+- Expanded feature/module outlines with detailed data models, UI flows, and pseudocode to make upcoming implementation phases deterministic
