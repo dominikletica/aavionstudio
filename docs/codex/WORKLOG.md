@@ -207,3 +207,4 @@
 - Reviewed release packaging and init tooling so new hardening assets ship cleanly (Tailwind cache removal, asset rebuild cleanup) and updated documentation accordingly
 - Routed SQLite busy-timeout env default through a container parameter so `bin/init` and release builds run without EnvVarProcessor fallback errors
 - Documented the implemented foundation in `docs/dev/sections/architecture/core-platform.md` for future contributors
+- Code-Review: Updated ModuleStateSynchronizer so new module rows honour the manifest’s default enabled flag unless the module is locked.
