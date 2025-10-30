@@ -6,10 +6,10 @@
 ## TODO
 ### Core Platform (P0 | XL)
 #### Hosting & Installer
-- [ ] Finalise rewrite-first vs root fallback handling, including installer warnings and documentation hooks
+- [x] Finalise rewrite-first vs root fallback handling, including installer warnings and documentation hooks
 - [x] Build installer wizard steps (diagnostics → environment → storage/db → admin account → summary) with `.env.local.php` generator
 - [ ] Implement health checks for PHP extensions, writable `var/*` directories, and SQLite availability with actionable remediation hints
-- [ ] Deliver root-level `index.php` compatibility loader plus hardening (`Options -Indexes`, deny sensitive paths) and banner logic
+- [x] Deliver root-level `index.php` compatibility loader plus hardening (`Options -Indexes`, deny sensitive paths) and banner logic
 
 #### Module System
 - [x] Implement module manifest contract & registry (services, routes, navigation, theme slots, scheduler hooks)
@@ -23,7 +23,7 @@
 
 #### Testing & Tooling
 - [x] Create unit/integration test harness covering installer flow, module loader bootstrap, and database attachment
-- [ ] Add smoke tests for root loader rewrite detection and installer diagnostics endpoints
+- [x] Add smoke tests for root loader rewrite detection and installer diagnostics endpoints
 - [ ] Review `bin/release` workflow so new core-platform steps (manifest cache, installer assets) remain compatible with the existing prebuild process; adjust only if gaps emerge
 
 ### Feat: User Management & Access Control (P0 | L)
@@ -202,4 +202,4 @@
 - Seeded initial Doctrine migration with core tables (system vs user DB split) plus config-driven defaults (`config/app/system_settings.php`, `config/app/projects.php`)
 - Introduced filesystem-based module discovery/registry with repository metadata for future `.aavmodule` update scans, updating docs and tests accordingly
 - Synced module metadata with `app_module_state`, exposed aggregated capabilities/parameters, and scaffolded the browser setup wizard (`/setup`) with diagnostics-friendly Twig template and functional test
-- Added root compatibility loader with rewrite diagnostics and installer warnings, covering behaviour with new unit/functional tests and documentation updates
+- Added root compatibility loader with rewrite diagnostics and installer warnings, shipped Apache/IIS fallback configs, nginx guidance, and corresponding unit/functional tests plus documentation updates
