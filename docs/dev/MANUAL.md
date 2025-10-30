@@ -19,7 +19,8 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 
 2. **Environment Variables**
    - Default dev config via `.env` / `.env.dev` (`APP_ENV=dev`, `APP_DEBUG=1`, `DATABASE_URL=sqlite:///%kernel.project_dir%/var/system.brain`).
-   - Local overrides belong in `.env.local`.
+   - `APP_SECRET` ships with a dummy value for local development and tests. The installer will generate a secure secret in `.env.local.php` for production deployments automatically. If you expose dev/test environments publicly, replace the dummy in `.env.*` with your own values.
+   - Additional overrides belong in `.env.local` or `.env.local.php`.
 
 3. **Local Web Server**
    - `symfony serve` or `php -S localhost:8000 -t public`
