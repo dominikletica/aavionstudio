@@ -25,6 +25,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 3. **Local Web Server**
    - `symfony serve` or `php -S localhost:8000 -t public`
    - For root fallback testing, set `APP_FORCE_ROOT_ENTRY=1` and hit `index.php`.
+   - The setup diagnostics flag compatibility mode when requests arrive via the root loader—fix docroot/rewrite configuration to clear the warning before going live.
    - Access the setup wizard at `http://localhost:8000/setup` to iterate through diagnostics and seed configuration (plain layout for now).
 
 ---

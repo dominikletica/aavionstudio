@@ -7,6 +7,7 @@ namespace App\Controller\Installer;
 use App\Doctrine\Health\SqliteHealthChecker;
 use App\Installer\DefaultProjects;
 use App\Installer\DefaultSystemSettings;
+use App\Bootstrap\RootEntryPoint;
 use Doctrine\DBAL\DriverManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -81,6 +82,63 @@ final class InstallerController extends AbstractController
             'php_version' => PHP_VERSION,
             'extensions' => $extensionStatuses,
             'sqlite' => $sqliteReport,
+            'rewrite' => $this->gatherRewriteDiagnostics(),
         ];
+    }
+
+    /**
+     * @return array<string, bool|string>
+     */
+    private function gatherRewriteDiagnostics(): array
+    {
+        $rootEntryActive = $this->readFlag(RootEntryPoint::FLAG_ROOT_ENTRY);
+        $forced = $this->readFlag(RootEntryPoint::FLAG_FORCED);
+
+        $mode = match (true) {
+            $forced => 'forced',
+            $rootEntryActive => 'compatibility',
+            default => 'rewrite',
+        };
+
+        $route = $this->readStringFlag(RootEntryPoint::FLAG_ROUTE, '/');
+        $originalUri = $this->readStringFlag(RootEntryPoint::FLAG_ORIGINAL_URI, $_SERVER['REQUEST_URI'] ?? '/');
+        $requestUri = $this->readStringFlag(RootEntryPoint::FLAG_REQUEST_URI, $_SERVER['REQUEST_URI'] ?? '/');
+
+        return [
+            'enabled' => !$rootEntryActive,
+            'mode' => $mode,
+            'forced' => $forced,
+            'route' => $route,
+            'original_uri' => $originalUri,
+            'request_uri' => $requestUri,
+        ];
+    }
+
+    private function readFlag(string $key): bool
+    {
+        $value = $_SERVER[$key] ?? $_ENV[$key] ?? getenv($key);
+
+        if (\is_bool($value)) {
+            return $value;
+        }
+
+        if (\is_int($value)) {
+            return $value === 1;
+        }
+
+        if (\is_string($value)) {
+            $value = strtolower(trim($value));
+
+            return \in_array($value, ['1', 'true', 'on', 'yes'], true);
+        }
+
+        return false;
+    }
+
+    private function readStringFlag(string $key, string $fallback): string
+    {
+        $value = $_SERVER[$key] ?? $_ENV[$key] ?? getenv($key);
+
+        return \is_string($value) && $value !== '' ? $value : $fallback;
     }
 }

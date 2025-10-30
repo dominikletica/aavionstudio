@@ -13,6 +13,7 @@
 | `App\Doctrine\Health\SqliteHealthChecker` | `src/Doctrine/Health/SqliteHealthChecker.php` | Reports connection status for system + user SQLite stores | Used in tests/diagnostics to confirm attachment and busy timeout |
 | `App\Installer\DefaultSystemSettings` | `src/Installer/DefaultSystemSettings.php` | Loads shared default settings from `config/app/system_settings.php` | Consumed by migrations/installer to seed baseline values |
 | `App\Installer\DefaultProjects` | `src/Installer/DefaultProjects.php` | Provides default project seeds from `config/app/projects.php` | Initial migration inserts `default` project via this helper |
+| `App\Bootstrap\RootEntryPoint` | `src/Bootstrap/RootEntryPoint.php` | Normalises requests that hit the root fallback (`index.php`) and forwards them to `public/index.php` | Sets compatibility flags for installer rewrite diagnostics |
 | `App\Module\ModuleDiscovery` | `src/Module/ModuleDiscovery.php` | Discovers module manifests under `/modules/*/module.php` | Supports drop-in modules without Composer autoload |
 | `App\Module\ModuleRegistry` | `src/Module/ModuleRegistry.php` | Provides module manifest lookup/capability aggregation | Hydrated from `app.modules` parameter during boot |
 | `App\Module\ModuleStateRepository` | `src/Module/ModuleStateRepository.php` | Reads persisted module enable/metadata flags from database | Optional helper for future enable/disable UI |

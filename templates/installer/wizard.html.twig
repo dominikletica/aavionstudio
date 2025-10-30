@@ -27,6 +27,32 @@
                 <h3>PHP Runtime</h3>
                 <p>Version detected: <strong>{{ diagnostics.php_version }}</strong></p>
 
+                <h3>Docroot &amp; rewrite status</h3>
+                <p>
+                    Rewrite engine:
+                    <strong>{{ diagnostics.rewrite.enabled ? 'enabled' : 'compatibility mode' }}</strong>
+                    {% if diagnostics.rewrite.mode == 'forced' %}
+                        (forced via <code>APP_FORCE_ROOT_ENTRY</code>)
+                    {% elseif not diagnostics.rewrite.enabled %}
+                        – request served by compatibility fallback
+                    {% endif %}
+                </p>
+
+                {% if not diagnostics.rewrite.enabled and not diagnostics.rewrite.forced %}
+                    <p role="alert"><strong>Warning:</strong> Configure the web server to use the <code>public/</code> directory as document root and enable URL rewrites to avoid exposing sensitive files.</p>
+                {% elseif diagnostics.rewrite.mode == 'forced' %}
+                    <p>Compatibility mode is intentionally forced; disable <code>APP_FORCE_ROOT_ENTRY</code> after testing the fallback.</p>
+                {% endif %}
+
+                <dl>
+                    <dt>Effective route</dt>
+                    <dd><code>{{ diagnostics.rewrite.route }}</code></dd>
+                    <dt>Original request URI</dt>
+                    <dd><code>{{ diagnostics.rewrite.original_uri }}</code></dd>
+                    <dt>Effective request URI</dt>
+                    <dd><code>{{ diagnostics.rewrite.request_uri }}</code></dd>
+                </dl>
+
                 <h3>Required extensions</h3>
                 <table>
                     <thead>
