@@ -47,7 +47,7 @@ final class ModuleStateSynchronizer
             if ($existing === false) {
                 $this->connection->insert('app_module_state', [
                     'name' => $manifest->slug,
-                    'enabled' => $locked ? 1 : 1,
+                    'enabled' => $locked ? 1 : (int) $manifest->enabled,
                     'metadata' => $metadataJson,
                     'updated_at' => $now,
                 ]);
