@@ -5,7 +5,7 @@ Updated: 2025-10-29
 
 This guide describes how to create a deployable archive of aavion Studio.
 
-Note: The repository ships with a placeholder `release.json` for tooling/tests. The release script generates a fresh `release.json` inside the staged build with version metadata.
+Note: The repository may ship with a placeholder `release.json` for tooling/tests. The release script generates a fresh `release.json` with version metadata.
 
 ## Prerequisites
 - PHP CLI with the same version as production
