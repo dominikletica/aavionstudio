@@ -168,6 +168,7 @@ IDs use ULIDs or UUIDs through `symfony/uid`. Soft delete occurs via flags/versi
 - **Theming:** Global CSS variables + per-project overrides; avoid runtime Tailwind builds.
 - **Editor:** CodeMirror with Markdown + JSON/Twig modes, autocomplete for `@entity` references, integrated via Importmap/Stimulus.
 - **Template Packs:** Enable import/export of schema + frontend bundles; support reverting to pack defaults.
+- **Theme Packs:** Install/activate from the admin UI (`.aavtheme` zip or Composer-provided pack); release builds compile assets ahead of time so operators avoid CLI.
 - **In-App Guidance:** Provide inline documentation (tooltips, overlays, quick tips) for editors and admins.
 
 💬 **Asset Pipeline:** Rely on Symfony AssetMapper + Tailwind bundle. No Node requirement on production hosts; assets prebuilt during release packaging.
@@ -216,7 +217,7 @@ IDs use ULIDs or UUIDs through `symfony/uid`. Soft delete occurs via flags/versi
 3. **Materialized Path Format:** Finalise path serialisation (`/parent/child`) and bulk reindex strategy for mass moves.  
 4. **Export Presets:** Define default packs (Blog, Docs, Storytelling) with field lists and metadata.  
 5. **Queue Adoption:** Determine thresholds for introducing Messenger workers (commit volume, export size, resolver load).  
-6. **Hosting Strategy:** Confirm final guidance for rewrite vs. root-index compatibility mode and document hardening steps for the fallback.
+6. **Hosting Strategy:** ✅ Rewrite-first deployment confirmed; root loader stays compatibility-only with installer warnings and hardening checklist (2025-10-31).
 
 ---
 

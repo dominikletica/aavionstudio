@@ -31,7 +31,7 @@
 3. Tailwind build pipeline per theme (build once per release).
 4. Preview controller leveraging query param (`?theme=slug`) for admin testing.
 
-## Open Questions
-- How do we isolate Tailwind builds per theme without exploding build times?
-- Should we allow runtime CSS variables injection for quick tweaks without rebuild?
-- Do we require theme dependency version checks (modules requiring certain theme capabilities)?
+## Decisions (2025-10-31)
+- `app:theme:build` processes themes sequentially and caches artefacts so unchanged packs skip rebuilds.
+- Runtime CSS-variable overrides are supported for quick tweaks stored in the database, reducing rebuild pressure.
+- The theme loader enforces optional capability/version constraints declared in `theme.yaml` and surfaces warnings during activation.

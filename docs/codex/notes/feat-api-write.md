@@ -37,7 +37,7 @@
 4. Add webhook dispatcher + delivery queue (Messenger).
 5. Publish API reference (OpenAPI spec) and developer quickstart docs.
 
-## Open Questions
-- Do we expose granular permissions per schema or entity type?
-- Should webhooks support signing secrets per endpoint?
-- Is GraphQL support desirable or can be deferred indefinitely?
+## Decisions (2025-10-31)
+- Initial scope relies on project-level capabilities; schema-specific permissions are deferred until required.
+- Webhooks carry per-endpoint signing secrets with rotation support to satisfy security audits.
+- GraphQL remains out of scope for launch; reassess once REST usage matures.

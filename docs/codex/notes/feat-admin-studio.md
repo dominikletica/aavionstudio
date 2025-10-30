@@ -47,7 +47,7 @@
 4. Add search palette + quick actions.
 5. Bake in help drawer and context docs hooks.
 
-## Open Questions
-- Should modules be able to register client-side bundles (React/Vue) or keep to Stimulus-only?
-- How do we package custom themes for distribution (zip, composer metapackage)?
-- Do we need multi-tenant branding (per project) within the same admin instance?
+## Decisions (2025-10-31)
+- Extensions stick to Stimulus-compatible ES modules; revisit heavier frameworks only if a first-party module justifies the cost.
+- Theme distribution standardises on zipped packs (`.aavtheme`) or Composer packages exposing `theme.yaml` manifests so operators can install via the admin UI.
+- Support instance-level branding plus per-project accent settings (logo/colour); full multi-tenant theming remains out of scope for launch.

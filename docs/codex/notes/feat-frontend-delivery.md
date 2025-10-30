@@ -23,7 +23,7 @@
 4. Wire schema-based template resolution (e.g., `schema_render(entity)`).
 5. Handle error pages and preview mode toggles.
 
-## Open Questions
-- Do we need per-project routing customisation (e.g., custom controllers for certain types)?
-- How should we guard preview mode so only authenticated admins can access draft views?
-- Should we embed structured data (JSON-LD) automatically based on schema metadata?
+## Decisions (2025-10-31)
+- Route resolution stays schema/slug driven; exotic routes rely on alias tables rather than custom controllers.
+- Preview mode requires authenticated users with the `content.preview` capability; share links use short-lived signed tokens layered on top.
+- JSON-LD helpers are opt-in per schema so templates decide when to emit structured data.

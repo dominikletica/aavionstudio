@@ -34,7 +34,7 @@
 5. Add cleanup command for orphaned/unreferenced media.
 6. Optional: add thumbnail pipeline, remote adapter interface.
 
-## Open Questions
-- Do we require per-project storage quotas? If so, where to enforce?
-- Should we integrate a configurable virus scanning hook before persisted?
-- How will CDN integration work for public assets (document expected rewrites)?
+## Decisions (2025-10-31)
+- Implement optional per-project storage quotas enforced during upload with warning thresholds and hard limits when configured.
+- Provide a pluggable virus-scan hook (ClamAV/HTTP) that operators can enable; when unconfigured it is safely skipped.
+- Document CDN integration via `ASSET_BASE_URL`/signed URL configuration so public assets can be fronted without custom code.

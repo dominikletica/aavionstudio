@@ -26,7 +26,7 @@
 3. Renderer service for frontend (resolve entity slugs -> URLs).
 4. Sitemap generator + cron/command integration.
 
-## Open Questions
-- Should menu drafts reuse the main Draft/Commit infrastructure or keep a simplified workflow?
-- How do modules safely extend core menus without causing merge conflicts?
-- Do we need per-user personalised menus (feature flag for future)?
+## Decisions (2025-10-31)
+- Menu updates reuse the shared Draft/Commit workflow for consistency with content publishing.
+- Module-supplied menu items register through manifest hooks with priority/merge rules to avoid collisions.
+- Personalised menus stay deferred behind a future feature flag; launch focuses on shared navigation.

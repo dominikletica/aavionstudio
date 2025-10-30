@@ -32,7 +32,7 @@
 3. Restore wizard (upload or select existing backup).
 4. Scheduling (Symfony scheduler/cron docs) + retention cleanup.
 
-## Open Questions
-- How do we handle backups on read-only hosting environments (ZIP streaming only)?
-- Should uploads be optional to reduce archive size (checkbox per backup)?
-- Do we need encryption for backups by default (password-protected archives)?
+## Decisions (2025-10-31)
+- Read-only hosting falls back to streaming archives directly to the requester and disables scheduled jobs/retention that require persistent writes.
+- Upload payloads become optional with a default-on toggle to shrink archives when storage is tight.
+- Offer passphrase-protected archives (AES-256 Zip); strongly recommended in docs but not enforced by software.

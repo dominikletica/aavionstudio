@@ -37,7 +37,7 @@
 4. Template preview system (render sandbox with sanitized data).
 5. Pack import/export + pack registry view.
 
-## Open Questions
-- Should we support schema inheritance / composition out of the gate?
-- How do we allow third-party modules to ship schema packs (Composer package vs manual upload)?
-- Do we need runtime template sandboxing to guard against heavy Twig logic?
+## Decisions (2025-10-31)
+- Initial release skips schema inheritance/composition; revisit after baseline authoring flow stabilises.
+- Third-party packs can be delivered either as Composer packages exposing pack paths or as admin-uploaded `.aavpack` archives that feed the same registrar.
+- Templates render inside a locked-down Twig sandbox profile to guard against heavy or unsafe logic while preserving required tags and filters.
