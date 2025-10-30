@@ -12,21 +12,12 @@ APP_ENV="$1"
 VERSION="$2"
 CHANNEL="$3"
 
-USE_DEV_DEPS="false"
-DEBUG_FLAG="0"
-
-if [[ "$APP_ENV" == "dev" ]]; then
-  USE_DEV_DEPS="true"
-  DEBUG_FLAG="1"
-fi
-
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="$ROOT_DIR/build"
 STAGE_DIR="$BUILD_DIR/${APP_ENV}-${VERSION}-${CHANNEL}"
 ZIP_NAME="aavionstudio-${VERSION}-${CHANNEL}.zip"
 ZIP_PATH="$BUILD_DIR/$ZIP_NAME"
 RELEASE_METADATA_PATH="$BUILD_DIR/release.json"
-RELEASE_METADATA_TMP="$ROOT_DIR/release.json.tmp"
 COMMIT_SHA="$(git -C "$ROOT_DIR" rev-parse --short HEAD)"
 GENERATED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
@@ -44,10 +35,6 @@ cat > "$RELEASE_METADATA_PATH" <<JSON
 }
 JSON
 
-rm -f "$RELEASE_METADATA_TMP"
-cp "$RELEASE_METADATA_PATH" "$RELEASE_METADATA_TMP"
-mv "$RELEASE_METADATA_TMP" "$ROOT_DIR/release.json"
-
 rm -rf "$STAGE_DIR"
 
 EXCLUDES=(
@@ -55,6 +42,9 @@ EXCLUDES=(
   "--exclude=.github"
   "--exclude=.gitignore"
   "--exclude=.gitmodules"
+  "--exclude=.codex"
+  "--exclude=AGENTS.md"
+  "--exclude=.phpunit.cache"
   "--exclude=node_modules"
   "--exclude=build"
   "--exclude=docs"
@@ -62,10 +52,10 @@ EXCLUDES=(
   "--exclude=.env.local"
   "--exclude=.env.local.php"
   "--exclude=.env.*.local"
-  "--exclude=var/cache/dev"
-  "--exclude=var/cache/test"
-  "--exclude=var/log"
-  "--exclude=var/sessions"
+  "--exclude=var"
+  "--exclude=vendor"
+  "--exclude=phpunit.dist.xml"
+  "--exclude=public/assets"
 )
 
 echo ">>> Syncing repository into staging directory"
@@ -74,43 +64,18 @@ rsync -a --delete "${EXCLUDES[@]}" "$ROOT_DIR"/ "$STAGE_DIR"/
 
 pushd "$STAGE_DIR" >/dev/null
 
-if [[ -f composer.lock ]]; then
-  if [[ "$USE_DEV_DEPS" == "true" ]]; then
-    echo ">>> Installing Composer dependencies (including dev)"
-    APP_ENV="$APP_ENV" composer install --no-interaction --optimize-autoloader
-  else
-    echo ">>> Installing Composer dependencies (no-dev)"
-    APP_ENV="$APP_ENV" composer install --no-dev --no-interaction --optimize-autoloader
-  fi
-fi
+bin/init "${APP_ENV}"
 
-echo ">>> Compiling assets (importmap / tailwind / asset-map)"
-if command -v php >/dev/null; then
-  APP_ENV="$APP_ENV" APP_DEBUG="$DEBUG_FLAG" php bin/console importmap:install
-  if [[ "$DEBUG_FLAG" == "0" ]]; then
-    APP_ENV="$APP_ENV" APP_DEBUG=0 php bin/console tailwind:build --minify
-  else
-    APP_ENV="$APP_ENV" APP_DEBUG=1 php bin/console tailwind:build
-  fi
-  APP_ENV="$APP_ENV" APP_DEBUG="$DEBUG_FLAG" php bin/console asset-map:compile
-  echo ">>> Warming Symfony cache"
-  APP_ENV="$APP_ENV" APP_DEBUG="$DEBUG_FLAG" php bin/console cache:clear --no-warmup
-  APP_ENV="$APP_ENV" APP_DEBUG="$DEBUG_FLAG" php bin/console cache:warmup
-fi
-
-# Clean caches/logs for distribution
-rm -rf var/cache/* var/log/*
-
-# Remove Tailwind binary cache (not needed at runtime)
-if [[ -d var/tailwindcss ]]; then
-  rm -rf var/tailwindcss
-fi
+rm -rf var/log var/logs
+rm -rf var/tailwind var/tailwindcss
 
 popd >/dev/null
 
 rm -f "$ZIP_PATH"
 
 echo ">>> Creating archive $ZIP_NAME"
-( cd "$BUILD_DIR" && zip -rq "$ZIP_NAME" "$(basename "$STAGE_DIR")" )
+( cd "$STAGE_DIR" && zip -rq "$ZIP_PATH" . )
+
+rm -rf "$STAGE_DIR"
 
 echo ">>> Release package available at $ZIP_PATH"

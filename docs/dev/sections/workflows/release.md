@@ -28,7 +28,7 @@ Note: The repository may ship with a placeholder `release.json` for tooling/test
    - `channel` captures release track (in `stable`, `testing`, `dev`, `alpha`, `beta`)
 4. The script will:
    - Install Composer dependencies (`--no-dev` outside `dev`)
-   - Refresh importmap assets, build Tailwind CSS, and remove downloaded Tailwind binaries
+   - Refresh importmap assets, build Tailwind CSS, and remove Tailwind build caches
    - Warm the Symfony cache for the chosen environment
    - Stage a clean copy in `build/<env>-<version>-<channel>/`
    - Generate release metadata in `build/release.json` and atomically update the repository `release.json`

@@ -74,6 +74,13 @@ echo ">>> Wrote $ENV_FILE for APP_ENV=$TARGET_ENV"
 echo ">>> Installing Composer dependencies"
 APP_ENV="$TARGET_ENV" APP_DEBUG="$TARGET_DEBUG" composer "${COMPOSER_FLAGS[@]}"
 
+ASSET_DIR="$ROOT_DIR/public/assets"
+if [[ -d "$ASSET_DIR" ]]; then
+  echo ">>> Clearing existing built assets"
+  rm -rf "$ASSET_DIR"
+fi
+mkdir -p "$ASSET_DIR"
+
 run_console() {
   local description="$1"
   shift
