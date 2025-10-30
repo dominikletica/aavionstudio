@@ -39,3 +39,6 @@ $RECYCLE.BIN/
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+# release artifacts
+/build/

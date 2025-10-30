@@ -16,6 +16,7 @@ Welcome to the documentation hub. Use the links below to jump to the manual that
 - Documentation templates: [`docs/templates/`](templates/)
 - Assets (screenshots, diagrams): [`docs/assets/`](assets/) *(create as needed)*
 - Contributor guide: [`AGENTS.md`](../AGENTS.md)
+- Release workflow: [`docs/dev/sections/workflows/release.md`](dev/sections/workflows/release.md)
 
 ## Navigation Tips
 - Developer guides live under [`docs/dev/sections/`](dev/sections/).

@@ -58,6 +58,9 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
   - Update module/feature drafts in `docs/codex/notes/` as behaviour changes.
   - Keep class map (`docs/dev/classmap.md`) in sync with new services/commands/components.
   - Log session progress in `docs/codex/WORKLOG.md`.
+- **Release Packaging**
+  - Generate deployable archives with `bin/release <env> <version> <channel>`.
+  - See [`docs/dev/sections/workflows/release.md`](sections/workflows/release.md) for details.
 
 ---
 

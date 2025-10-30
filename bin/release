@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ $# -lt 3 ]]; then
+  echo "Usage: $(basename "$0") <environment> <version> <channel>" >&2
+  echo "Example: $(basename "$0") prod 1.0.2 stable" >&2
+  exit 1
+fi
+
+APP_ENV="$1"
+VERSION="$2"
+CHANNEL="$3"
+
+USE_DEV_DEPS="false"
+DEBUG_FLAG="0"
+
+if [[ "$APP_ENV" == "dev" ]]; then
+  USE_DEV_DEPS="true"
+  DEBUG_FLAG="1"
+fi
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BUILD_DIR="$ROOT_DIR/build"
+STAGE_DIR="$BUILD_DIR/${APP_ENV}-${VERSION}-${CHANNEL}"
+ZIP_NAME="aavionstudio-${VERSION}-${CHANNEL}.zip"
+ZIP_PATH="$BUILD_DIR/$ZIP_NAME"
+COMMIT_SHA="$(git -C "$ROOT_DIR" rev-parse --short HEAD)"
+GENERATED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+mkdir -p "$BUILD_DIR"
+rm -rf "$STAGE_DIR"
+
+EXCLUDES=(
+  "--exclude=.git"
+  "--exclude=.github"
+  "--exclude=.gitignore"
+  "--exclude=.gitmodules"
+  "--exclude=node_modules"
+  "--exclude=build"
+  "--exclude=docs"
+  "--exclude=tests"
+  "--exclude=.env.local"
+  "--exclude=.env.local.php"
+  "--exclude=.env.*.local"
+  "--exclude=var/cache/dev"
+  "--exclude=var/cache/test"
+  "--exclude=var/log"
+  "--exclude=var/sessions"
+  "--exclude=release.json"
+)
+
+echo ">>> Syncing repository into staging directory"
+mkdir -p "$STAGE_DIR"
+rsync -a --delete "${EXCLUDES[@]}" "$ROOT_DIR"/ "$STAGE_DIR"/
+
+pushd "$STAGE_DIR" >/dev/null
+
+if [[ -f composer.lock ]]; then
+  if [[ "$USE_DEV_DEPS" == "true" ]]; then
+    echo ">>> Installing Composer dependencies (including dev)"
+    APP_ENV="$APP_ENV" composer install --no-interaction --optimize-autoloader
+  else
+    echo ">>> Installing Composer dependencies (no-dev)"
+    APP_ENV="$APP_ENV" composer install --no-dev --no-interaction --optimize-autoloader
+  fi
+fi
+
+echo ">>> Compiling assets (importmap / tailwind / asset-map)"
+if command -v php >/dev/null; then
+  APP_ENV="$APP_ENV" APP_DEBUG="$DEBUG_FLAG" php bin/console importmap:install
+  if [[ "$DEBUG_FLAG" == "0" ]]; then
+    APP_ENV="$APP_ENV" APP_DEBUG=0 php bin/console tailwind:build --minify
+  else
+    APP_ENV="$APP_ENV" APP_DEBUG=1 php bin/console tailwind:build
+  fi
+  APP_ENV="$APP_ENV" APP_DEBUG="$DEBUG_FLAG" php bin/console asset-map:compile
+  echo ">>> Warming Symfony cache"
+  APP_ENV="$APP_ENV" APP_DEBUG="$DEBUG_FLAG" php bin/console cache:clear --no-warmup
+  APP_ENV="$APP_ENV" APP_DEBUG="$DEBUG_FLAG" php bin/console cache:warmup
+fi
+
+# Clean caches/logs for distribution
+rm -rf var/cache/* var/log/*
+
+# Remove Tailwind binary cache (not needed at runtime)
+if [[ -d var/tailwindcss ]]; then
+  rm -rf var/tailwindcss
+fi
+
+cat > release.json <<JSON
+{
+  "version": "$VERSION",
+  "channel": "$CHANNEL",
+  "environment": "$APP_ENV",
+  "git_commit": "$COMMIT_SHA",
+  "generated_at": "$GENERATED_AT"
+}
+JSON
+
+popd >/dev/null
+
+rm -f "$ZIP_PATH"
+
+echo ">>> Creating archive $ZIP_NAME"
+( cd "$BUILD_DIR" && zip -rq "$ZIP_NAME" "$(basename "$STAGE_DIR")" )
+
+echo ">>> Release package available at $ZIP_PATH"
