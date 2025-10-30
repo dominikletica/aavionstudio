@@ -11,13 +11,13 @@ Note: The repository may ship with a placeholder `release.json` for tooling/test
 - PHP CLI with the same version as production
 - Composer
 - zip utility
-- Optional: Tailwind bundle prerequisites (`bin/init_repository` already installs them)
+- Optional: Tailwind bundle prerequisites (`bin/init <env>` already installs them)
 
 ## Steps
 1. Ensure the working tree is clean and up to date (`git status`).
 2. Bootstrap dependencies if you have not already:
    ```bash
-   bin/init_repository
+   bin/init dev
    ```
 3. Run the release script with target environment, version, and channel tag:
    ```bash
