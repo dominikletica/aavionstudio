@@ -27,10 +27,23 @@
 - [x] Review `bin/release` workflow so new core-platform steps (manifest cache, installer assets) remain compatible with the existing prebuild process; adjust only if gaps emerge
 
 ### Feat: User Management & Access Control (P0 | L)
-- [ ] Create user entity, login flow, and password reset process
-- [ ] Seed role hierarchy + capability registry sourced from module manifests
-- [ ] Build admin UI for user/role/API key management with audit logging
-- [ ] Cover authentication, role assignment, and API-key flows with functional/security tests
+#### Authentication & Core Entities
+- [ ] Add migration(s) to extend `app_user` (rename `password` → `password_hash`, add status/last login) and create supporting tables (`app_role`, `app_user_role`, `app_project_user`, `app_password_reset_token`, `app_remember_me_token`, `app_audit_log`).
+- [ ] Implement DB-backed user provider, user model, password hasher config, login/logout/rememeber-me controllers, and rate limiting for authentication attempts.
+- [ ] Wire password reset + invitation flow (token storage, signed links, controllers, mailer stubs) and record audit events for every credential change.
+
+#### Roles, Capabilities & Project Memberships
+- [ ] Materialise global role hierarchy + default seeds; expose capability registry service that hydrates from module manifests and persists defaults in the database.
+- [ ] Implement project membership repository (`app_project_user`) and access voters that combine global roles, project overrides, and capability requirements.
+
+#### Admin UI & API Keys
+- [ ] Build `/admin/users` management interface (listing, filters, detail view) with forms for profile edits, role assignments, project overrides, invitations, and password resets.
+- [ ] Implement API key issuance/revocation (UI + CLI) with scoped capability enforcement and hashed storage.
+- [ ] Surface audit log viewer for security events (auth attempts, role changes, API key updates) with filters.
+
+#### Testing & Tooling
+- [ ] Add unit/functional tests covering authentication success/failure, voter decisions, admin UI flows, and API key endpoints.
+- [ ] Provide documentation updates (developer + user manuals) for login, roles, project membership, API keys, and troubleshooting; schedule follow-up smoke tests in release workflow.
 
 ### Feat: Admin Studio UI (P0 | L)
 - [ ] Scaffold layout (sidebar, header, notifications) with Tailwind components
@@ -208,3 +221,6 @@
 - Routed SQLite busy-timeout env default through a container parameter so `bin/init` and release builds run without EnvVarProcessor fallback errors
 - Documented the implemented foundation in `docs/dev/sections/architecture/core-platform.md` for future contributors
 - Code-Review: Updated ModuleStateSynchronizer so new module rows honour the manifest’s default enabled flag unless the module is locked.
+
+### 2025-10-31
+- Kick-off: Roadmap Step 3 (User Management & Access Control) – audited feature outline, captured schema/auth updates, and expanded TODOs into implementation phases covering migrations, security wiring, admin UI, API keys, and testing.
