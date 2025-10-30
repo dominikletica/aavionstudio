@@ -165,3 +165,8 @@
 - Established documentation style guide, templates, manuals, and tooling for parallel doc updates
 - Expanded draft library covering user management, admin studio, schema/templates, write API, caching, theming, navigation, backup, and diff tooling
 - Reorganised TODOs by feature/module with granular tasks for implementation planning
+
+### 2025-10-30
+- Added release automation (`bin/release`) creating environment/version/channel-specific packages with metadata
+- Clarified documentation portals, manuals, and release workflow references; added user/dev section skeletons and class map
+- Generated dummy `release.json` for tooling; release script now cleans Tailwind binaries and rewrites metadata ahead of staging
