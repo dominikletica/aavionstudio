@@ -40,6 +40,7 @@
 - Table naming convention: `app_<domain>` (`app_project`, `app_entity`, `app_entity_version`, `app_draft`, `app_schema`, `app_template`, `app_relation`, `app_api_key`, `app_user`, `app_log`).
 - Doctrine type overrides: register `ulid`, `uuid`, JSON column helper.
 - Migrations must include triggers or checks for materialized path integrity.
+- Default seeds live under `config/app/` (`system_settings.php`, `projects.php`) so baseline data can evolve without rewriting migrations.
 
 ## Installer UX Flow
 1. **Welcome & Diagnostics**
@@ -58,6 +59,7 @@
 5. **Summary & Finalisation**
    - Present checklist of performed actions, surface warnings (e.g., running in root compatibility mode) with links to hardening docs.
    - Trigger cache warmup + module manifest compilation before redirecting to `/admin/login`.
+   - Plain Twig template (`templates/installer/wizard.html.twig`) renders the wizard navigation/sections; styling layers can be added later.
 
 ## Diagnostics Reference
 - `extends_php_version`: warn when below 8.3 and link to upgrade guide.
@@ -71,6 +73,7 @@
 - Admin UI nav composed from module manifests (sorted by priority).
 - Routes isolated per module under `/admin/<module-slug>`; fallback to catch-all for modules without UI.
 - AssetMapper pipeline loads Stimulus controllers from `modules/*/assets/controllers`.
+- Manifests declare optional `repository` URL so the updater can fetch `.aavmodule` releases alongside theme packs.
 
 ### Module Manifest Contract
 - Required fields: `name`, `priority`, `services`, `routes`, `capabilities`.

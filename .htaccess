@@ -1,0 +1,19 @@
+# Apache compatibility fallback.
+# Prefer configuring the webroot to `public/` and enabling `mod_rewrite`.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block direct access to sensitive project directories.
+    RewriteRule ^(?:config|src|vendor|var|migrations|tests|docs|modules|templates|translations|bin)(?:/|$) - [F,L,NC]
+
+    # Redirect all other requests to the public front controller.
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "\.(env|lock|json|ya?ml|xml|local)$">
+    Require all denied
+</FilesMatch>

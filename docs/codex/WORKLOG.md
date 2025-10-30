@@ -5,11 +5,26 @@
 
 ## TODO
 ### Core Platform (P0 | XL)
-- [ ] Finalise hosting strategy (rewrite-first vs root fallback) and bake checks into installer
-- [ ] Prepare initial Doctrine migrations for project/entity/version/draft/schema tables
-- [ ] Implement module manifest loader (services, routes, UI navigation) with enable/disable flags
-- [ ] Wire dual SQLite attach listener with health checks and busy timeout configuration
-- [ ] Create unit/integration test harness for installer, module loader, and database bootstrap
+#### Hosting & Installer
+- [x] Finalise rewrite-first vs root fallback handling, including installer warnings and documentation hooks
+- [x] Build installer wizard steps (diagnostics → environment → storage/db → admin account → summary) with `.env.local.php` generator
+- [x] Implement health checks for PHP extensions, writable `var/*` directories, and SQLite availability with actionable remediation hints
+- [x] Deliver root-level `index.php` compatibility loader plus hardening (`Options -Indexes`, deny sensitive paths) and banner logic
+
+#### Module System
+- [x] Implement module manifest contract & registry (services, routes, navigation, theme slots, scheduler hooks)
+- [x] Persist module metadata in `system.brain` for future enable/disable flows; load manifests during cache warmup with validation errors surfaced (installer does not manage modules yet)
+- [x] Integrate module-provided capabilities into the central registry for later features (user access, admin navigation)
+
+#### Database & Migrations
+- [x] Prepare initial Doctrine migrations for core tables (`app_project`, `app_entity`, `app_entity_version`, `app_draft`, `app_schema`, `app_template`, `app_relation`, `app_user`, `app_api_key`, `app_log`)
+- [x] Configure dual SQLite connections with attach listener, busy timeout, and connection health checks
+- [x] Seed baseline configuration records (system settings, installer state) via a hybrid approach (lightweight fixtures/config files plus installer overrides) to keep defaults easy to evolve
+
+#### Testing & Tooling
+- [x] Create unit/integration test harness covering installer flow, module loader bootstrap, and database attachment
+- [x] Add smoke tests for root loader rewrite detection and installer diagnostics endpoints
+- [x] Review `bin/release` workflow so new core-platform steps (manifest cache, installer assets) remain compatible with the existing prebuild process; adjust only if gaps emerge
 
 ### Feat: User Management & Access Control (P0 | L)
 - [ ] Create user entity, login flow, and password reset process
@@ -117,7 +132,7 @@
 
 ## Roadmap To Next Release
 - [x] **Step 1:** Discuss open questions & confirm hosting/security decisions
-- [ ] **Step 2:** Implement Core Platform & architecture foundation
+- [x] **Step 2:** Implement Core Platform & architecture foundation
 - [ ] **Step 3:** Implement User Management & Access Control
 - [ ] **Step 4:** Build Admin Studio UI shell & navigation
 - [ ] **Step 5:** Deliver Schema/Template system & Draft/Commit workflow
@@ -180,3 +195,16 @@
 - Locked in requirement that all operational flows (theme management, backups, installs) remain browser-driven so end users never need CLI access
 - Captured answers to open questions across core outlines (caching, schemas, access control, frontend delivery, themes, media, backups, API) to unblock implementation backlog
 - Expanded feature/module outlines with detailed data models, UI flows, and pseudocode to make upcoming implementation phases deterministic
+
+### 2025-10-30 (Session 4)
+- Kicked off Core Platform implementation (Step 2) focusing on database foundations and shared defaults
+- Added SQLite busy-timeout/foreign-key pragmas, attachment health checks, and PHPUnit coverage for the connection listener
+- Seeded initial Doctrine migration with core tables (system vs user DB split) plus config-driven defaults (`config/app/system_settings.php`, `config/app/projects.php`)
+- Introduced filesystem-based module discovery/registry with repository metadata for future `.aavmodule` update scans, updating docs and tests accordingly
+- Synced module metadata with `app_module_state`, exposed aggregated capabilities/parameters, and scaffolded the browser setup wizard (`/setup`) with diagnostics-friendly Twig template and functional test
+- Added root compatibility loader with rewrite diagnostics and installer warnings, shipped Apache/IIS fallback configs, nginx guidance, and corresponding unit/functional tests plus documentation updates
+- Expanded installer diagnostics with actionable extension and filesystem checks (hints for `var/*` and `public/assets/`), keeping tests/docs in sync
+- Reviewed release packaging and init tooling so new hardening assets ship cleanly (Tailwind cache removal, asset rebuild cleanup) and updated documentation accordingly
+- Routed SQLite busy-timeout env default through a container parameter so `bin/init` and release builds run without EnvVarProcessor fallback errors
+- Documented the implemented foundation in `docs/dev/sections/architecture/core-platform.md` for future contributors
+- Code-Review: Updated ModuleStateSynchronizer so new module rows honour the manifest’s default enabled flag unless the module is locked.

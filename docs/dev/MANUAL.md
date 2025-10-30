@@ -1,7 +1,7 @@
 # Developer Manual
 
 Status: Draft  
-Updated: 2025-10-29
+Updated: 2025-10-30
 
 Welcome to the technical companion for aavion Studio. This manual outlines the development workflow, architecture conventions, and references to subsystem guides under `docs/dev/sections/`.
 
@@ -25,6 +25,9 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 3. **Local Web Server**
    - `symfony serve` or `php -S localhost:8000 -t public`
    - For root fallback testing, set `APP_FORCE_ROOT_ENTRY=1` and hit `index.php`.
+   - The setup diagnostics flag compatibility mode when requests arrive via the root loader—fix docroot/rewrite configuration to clear the warning before going live.
+   - Apache/IIS fallback files (`.htaccess`, `web.config`) ship with the repository, but production installs should point the web server directly at `public/`.
+   - Access the setup wizard at `http://localhost:8000/setup` to iterate through diagnostics and seed configuration (plain layout for now).
 
 ---
 
@@ -36,9 +39,10 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 | `modules/` | Optional feature modules (service manifests, assets, templates) |
 | `assets/` | Tailwind styles, Stimulus controllers, JS modules |
 | `public/` | Webroot (front controller, built assets) |
-| `data/` | Snapshots, uploads, backups |
-| `var/` | Cache, logs, SQLite databases (`system.brain`, `user.brain`) |
+| `config/app/` | Default seeds for system settings, projects, modules |
+| `var/` | Cache, logs, SQLite databases (`var/system.brain`, `var/user.brain`), snapshots, uploads, backups (installer diagnostics flag missing/writable directories) |
 | `docs/` | Documentation (developer, user, codex notes) |
+| `modules/` | Drop-in feature modules discovered via `module.php` manifests (no Composer autoload required, support `.aavmodule` bundles) |
 
 ---
 
@@ -58,6 +62,11 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
   - Update module/feature drafts in `docs/codex/notes/` as behaviour changes.
   - Keep class map (`docs/dev/classmap.md`) in sync with new services/commands/components.
   - Log session progress in `docs/codex/WORKLOG.md`.
+- **Module Packaging**
+  - Each module ships a `module.php` manifest (returning `ModuleManifest`) and optional config/assets under the same directory.
+  - Release bundles use the `.aavmodule` extension and include a `repository` URL for update scans (mirrors theme update behaviour).
+  - Drop modules into `/modules/<slug>/` and clear cache; discovery works without Composer autoload.
+  - Aggregated capability metadata is exposed via the `app.capabilities` container parameter (derived from enabled module manifests).
 - **Release Packaging**
   - Generate deployable archives with `bin/release <env> <version> <channel>`.
   - See [`docs/dev/sections/workflows/release.md`](sections/workflows/release.md) for details.

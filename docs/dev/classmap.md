@@ -9,7 +9,15 @@
 | Service ID | Class | Responsibility | Notes |
 |------------|-------|----------------|-------|
 | `App\Kernel` | `src/Kernel.php` | Application kernel | Uses MicroKernelTrait |
-| _TBD_ |  |  | Populate as services are introduced |
+| `App\Doctrine\Listener\AttachUserDatabaseListener` | `src/Doctrine/Listener/AttachUserDatabaseListener.php` | Attaches `user.brain` to primary SQLite connection, configures pragmas | Sets `PRAGMA busy_timeout`/`foreign_keys` and ensures secondary DB file exists |
+| `App\Doctrine\Health\SqliteHealthChecker` | `src/Doctrine/Health/SqliteHealthChecker.php` | Reports connection status for system + user SQLite stores | Used in tests/diagnostics to confirm attachment and busy timeout |
+| `App\Installer\DefaultSystemSettings` | `src/Installer/DefaultSystemSettings.php` | Loads shared default settings from `config/app/system_settings.php` | Consumed by migrations/installer to seed baseline values |
+| `App\Installer\DefaultProjects` | `src/Installer/DefaultProjects.php` | Provides default project seeds from `config/app/projects.php` | Initial migration inserts `default` project via this helper |
+| `App\Bootstrap\RootEntryPoint` | `src/Bootstrap/RootEntryPoint.php` | Normalises requests that hit the root fallback (`index.php`) and forwards them to `public/index.php` | Sets compatibility flags for installer rewrite diagnostics |
+| `App\Module\ModuleDiscovery` | `src/Module/ModuleDiscovery.php` | Discovers module manifests under `/modules/*/module.php` | Supports drop-in modules without Composer autoload |
+| `App\Module\ModuleRegistry` | `src/Module/ModuleRegistry.php` | Provides module manifest lookup/capability aggregation | Hydrated from `app.modules` parameter during boot |
+| `App\Module\ModuleStateRepository` | `src/Module/ModuleStateRepository.php` | Reads persisted module enable/metadata flags from database | Optional helper for future enable/disable UI |
+| `App\Module\ModuleStateSynchronizer` | `src/Module/ModuleStateSynchronizer.php` | Syncs manifest metadata with `app_module_state` table during kernel boot | Keeps repository URLs/locks up to date |
 
 ### Suggested Structure
 - **Core Services:** Module loader, schema registry, draft manager, snapshot manager, resolver engine, media storage.
