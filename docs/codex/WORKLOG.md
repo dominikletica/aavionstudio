@@ -5,11 +5,26 @@
 
 ## TODO
 ### Core Platform (P0 | XL)
-- [ ] Finalise hosting strategy (rewrite-first vs root fallback) and bake checks into installer
-- [ ] Prepare initial Doctrine migrations for project/entity/version/draft/schema tables
-- [ ] Implement module manifest loader (services, routes, UI navigation) with enable/disable flags
-- [ ] Wire dual SQLite attach listener with health checks and busy timeout configuration
-- [ ] Create unit/integration test harness for installer, module loader, and database bootstrap
+#### Hosting & Installer
+- [ ] Finalise rewrite-first vs root fallback handling, including installer warnings and documentation hooks
+- [ ] Build installer wizard steps (diagnostics → environment → storage/db → admin account → summary) with `.env.local.php` generator
+- [ ] Implement health checks for PHP extensions, writable `var/*` directories, and SQLite availability with actionable remediation hints
+- [ ] Deliver root-level `index.php` compatibility loader plus hardening (`Options -Indexes`, deny sensitive paths) and banner logic
+
+#### Module System
+- [ ] Implement module manifest contract & registry (services, routes, navigation, theme slots, scheduler hooks)
+- [ ] Persist module metadata in `system.brain` for future enable/disable flows; load manifests during cache warmup with validation errors surfaced (installer does not manage modules yet)
+- [ ] Integrate module-provided capabilities into the central registry for later features (user access, admin navigation)
+
+#### Database & Migrations
+- [ ] Prepare initial Doctrine migrations for core tables (`app_project`, `app_entity`, `app_entity_version`, `app_draft`, `app_schema`, `app_template`, `app_relation`, `app_user`, `app_api_key`, `app_log`)
+- [ ] Configure dual SQLite connections with attach listener, busy timeout, and connection health checks
+- [ ] Seed baseline configuration records (system settings, installer state) via a hybrid approach (lightweight fixtures/config files plus installer overrides) to keep defaults easy to evolve
+
+#### Testing & Tooling
+- [ ] Create unit/integration test harness covering installer flow, module loader bootstrap, and database attachment
+- [ ] Add smoke tests for root loader rewrite detection and installer diagnostics endpoints
+- [ ] Review `bin/release` workflow so new core-platform steps (manifest cache, installer assets) remain compatible with the existing prebuild process; adjust only if gaps emerge
 
 ### Feat: User Management & Access Control (P0 | L)
 - [ ] Create user entity, login flow, and password reset process
