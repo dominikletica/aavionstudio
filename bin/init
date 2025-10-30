@@ -79,7 +79,10 @@ run_console() {
 run_console "Installing importmap assets" importmap:install
 run_console "Building Tailwind assets" tailwind:build
 run_console "Compiling asset map" asset-map:compile
-run_console "Creating SQLite database (if needed)" doctrine:database:create --if-not-exists
+# Fix: dbal throwing an error with --if-not-exists on SQLite, so we check for the DB file first
+if [ ! -f var/system.brain ]; then
+run_console "Creating SQLite database" doctrine:database:create
+fi
 run_console "Ensuring Messenger transports exist" messenger:setup-transports --no-interaction
 run_console "Clearing cache" cache:clear
 run_console "Warming up cache" cache:warmup
