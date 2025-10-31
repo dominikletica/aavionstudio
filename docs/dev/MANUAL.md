@@ -72,6 +72,8 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
   - See [`docs/dev/sections/workflows/release.md`](sections/workflows/release.md) for details.
 - **Automation & Access**
   - Issue API keys for integrations with `php bin/console app:api-key:issue <user>`; see [`docs/dev/sections/security/api-keys.md`](sections/security/api-keys.md) for usage details.
+- **Audit Trail**
+  - Inspect security events via `/admin/security/audit`; implementation notes live in [`docs/dev/sections/security/audit-log.md`](sections/security/audit-log.md).
 
 ---
 

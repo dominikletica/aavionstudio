@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Security audit log · Admin · aavion Studio</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 2rem; background: #f5f7fb; color: #111827; }
+        h1 { margin-top: 0; }
+        .card { background: #fff; padding: 1.75rem; border-radius: 12px; box-shadow: 0 18px 36px rgba(15,23,42,.08); margin-bottom: 1.5rem; }
+        form.filters { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 1rem; }
+        label { display: block; font-weight: 600; margin-bottom: .35rem; }
+        input[type="text"], select { width: 100%; padding: .65rem 1rem; border-radius: 10px; border: 1px solid #cbd5f5; }
+        button { padding: .7rem 1.4rem; border-radius: 10px; border: none; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-weight: 600; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { text-align: left; padding: .75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+        .meta { color: #6b7280; font-size: .88rem; }
+        .context { background: #111827; color: #f9fafb; padding: .65rem .9rem; border-radius: 8px; font-family: "SFMono-Regular", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: .8rem; line-height: 1.45; }
+        .tag { display: inline-block; padding: .2rem .55rem; border-radius: 999px; font-size: .75rem; background: #e0f2fe; color: #05558a; letter-spacing: .04em; }
+        .grid-row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+        .action-select { min-width: 220px; }
+        .reset-link { color: #2563eb; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <h1>Security audit log</h1>
+
+    <div class="card">
+        <form class="filters" method="get" action="{{ path('admin_security_audit') }}">
+            <div>
+                <label for="filter_action">Action</label>
+                <select id="filter_action" name="action" class="action-select">
+                    <option value="">All actions</option>
+                    {% for action in actions %}
+                        <option value="{{ action }}" {% if filters.action == action %}selected{% endif %}>{{ action }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="filter_actor">Actor (email or ID)</label>
+                <input type="text" id="filter_actor" name="actor" value="{{ filters.actor }}">
+            </div>
+            <div>
+                <label for="filter_subject">Subject ID</label>
+                <input type="text" id="filter_subject" name="subject" value="{{ filters.subject }}">
+            </div>
+            <div>
+                <label for="filter_from">From</label>
+                <input type="text" id="filter_from" name="from" placeholder="2025-10-30" value="{{ filters.from }}">
+            </div>
+            <div>
+                <label for="filter_to">To</label>
+                <input type="text" id="filter_to" name="to" placeholder="2025-10-31" value="{{ filters.to }}">
+            </div>
+            <div class="grid-row">
+                <button type="submit">Apply filters</button>
+                <a class="reset-link" href="{{ path('admin_security_audit') }}">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        {% if entries is empty %}
+            <p class="meta">No events recorded for the selected filters.</p>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:12rem;">Occurred at</th>
+                        <th style="width:10rem;">Action</th>
+                        <th style="width:14rem;">Actor</th>
+                        <th style="width:10rem;">Subject</th>
+                        <th>Context</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                        <tr>
+                            <td>
+                                {{ entry.occurred_at|date('Y-m-d H:i:s') }}<br>
+                                <span class="meta">ID: {{ entry.id }}</span>
+                            </td>
+                            <td><span class="tag">{{ entry.action }}</span></td>
+                            <td>
+                                {% if entry.actor_email %}
+                                    <strong>{{ entry.actor_email }}</strong><br>
+                                    <span class="meta">{{ entry.actor_name ?: entry.actor_id }}</span>
+                                {% elseif entry.actor_id %}
+                                    <span class="meta">{{ entry.actor_id }}</span>
+                                {% else %}
+                                    <span class="meta">System</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entry.subject_id %}
+                                    <code>{{ entry.subject_id }}</code>
+                                {% else %}
+                                    <span class="meta">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <pre class="context">{{ entry.context|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</body>
+</html>

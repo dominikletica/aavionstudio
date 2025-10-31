@@ -43,7 +43,7 @@
 - [x] Add invitation management screen (listing/create/cancel) under `/admin/users/invitations` with email delivery and audit logging.
 - [x] Build `/admin/users` management interface (listing, filters, detail view) with forms for profile edits, role assignments, project overrides, invitations, and password resets. *(Initial profile + role editing delivered; project overrides/password resets remain as follow-up tasks.)*
 - [x] Implement API key issuance/revocation (UI + CLI) with scoped capability enforcement and hashed storage. *(Scopes + expiry captured; capability enforcement middleware still pending once API surface lands.)*
-- [ ] Surface audit log viewer for security events (auth attempts, role changes, API key updates) with filters.
+- [x] Surface audit log viewer for security events (auth attempts, role changes, API key updates) with filters.
 
 #### Testing & Tooling
 - [ ] Add unit/functional tests covering authentication success/failure, voter decisions, admin UI flows, and API key endpoints (invitation onboarding + login flow + admin user management + API key issuance/revoke covered; remaining: voter edge cases + HTTP API endpoints).
@@ -242,3 +242,4 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Extended invitation acceptance test to verify password hashing, role persistence, and a full login with the invited account; documented onboarding flow for developers and administrators.
 - Shipped `/admin/users` management UI with listing/search filters, profile + role editor, audit logging, and functional coverage; documented tooling for developers and administrators.
 - Added API key manager service, CLI issuance command, and admin UI for creation/revocation with audit logging and tests; documented developer + user flows.
+- Delivered security audit log viewer (`/admin/security/audit`) with filters, repository helper, Twig view, and functional coverage; updated developer/user documentation and roadmap tracking.

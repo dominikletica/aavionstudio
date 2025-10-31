@@ -56,7 +56,7 @@
 ## Admin UI
 - `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys; profile/role editor and API key management implemented, invitation management UI (`/admin/users/invitations`) already in place with invitee onboarding form.
 - Form-driven editor with validation, optional invitation emails, password reset trigger, API key issuance/revocation.
-- Audit log integration: record login attempts, role changes, API key creation.
+- Audit log integration: record login attempts, role changes, API key creation; viewer available under `/admin/security/audit` with filters.
 - Bulk actions for enabling/disabling users, resetting 2FA (future), revoking sessions.
 - Table filters by role, project, status; search by email/display name.
 

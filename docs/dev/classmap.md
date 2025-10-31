@@ -29,6 +29,7 @@
 | `App\Security\User\UserCreator` | `src/Security/User/UserCreator.php` | Creates users (e.g. invitation onboarding) with hashed passwords and audit logging | Consumed by invitation acceptance; functional coverage in `tests/Controller/Security/InvitationAcceptControllerTest.php` |
 | `App\Security\User\UserAdminManager` | `src/Security/User/UserAdminManager.php` | Lists/updates users for admin UI, persists role assignments, records audit logs | Exercised via `tests/Controller/Admin/UserControllerTest.php` |
 | `App\Security\Api\ApiKeyManager` | `src/Security/Api/ApiKeyManager.php` | Issues, lists, and revokes API keys with hashed secrets and audit logging | Unit coverage in `tests/Security/Api/ApiKeyManagerTest.php` |
+| `App\Security\Audit\SecurityAuditRepository` | `src/Security/Audit/SecurityAuditRepository.php` | Reads audit log entries with filtering and context decoding | Used by admin audit viewer (`tests/Controller/Admin/SecurityAuditControllerTest.php`) |
 
 ### Suggested Structure
 - **Core Services:** Module loader, schema registry, draft manager, snapshot manager, resolver engine, media storage.
@@ -53,6 +54,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `admin_users_index` | `src/Controller/Admin/UserController.php` | Lists users for admin management | Core |
 | `admin_users_edit` | `src/Controller/Admin/UserController.php` | Edits user profile/roles | Core |
 | `admin_users_api_keys_revoke` | `src/Controller/Admin/UserController.php` | Revokes an API key for a user | Core |
+| `admin_security_audit` | `src/Controller/Admin/SecurityAuditController.php` | Lists security audit log entries with filters | Core |
 | `app_frontend` | _TBD_ | Catch-all frontend controller | Core |
 | `app_admin_dashboard` | _TBD_ | Admin landing page | Core |
 | ... |  |  |  |

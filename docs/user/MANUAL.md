@@ -28,6 +28,7 @@ Welcome! This manual will guide administrators, editors, and integrators through
 - **Invitations** – Administrators can invite users via `/admin/users/invitations`; invitees complete onboarding at `/invite/{token}` within seven days to set their password. [See detailed guide](sections/administration/invitations.md).
 - **Projects & Settings** – Managing projects, locales, error-page entities (default project provides fallback Twig templates).
 - **User & Access Management** – Creating users, assigning roles/permissions, managing API keys. [See user management guide](sections/administration/user-management.md).
+- **Security Audit Log** – Review authentication and permission changes under `/admin/security/audit`; filter by action, actor, subject, or date to trace events quickly.
 - **Maintenance Tools** – Cache, snapshot rebuild, queue monitoring, health checks.
 
 ---
