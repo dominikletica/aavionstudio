@@ -147,11 +147,15 @@
 - [ ] Cache diff results for common comparisons
 - [ ] Cover diff edge cases (large payloads, markdown comparison) with tests
 
+### Follow-up Tasks (Visit periodically)
+- [ ] Wire API key-based authentication/authorization into the public HTTP API once the write/read endpoints land (reuse `ApiKeyManager` issuance data).
+- [ ] Add smoke checks for `/admin/api/api-keys` in the release workflow to ensure serialization changes remain backwards compatible.
+
 ## Roadmap To Next Release
 Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - [x] **Step 1:** Discuss open questions & confirm hosting/security decisions
 - [x] **Step 2:** Implement Core Platform & architecture foundation
-- [ ] **Step 3:** Implement User Management & Access Control
+- [x] **Step 3:** Implement User Management & Access Control
 - [ ] **Step 4:** Build Admin Studio UI shell & navigation
 - [ ] **Step 5:** Deliver Schema/Template system & Draft/Commit workflow
 - [ ] **Step 6:** Implement Snapshot delivery, Frontend rendering, and Resolver pipeline

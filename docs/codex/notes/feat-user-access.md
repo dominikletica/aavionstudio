@@ -65,6 +65,7 @@
 - OAuth2 / SSO left for future module; design interfaces to allow pluggable user providers.
 - Webhooks triggerable per module (e.g., notifier for failed login).
 - CLI commands for API key creation/revocation to support headless automation.
+- Admin REST endpoints (`/admin/api/api-keys`) expose listing/creation/revocation for operators; extend with read/write API enforcement in later roadmap steps.
 - API scope model maps to capabilities (`content.read`, `content.write`, `admin.*`) to reuse registry.
 
 ## Audit Logging
