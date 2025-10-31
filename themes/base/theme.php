@@ -9,6 +9,7 @@ return new ThemeManifest(
     name: 'Base Theme',
     description: 'Default built-in theme containing repository fonts/icons and minimal Twig scaffolding.',
     basePath: __DIR__,
+    version: '1.0.0-dev',
     priority: 1000,
     services: null,
     assets: 'assets',

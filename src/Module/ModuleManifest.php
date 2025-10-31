@@ -35,7 +35,7 @@ final class ModuleManifest
         return new self(
             slug: (string) ($data['slug'] ?? throw new \InvalidArgumentException('Module slug missing.')),
             name: (string) ($data['name'] ?? throw new \InvalidArgumentException('Module name missing.')),
-            description: (string) ($data['description'] ?? ''),
+            description: (string) ($data['description'] ?? throw new \InvalidArgumentException('Module description missing.')),
             basePath: $basePath,
             priority: (int) ($data['priority'] ?? 0),
             services: isset($data['services']) ? (string) $data['services'] : null,
@@ -58,7 +58,7 @@ final class ModuleManifest
         return new self(
             slug: (string) ($data['slug'] ?? throw new \InvalidArgumentException('Module slug missing.')),
             name: (string) ($data['name'] ?? throw new \InvalidArgumentException('Module name missing.')),
-            description: (string) ($data['description'] ?? ''),
+            description: (string) ($data['description'] ?? throw new \InvalidArgumentException('Module description missing.')),
             basePath: $basePath,
             priority: (int) ($data['priority'] ?? 0),
             services: isset($data['services']) ? (string) $data['services'] : null,

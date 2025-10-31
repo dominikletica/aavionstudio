@@ -27,6 +27,15 @@ final class ThemeStateSynchronizer
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
         foreach ($manifests as $manifest) {
+            $metadata = $manifest->metadata;
+
+            if ($manifest->repository !== null) {
+                $metadata['repository'] = $manifest->repository;
+            }
+
+            $metadataJson = json_encode($metadata, JSON_THROW_ON_ERROR);
+            $locked = (bool) ($metadata['locked'] ?? false);
+
             $existing = $this->connection->fetchAssociative(
                 'SELECT enabled FROM app_theme_state WHERE name = :name',
                 ['name' => $manifest->slug],
@@ -35,18 +44,21 @@ final class ThemeStateSynchronizer
             if ($existing === false) {
                 $this->connection->insert('app_theme_state', [
                     'name' => $manifest->slug,
-                    'enabled' => 1,
-                    'metadata' => json_encode($manifest->metadata, JSON_THROW_ON_ERROR),
+                    'enabled' => $locked ? 1 : (int) $manifest->enabled,
+                    'metadata' => $metadataJson,
                     'updated_at' => $now,
                 ]);
 
                 continue;
             }
 
+            $enabled = $locked ? 1 : (int) $existing['enabled'];
+
             $this->connection->update(
                 'app_theme_state',
                 [
-                    'metadata' => json_encode($manifest->metadata, JSON_THROW_ON_ERROR),
+                    'enabled' => $enabled,
+                    'metadata' => $metadataJson,
                     'updated_at' => $now,
                 ],
                 ['name' => $manifest->slug],

@@ -45,6 +45,7 @@ use App\Module\ModuleManifest;
 return [
     'slug' => 'demo',
     'name' => 'Demo Module',
+    'description' => 'Demo module used for discovery testing.',
     'services' => 'config/services.php',
     'priority' => 10,
     'repository' => 'https://example.com/demo-module.git',

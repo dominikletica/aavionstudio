@@ -30,6 +30,7 @@ final class CapabilitySynchronizerTest extends TestCase
             [
                 'slug' => 'core',
                 'name' => 'Core',
+                'description' => 'Core services',
                 'base_path' => __DIR__,
                 'priority' => 0,
                 'navigation' => [],

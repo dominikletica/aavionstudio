@@ -32,7 +32,7 @@ final class ThemeManifest
         return new self(
             slug: (string) ($data['slug'] ?? throw new \InvalidArgumentException('Theme slug missing.')),
             name: (string) ($data['name'] ?? throw new \InvalidArgumentException('Theme name missing.')),
-            description: (string) ($data['description'] ?? ''),
+            description: (string) ($data['description'] ?? throw new \InvalidArgumentException('Theme description missing.')),
             basePath: $basePath,
             version: isset($data['version']) ? (string) $data['version'] : null,
             priority: (int) ($data['priority'] ?? 0),
@@ -54,7 +54,7 @@ final class ThemeManifest
         return new self(
             slug: (string) ($data['slug'] ?? throw new \InvalidArgumentException('Theme slug missing.')),
             name: (string) ($data['name'] ?? throw new \InvalidArgumentException('Theme name missing.')),
-            description: (string) ($data['description'] ?? ''),
+            description: (string) ($data['description'] ?? throw new \InvalidArgumentException('Theme description missing.')),
             basePath: $basePath,
             version: isset($data['version']) ? (string) $data['version'] : null,
             priority: (int) ($data['priority'] ?? 0),
