@@ -18,6 +18,14 @@
 | `App\Module\ModuleRegistry` | `src/Module/ModuleRegistry.php` | Provides module manifest lookup/capability aggregation | Hydrated from `app.modules` parameter during boot |
 | `App\Module\ModuleStateRepository` | `src/Module/ModuleStateRepository.php` | Reads persisted module enable/metadata flags from database | Optional helper for future enable/disable UI |
 | `App\Module\ModuleStateSynchronizer` | `src/Module/ModuleStateSynchronizer.php` | Syncs manifest metadata with `app_module_state` table during kernel boot | Keeps repository URLs/locks up to date |
+| `App\Theme\ThemeDiscovery` | `src/Theme/ThemeDiscovery.php` | Discovers theme manifests from `/themes/*/theme.{php,yaml}` | Produces `ThemeManifest` list used during kernel boot |
+| `App\Theme\ThemeRegistry` | `src/Theme/ThemeRegistry.php` | Provides theme manifest lookup for tooling | Hydrated from `app.themes` parameter |
+| `App\Theme\ThemeStateSynchronizer` | `src/Theme/ThemeStateSynchronizer.php` | Syncs theme metadata into `app_theme_state` during kernel boot | Keeps DB record aligned with manifest info |
+| `App\Theme\ThemeStateRepository` | `src/Theme/ThemeStateRepository.php` | Reads stored theme enable/metadata state | Simple helper for future management UI |
+| `App\Asset\AssetStateTracker` | `src/Asset/AssetStateTracker.php` | Hashes module/theme asset trees and stores checksum cache in `var/cache/assets-state.json` | Depends on `ModuleRegistry`/`ThemeRegistry` plus kernel dir parameters |
+| `App\Asset\AssetPipelineRefresher` | `src/Asset/AssetPipelineRefresher.php` | Runs consolidated asset rebuild (sync → importmap → Tailwind → asset-map → cache warmup) and persists state hashes | Depends on `AssetStateTracker`, logger, kernel parameters |
+| `App\Service\AssetRebuildScheduler` | `src/Service/AssetRebuildScheduler.php` | Orchestrates synchronous/asynchronous rebuilds; dispatches `AssetRebuildMessage` when changes detected | Uses tracker, Messenger bus, pipeline refresher |
+| `App\MessageHandler\AssetRebuildMessageHandler` | `src/MessageHandler/AssetRebuildMessageHandler.php` | Messenger handler executing queued asset rebuild jobs | Handles `App\Message\AssetRebuildMessage` |
 | `App\Security\User\AppUserProvider` | `src/Security/User/AppUserProvider.php` | Doctrine-backed user provider for authentication | Handles status checks, password upgrades, role loading |
 | `App\Security\Capability\CapabilityRegistry` | `src/Security/Capability/CapabilityRegistry.php` | Aggregates module-declared capabilities for lookup | Feeds synchronizer and future ACL tooling |
 | `App\Security\Capability\CapabilitySynchronizer` | `src/Security/Capability/CapabilitySynchronizer.php` | Persists capability defaults into `app_role_capability` and logs seeding | Invoked during kernel boot |
@@ -61,6 +69,8 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `admin_api_keys_list` | `src/Controller/Admin/AdminApiKeyController.php` | REST endpoint listing API keys for a user | Core |
 | `admin_api_keys_create` | `src/Controller/Admin/AdminApiKeyController.php` | Creates API keys via REST endpoint | Core |
 | `admin_api_keys_revoke` | `src/Controller/Admin/AdminApiKeyController.php` | Revokes API keys via REST endpoint | Core |
+| `admin_assets_overview` | `src/Controller/Admin/SystemAssetsController.php` | Admin UI for queuing or running asset pipeline rebuilds | Core |
+| `admin_assets_rebuild` | `src/Controller/Admin/SystemAssetsController.php` | POST endpoint backing the rebuild forms | Core |
 | `app_frontend` | _TBD_ | Catch-all frontend controller | Core |
 | `app_admin_dashboard` | _TBD_ | Admin landing page | Core |
 | ... |  |  |  |
@@ -75,6 +85,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `app:backup:run` | _TBD_ | Create backup archive | BackupManager |
 | `app:api-key:issue` | `src/Command/IssueApiKeyCommand.php` | Issue API key for a user and print the secret | `ApiKeyManager`, `AppUserRepository` |
 | `app:assets:sync` | `src/Command/SyncDiscoveredAssetsCommand.php` | Mirrors `modules/*/assets` and `themes/*/assets` into the core `assets/` tree for builds/tests | `ModuleRegistry`, `%kernel.project_dir%`, `Filesystem` |
+| `app:assets:rebuild` | `src/Command/RebuildAssetsCommand.php` | Runs or queues the full asset pipeline rebuild; supports `--force` and `--async` | `AssetRebuildScheduler` |
 | ... |  |  |  |
 
 ---

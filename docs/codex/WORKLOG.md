@@ -150,6 +150,7 @@
 ### Follow-up Tasks (Visit periodically)
 - [ ] Wire API key-based authentication/authorization into the public HTTP API once the write/read endpoints land (reuse `ApiKeyManager` issuance data).
 - [ ] Add smoke checks for `/admin/api/api-keys` in the release workflow to ensure serialization changes remain backwards compatible.
+- [ ] Hook future module-/theme-installers into the asset rebuild scheduler 
 
 ## Roadmap To Next Release
 Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
@@ -268,3 +269,6 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Added PHPUnit lint suites: `tests/Lint/InitPipelineTest.php` replays the full init pipeline (cleanup, asset builds, DB setup, cache warmup) and `tests/Lint/TwigLintTest.php` validates Twig templates (optionally themes) via `lint:twig`.
 - Refreshed asset strategy outline (`docs/codex/notes/feat-admin-assets.md`) to capture implemented fonts/icons/illustrations stack and remaining Roadmap Step 4 follow-ups.
 - Introduced `app:assets:sync` command plus pipeline/test integration to mirror module/theme assets into `assets/` before builds; Twig lint now includes `themes/*/templates` and `modules/*/templates`.
+- Added state-aware asset rebuild flow (`AssetStateTracker`, `AssetPipelineRefresher`, `AssetRebuildScheduler`) with new `app:assets:rebuild` command + Messenger handler, updated `bin/init` and lint suites to rely on it, and documented runtime rebuild strategy for theme/module installs.
+- Extended theme discovery pipeline: added `ThemeDiscovery`, `ThemeRegistry`, and manifest descriptions (`theme.php`/`theme.yaml`) so sync/rebuild logic mirrors module auto-discovery and future theme services share the same bootstrap path.
+- Aligned persistence by introducing `app_theme_state`, `ThemeStateSynchronizer`, and `ThemeStateRepository`, seeded the locked `base` theme, and shipped an admin assets console view for queuing/running rebuilds on demand.

@@ -5,6 +5,9 @@ namespace App;
 use App\Module\ModuleDiscovery;
 use App\Module\ModuleManifest;
 use App\Module\ModuleStateSynchronizer;
+use App\Theme\ThemeDiscovery;
+use App\Theme\ThemeManifest;
+use App\Theme\ThemeStateSynchronizer;
 use App\Security\Capability\CapabilitySynchronizer;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -23,6 +26,11 @@ class Kernel extends BaseKernel
      * @var list<ModuleManifest>|null
      */
     private ?array $discoveredModules = null;
+
+    /**
+     * @var list<ThemeManifest>|null
+     */
+    private ?array $discoveredThemes = null;
 
     protected function configureContainer(ContainerConfigurator $container, LoaderInterface $loader): void
     {
@@ -55,6 +63,19 @@ class Kernel extends BaseKernel
 
         foreach ($activeManifests as $manifest) {
             if ($servicesPath = $manifest->servicesPath()) {
+                $container->import($servicesPath);
+            }
+        }
+
+        $themes = $this->discoverThemes();
+        $persistedThemes = array_map(static fn (ThemeManifest $manifest): array => $manifest->toArray(), $themes);
+        $container->parameters()->set('app.themes', $persistedThemes);
+
+        foreach ($themes as $theme) {
+            if (!$theme->enabled) {
+                continue;
+            }
+            if ($servicesPath = $theme->servicesPath()) {
                 $container->import($servicesPath);
             }
         }
@@ -103,6 +124,85 @@ class Kernel extends BaseKernel
         return $this->discoveredModules = $manifests;
     }
 
+    /**
+     * @return list<ThemeManifest>
+     */
+    private function discoverThemes(): array
+    {
+        if ($this->discoveredThemes !== null) {
+            return $this->discoveredThemes;
+        }
+
+        $themesDir = $this->getProjectDir().'/themes';
+        $discovery = new ThemeDiscovery($themesDir);
+        $manifests = $this->applyThemeStates($discovery->discover());
+
+        return $this->discoveredThemes = $manifests;
+    }
+
+    /**
+     * @param list<ThemeManifest> $manifests
+     * @return list<ThemeManifest>
+     */
+    private function applyThemeStates(array $manifests): array
+    {
+        $connection = $this->createBootstrapConnection();
+
+        if ($connection === null) {
+            return $manifests;
+        }
+
+        try {
+            $schemaManager = $connection->createSchemaManager();
+        } catch (\Throwable) {
+            return $manifests;
+        }
+
+        if (!$schemaManager->tablesExist(['app_theme_state'])) {
+            return $manifests;
+        }
+
+        $states = [];
+        $rows = $connection->fetchAllAssociative('SELECT name, enabled, metadata FROM app_theme_state');
+
+        foreach ($rows as $row) {
+            $metadata = [];
+
+            if (isset($row['metadata'])) {
+                $decoded = json_decode((string) $row['metadata'], true);
+
+                if (is_array($decoded)) {
+                    $metadata = $decoded;
+                }
+            }
+
+            $states[(string) $row['name']] = [
+                'enabled' => ((int) $row['enabled']) === 1,
+                'metadata' => $metadata,
+            ];
+        }
+
+        $result = [];
+
+        foreach ($manifests as $manifest) {
+            $state = $states[$manifest->slug] ?? null;
+            $enabled = $state['enabled'] ?? true;
+            $metadata = array_merge($state['metadata'] ?? [], $manifest->metadata);
+
+            if ($manifest->repository !== null) {
+                $metadata['repository'] = $manifest->repository;
+            }
+
+            if (!empty($metadata['locked'])) {
+                $enabled = true;
+            }
+
+            $result[] = $manifest->withState($enabled, $metadata);
+        }
+
+        return $result;
+    }
+
     public function boot(): void
     {
         parent::boot();
@@ -111,6 +211,12 @@ class Kernel extends BaseKernel
             $synchronizer = $this->container->get(ModuleStateSynchronizer::class);
             \assert($synchronizer instanceof ModuleStateSynchronizer);
             $synchronizer->synchronize($this->discoverModules());
+        }
+
+        if ($this->container->has(ThemeStateSynchronizer::class)) {
+            $themeSynchronizer = $this->container->get(ThemeStateSynchronizer::class);
+            \assert($themeSynchronizer instanceof ThemeStateSynchronizer);
+            $themeSynchronizer->synchronize($this->discoverThemes());
         }
 
         if ($this->container->has(CapabilitySynchronizer::class)) {

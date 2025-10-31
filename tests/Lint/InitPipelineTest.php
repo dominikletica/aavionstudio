@@ -24,14 +24,9 @@ final class InitPipelineTest extends TestCase
     {
         $this->resetProjectState();
 
-        $this->runConsoleCommand(['app:assets:sync'], 'Asset sync');
-        $this->runConsoleCommand(['importmap:install'], 'Importmap install');
-        $this->runConsoleCommand(['tailwind:build'], 'Tailwind build');
-        $this->runConsoleCommand(['asset-map:compile'], 'Asset map compile');
+        $this->runConsoleCommand(['app:assets:rebuild', '--force'], 'Asset rebuild');
         $this->runConsoleCommand(['doctrine:database:create'], 'Doctrine database create');
         $this->runConsoleCommand(['messenger:setup-transports', '--no-interaction'], 'Messenger transports setup');
-        $this->runConsoleCommand(['cache:clear'], 'Cache clear');
-        $this->runConsoleCommand(['cache:warmup'], 'Cache warmup');
 
         self::assertDirectoryExists($this->projectDir.'/public/assets', 'Compiled assets directory missing.');
         self::assertFileExists($this->projectDir.'/var/system.brain', 'SQLite database not created.');

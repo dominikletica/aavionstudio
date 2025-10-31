@@ -13,7 +13,7 @@
 ## Theme Pack Structure
 ```
 my-theme.aavtheme
-├── theme.yaml
+├── theme.yaml (or theme.php)
 ├── templates/
 │   ├── base.html.twig
 │   └── components/
@@ -25,6 +25,7 @@ my-theme.aavtheme
 - `theme.yaml` fields:
   ```yaml
   name: "Aurora"
+  description: "Premium marketing theme with hero builder"
   slug: "aurora"
   version: "1.2.0"
   author: "aavion"
@@ -36,12 +37,15 @@ my-theme.aavtheme
       type: "color"
       default: "#0ea5e9"
   ```
+  - `description` surfaces friendly copy in admin lists; keep concise.
   - `repository` allows the admin UI to surface latest release info via metadata JSON (offline friendly – fetched during packaging, cached locally).
+  - The built-in `base` theme (slug `base`) ships with the repository and remains locked/enabled to guarantee default templates/assets.
 
-### Development Layout
-- Unpacked themes live under `/themes/<slug>/` during development. Their assets (`/themes/<slug>/assets`) are mirrored into `/assets/themes/<slug>/` via the `app:assets:sync` command so AssetMapper/ImportMap builds pick them up without adding new root paths.
+### Discovery & Development Layout
+- Unpacked themes live under `/themes/<slug>/` during development and ship a manifest (`theme.php` returning an array/`ThemeManifest` or `theme.yaml`). `ThemeDiscovery` hydrates `ThemeRegistry` so downstream tooling (assets, Twig lint, UI) sees all available themes without manual registration.
+- Their assets (`/themes/<slug>/assets`) are mirrored into `/assets/themes/<slug>/` via the `app:assets:sync` command so AssetMapper/ImportMap builds pick them up without adding new root paths.
 - Modules follow the same pattern: any `/modules/<slug>/assets` directory is mirrored into `/assets/modules/<slug>/`.
-- Lint/Test pipelines (PHPUnit lint suite) call `app:assets:sync` automatically before running Tailwind/AssetMapper to avoid stale mirrors.
+- Lint/Test pipelines invoke `app:assets:rebuild --force` (which runs a sync under the hood) before running Tailwind/AssetMapper to avoid stale mirrors.
 
 ## Architecture
 - Theme packs distributed as ZIP or Composer package containing:
@@ -77,12 +81,16 @@ my-theme.aavtheme
 2. Admin UI for theme management + configuration forms.
 3. Tailwind build pipeline per theme (build once per release).
 4. Preview controller leveraging query param (`?theme=slug`) for admin testing.
+5. (TODO) Hook installer/upload routines into the rebuild scheduler so ZIP installs queue asset recompilation automatically.
 
 ## Asset Build Strategy
 - Build pipeline caches Tailwind output per theme using manifest checksum.
 - Release packaging pre-renders `public/themes/<slug>/theme.css` and JS controllers.
 - Admin-initiated rebuild allowed for custom themes uploaded post-release; runs via background job with progress notifications.
 - Rebuild executed via PHP service (`ThemeBuildService`) invoking Tailwind bundle compiler programmatically—no shell access required. Fallback to cached CSS when rebuild queue running to avoid downtime.
+- Runtime installs trigger `AssetRebuildScheduler::schedule()` which dispatches an asynchronous pipeline rebuild (`app:assets:rebuild`) covering sync → importmap → Tailwind (minify in prod) → asset-map → cache warmup.
+- Admin UI exposes a manual “Rebuild Assets” action wired to the same scheduler for filesystem edits or emergency refreshes.
+- Theme activation state (+ metadata) persists in `app_theme_state`, mirroring the module workflow; synchronisers keep DB and manifests in sync so install/update routines can share the same code paths.
 
 ## Decisions (2025-10-30)
 - `app:theme:build` processes themes sequentially and caches artefacts so unchanged packs skip rebuilds.

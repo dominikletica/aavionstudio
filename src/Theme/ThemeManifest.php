@@ -2,26 +2,23 @@
 
 declare(strict_types=1);
 
-namespace App\Module;
+namespace App\Theme;
 
-final class ModuleManifest
+final class ThemeManifest
 {
     /**
-     * @param list<array<string, mixed>> $navigation
-     * @param list<array<string, mixed>> $capabilities
-     * @param array<string, mixed>        $metadata
+     * @param array<string, mixed> $metadata
      */
     public function __construct(
         public readonly string $slug,
         public readonly string $name,
         public readonly string $description,
         public readonly string $basePath,
+        public readonly ?string $version = null,
         public readonly int $priority = 0,
         public readonly ?string $services = null,
-        public readonly ?string $routes = null,
+        public readonly ?string $assets = 'assets',
         public readonly ?string $repository = null,
-        public readonly array $navigation = [],
-        public readonly array $capabilities = [],
         public readonly array $metadata = [],
         public readonly bool $enabled = true,
     ) {
@@ -33,16 +30,15 @@ final class ModuleManifest
     public static function fromArray(array $data, string $basePath): self
     {
         return new self(
-            slug: (string) ($data['slug'] ?? throw new \InvalidArgumentException('Module slug missing.')),
-            name: (string) ($data['name'] ?? throw new \InvalidArgumentException('Module name missing.')),
+            slug: (string) ($data['slug'] ?? throw new \InvalidArgumentException('Theme slug missing.')),
+            name: (string) ($data['name'] ?? throw new \InvalidArgumentException('Theme name missing.')),
             description: (string) ($data['description'] ?? ''),
             basePath: $basePath,
+            version: isset($data['version']) ? (string) $data['version'] : null,
             priority: (int) ($data['priority'] ?? 0),
             services: isset($data['services']) ? (string) $data['services'] : null,
-            routes: isset($data['routes']) ? (string) $data['routes'] : null,
+            assets: isset($data['assets']) ? (string) $data['assets'] : 'assets',
             repository: isset($data['repository']) ? (string) $data['repository'] : null,
-            navigation: isset($data['navigation']) ? (array) $data['navigation'] : [],
-            capabilities: isset($data['capabilities']) ? (array) $data['capabilities'] : [],
             metadata: isset($data['metadata']) ? (array) $data['metadata'] : [],
             enabled: isset($data['enabled']) ? (bool) $data['enabled'] : true,
         );
@@ -53,19 +49,18 @@ final class ModuleManifest
      */
     public static function fromPersistedArray(array $data): self
     {
-        $basePath = (string) ($data['base_path'] ?? throw new \InvalidArgumentException('Module base_path missing.'));
+        $basePath = (string) ($data['base_path'] ?? throw new \InvalidArgumentException('Theme base_path missing.'));
 
         return new self(
-            slug: (string) ($data['slug'] ?? throw new \InvalidArgumentException('Module slug missing.')),
-            name: (string) ($data['name'] ?? throw new \InvalidArgumentException('Module name missing.')),
+            slug: (string) ($data['slug'] ?? throw new \InvalidArgumentException('Theme slug missing.')),
+            name: (string) ($data['name'] ?? throw new \InvalidArgumentException('Theme name missing.')),
             description: (string) ($data['description'] ?? ''),
             basePath: $basePath,
+            version: isset($data['version']) ? (string) $data['version'] : null,
             priority: (int) ($data['priority'] ?? 0),
             services: isset($data['services']) ? (string) $data['services'] : null,
-            routes: isset($data['routes']) ? (string) $data['routes'] : null,
+            assets: isset($data['assets']) ? (string) $data['assets'] : 'assets',
             repository: isset($data['repository']) ? (string) $data['repository'] : null,
-            navigation: isset($data['navigation']) ? (array) $data['navigation'] : [],
-            capabilities: isset($data['capabilities']) ? (array) $data['capabilities'] : [],
             metadata: isset($data['metadata']) ? (array) $data['metadata'] : [],
             enabled: isset($data['enabled']) ? (bool) $data['enabled'] : true,
         );
@@ -81,15 +76,34 @@ final class ModuleManifest
             'name' => $this->name,
             'description' => $this->description,
             'base_path' => $this->basePath,
+            'version' => $this->version,
             'priority' => $this->priority,
             'services' => $this->services,
-            'routes' => $this->routes,
+            'assets' => $this->assets,
             'repository' => $this->repository,
-            'navigation' => $this->navigation,
-            'capabilities' => $this->capabilities,
             'metadata' => $this->metadata,
             'enabled' => $this->enabled,
         ];
+    }
+
+    public function servicesPath(): ?string
+    {
+        if ($this->services === null) {
+            return null;
+        }
+
+        return $this->resolve($this->services);
+    }
+
+    public function assetsPath(): ?string
+    {
+        if ($this->assets === null) {
+            return null;
+        }
+
+        $path = $this->resolve($this->assets);
+
+        return is_dir($path) ? $path : null;
     }
 
     /**
@@ -102,40 +116,14 @@ final class ModuleManifest
             name: $this->name,
             description: $this->description,
             basePath: $this->basePath,
+            version: $this->version,
             priority: $this->priority,
             services: $this->services,
-            routes: $this->routes,
+            assets: $this->assets,
             repository: $this->repository,
-            navigation: $this->navigation,
-            capabilities: $this->capabilities,
             metadata: $metadata,
             enabled: $enabled,
         );
-    }
-
-    public function servicesPath(): ?string
-    {
-        if ($this->services === null) {
-            return null;
-        }
-
-        return $this->resolve($this->services);
-    }
-
-    public function routesPath(): ?string
-    {
-        if ($this->routes === null) {
-            return null;
-        }
-
-        return $this->resolve($this->routes);
-    }
-
-    public function assetsPath(): ?string
-    {
-        $assetsDir = $this->resolve('assets');
-
-        return is_dir($assetsDir) ? $assetsDir : null;
     }
 
     private function resolve(string $relative): string

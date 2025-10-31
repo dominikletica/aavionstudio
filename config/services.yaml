@@ -40,6 +40,10 @@ services:
             $manifestsData: '%app.modules%'
         public: true
 
+    App\Theme\ThemeRegistry:
+        arguments:
+            $manifestsData: '%app.themes%'
+
     App\Security\Authorization\ProjectCapabilityVoter:
         tags: ['security.voter']
 

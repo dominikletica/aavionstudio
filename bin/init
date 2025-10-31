@@ -88,20 +88,11 @@ run_console() {
   APP_ENV="$TARGET_ENV" APP_DEBUG="$TARGET_DEBUG" php bin/console "$@"
 }
 
-run_console "Synchronizing module/theme assets" app:assets:sync
-run_console "Installing importmap assets" importmap:install
-tailwind_args=()
-if [[ "$TARGET_ENV" == "prod" ]]; then
-  tailwind_args+=(--minify)
-fi
-run_console "Building Tailwind assets" tailwind:build "${tailwind_args[@]}"
-run_console "Compiling asset map" asset-map:compile
+run_console "Rebuilding asset pipeline" app:assets:rebuild --force
 # Fix: dbal throwing an error with --if-not-exists on SQLite, so we check for the DB file first
 if [ ! -f var/system.brain ]; then
 run_console "Creating SQLite database" doctrine:database:create
 fi
 run_console "Ensuring Messenger transports exist" messenger:setup-transports --no-interaction
-run_console "Clearing cache" cache:clear
-run_console "Warming up cache" cache:warmup
 
 echo ">>> Repository initialisation complete for $TARGET_ENV"

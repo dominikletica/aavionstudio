@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Module\ModuleRegistry;
+use App\Theme\ThemeRegistry;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -12,7 +13,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
 
 #[AsCommand(
     name: 'app:assets:sync',
@@ -22,6 +22,7 @@ final class SyncDiscoveredAssetsCommand extends Command
 {
     public function __construct(
         private readonly ModuleRegistry $moduleRegistry,
+        private readonly ThemeRegistry $themeRegistry,
         #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
     ) {
         parent::__construct();
@@ -63,8 +64,8 @@ final class SyncDiscoveredAssetsCommand extends Command
         $syncedTargets = [];
 
         foreach ($this->moduleRegistry->all() as $manifest) {
-            $source = $manifest->basePath.'/assets';
-            if (!is_dir($source)) {
+            $source = $manifest->assetsPath();
+            if ($source === null || !is_dir($source)) {
                 continue;
             }
 
@@ -84,28 +85,19 @@ final class SyncDiscoveredAssetsCommand extends Command
     private function syncThemeAssets(Filesystem $filesystem, SymfonyStyle $io, string $targetRoot): array
     {
         $syncedTargets = [];
-        $themesDir = $this->projectDir.'/themes';
 
-        if (!is_dir($themesDir)) {
-            return $syncedTargets;
-        }
+        foreach ($this->themeRegistry->all() as $manifest) {
+            $source = $manifest->assetsPath();
 
-        $finder = new Finder();
-        $finder->directories()->depth('== 0')->in($themesDir);
-
-        foreach ($finder as $directory) {
-            $slug = $directory->getBasename();
-            $source = $directory->getPathname().'/assets';
-
-            if (!is_dir($source)) {
+            if ($source === null || !is_dir($source)) {
                 continue;
             }
 
-            $target = $targetRoot.'/'.$slug;
+            $target = $targetRoot.'/'.$manifest->slug;
             $this->mirrorDirectory($filesystem, $source, $target);
             $syncedTargets[] = $target;
 
-            $io->note(\sprintf('Theme "%s" assets mirrored to %s', $slug, $this->relativePath($target)));
+            $io->note(\sprintf('Theme "%s" assets mirrored to %s', $manifest->slug, $this->relativePath($target)));
         }
 
         return $syncedTargets;
