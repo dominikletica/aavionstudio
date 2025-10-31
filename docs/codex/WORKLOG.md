@@ -254,3 +254,16 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Added project capability probe endpoint + functional tests to exercise voter decisions within HTTP requests.
 - Exposed admin REST endpoints for API key listing/creation/revocation with functional coverage ensuring JSON contracts and audit logging.
 - Fixed admin API key issuance/revocation to log authenticated actor IDs instead of emails so audit records link to user IDs and respect foreign key constraints.
+
+### 2025-10-31 (Session 2)
+- Kick-off prep for Roadmap Step 4 (Admin Studio UI): evaluate icon/asset strategy without Node-based pipelines.
+- Compare Tabler SVG set vs webfont delivery; assess importmap + asset-map workflow for bundling icons under `public/assets/icons`.
+- Investigate importing `@tabler/icons-webfont` via importmap (404 encountered) and alternatives (pre-fetch via init script, local font hosting).
+- Brainstorm additional UI assets (font stacks, baseline CSS utilities, illustration packs) that stay compatible with the existing Tailwind/Twig setup.
+- Created outline [`feat-admin-assets`](notes/feat-admin-assets.md) to capture icon/font/utility asset decisions and implementation proposals.
+- Fixed `assets/styles/illustrations.css` to use direct SVG URLs, removing editor lint errors and verified via `php bin/console asset-map:compile`.
+- Downloaded and organized additional assets (fonts, illustrations, tabler-webfont + css-classes, alpine & apexcharts) `into assets/` and imported them so asset-map can compile.
+- Registered Alpine.js and ApexCharts in the import map and bootstrap so both libraries load via AssetMapper and expose globals for upcoming UI components.
+- Updated `bin/init` so production runs pass `--minify` to `tailwind:build`, keeping dev/test outputs readable while shipping compressed CSS for releases.
+- Added PHPUnit lint suites: `tests/Lint/InitPipelineTest.php` replays the full init pipeline (cleanup, asset builds, DB setup, cache warmup) and `tests/Lint/TwigLintTest.php` validates Twig templates (optionally themes) via `lint:twig`.
+- Refreshed asset strategy outline (`docs/codex/notes/feat-admin-assets.md`) to capture implemented fonts/icons/illustrations stack and remaining Roadmap Step 4 follow-ups.
