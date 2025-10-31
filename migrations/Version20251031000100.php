@@ -63,8 +63,24 @@ final class Version20251031000100 extends AbstractMigration
             requested_at DATETIME NOT NULL,
             expires_at DATETIME NOT NULL,
             consumed_at DATETIME DEFAULT NULL,
-            metadata TEXT NOT NULL DEFAULT '{}',
+            metadata TEXT NOT NULL DEFAULT ''{}'',
             FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE
+        )');
+
+        // Invitations for new users.
+        $this->addSql('CREATE TABLE IF NOT EXISTS app_user_invitation (
+            id CHAR(26) NOT NULL PRIMARY KEY,
+            email VARCHAR(190) NOT NULL,
+            token_hash VARCHAR(128) NOT NULL,
+            status VARCHAR(16) NOT NULL DEFAULT ''pending'',
+            invited_by CHAR(26) DEFAULT NULL,
+            metadata TEXT NOT NULL DEFAULT ''{}'',
+            created_at DATETIME NOT NULL,
+            expires_at DATETIME NOT NULL,
+            accepted_at DATETIME DEFAULT NULL,
+            cancelled_at DATETIME DEFAULT NULL,
+            UNIQUE(email),
+            FOREIGN KEY (invited_by) REFERENCES app_user(id) ON DELETE SET NULL
         )');
 
         // Remember-me tokens (persistent login).
@@ -133,6 +149,7 @@ final class Version20251031000100 extends AbstractMigration
         $this->addSql('DROP TABLE IF EXISTS app_audit_log');
         $this->addSql('DROP TABLE IF EXISTS app_remember_me_token');
         $this->addSql('DROP TABLE IF EXISTS app_password_reset_token');
+        $this->addSql('DROP TABLE IF EXISTS app_user_invitation');
         $this->addSql('DROP TABLE IF EXISTS app_project_user');
         $this->addSql('DROP TABLE IF EXISTS app_user_role');
         $this->addSql('DROP TABLE IF EXISTS app_role');

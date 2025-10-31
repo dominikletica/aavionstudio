@@ -22,6 +22,7 @@
 | `App\Security\Capability\CapabilityRegistry` | `src/Security/Capability/CapabilityRegistry.php` | Aggregates module-declared capabilities for lookup | Feeds synchronizer and future ACL tooling |
 | `App\Security\Capability\CapabilitySynchronizer` | `src/Security/Capability/CapabilitySynchronizer.php` | Persists capability defaults into `app_role_capability` and logs seeding | Invoked during kernel boot |
 | `App\Security\Password\PasswordResetTokenManager` | `src/Security/Password/PasswordResetTokenManager.php` | Issues, validates, and purges password reset tokens | Stores selector/verifier hashes in `app_password_reset_token` |
+| `App\Security\User\UserInvitationManager` | `src/Security/User/UserInvitationManager.php` | Manages invitation tokens and audit logging | Powers admin onboarding flow |
 
 ### Suggested Structure
 - **Core Services:** Module loader, schema registry, draft manager, snapshot manager, resolver engine, media storage.

@@ -86,7 +86,7 @@
 1. User entity + Doctrine migration; security firewall, password hasher, login/logout/remember-me + reset tokens; rate limiting + audit logging foundations.
 2. Role hierarchy + capability registry integration; seed defaults; expose capability parameter/service.
 3. Project membership model + voters; ensure module capability checks use voters; augment audit log events.
-4. Admin UI for accounts, project assignments, API keys; invitation + password reset flows; CLI helpers.
+4. Admin UI for accounts, project assignments, API keys; invitation + password reset flows; CLI helpers (backend invitation manager already in place).
 5. API key issuance + scope enforcement (HTTP + CLI); document usage; cover with tests.
 6. Optional enhancements: 2FA, account lockout, session revocation dashboards, webhook notifications.
 
