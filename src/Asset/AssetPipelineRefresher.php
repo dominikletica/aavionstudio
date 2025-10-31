@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Asset;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -44,6 +45,9 @@ final class AssetPipelineRefresher
         ]);
 
         try {
+            $this->runConsoleCommand(['cache:clear']);
+            $this->cleanupSyncedAssetTargets();
+
             $this->runConsoleCommand(['app:assets:sync']);
             $this->runConsoleCommand(['importmap:install']);
 
@@ -54,7 +58,6 @@ final class AssetPipelineRefresher
             $this->runConsoleCommand($tailwindCommand);
 
             $this->runConsoleCommand(['asset-map:compile']);
-            $this->runConsoleCommand(['cache:clear']);
             $this->runConsoleCommand(['cache:warmup']);
         } catch (\Throwable $exception) {
             $this->logger->error('[assets] Pipeline rebuild failed.', [
@@ -68,6 +71,27 @@ final class AssetPipelineRefresher
         $this->logger->info('[assets] Pipeline rebuild completed successfully.');
 
         return true;
+    }
+
+    private function cleanupSyncedAssetTargets(): void
+    {
+        $filesystem = new Filesystem();
+        $paths = [
+            $this->projectDir.'/assets/modules',
+            $this->projectDir.'/assets/themes',
+        ];
+
+        foreach ($paths as $path) {
+            if (!is_dir($path)) {
+                continue;
+            }
+
+            $contents = glob($path.'/*') ?: [];
+
+            foreach ($contents as $target) {
+                $filesystem->remove($target);
+            }
+        }
     }
 
     /**

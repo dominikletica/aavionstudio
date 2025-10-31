@@ -24,7 +24,7 @@
 | `App\Theme\ThemeStateRepository` | `src/Theme/ThemeStateRepository.php` | Reads stored theme enable/metadata state | Simple helper for future management UI |
 | `App\Twig\TemplatePathConfigurator` | `src/Twig/TemplatePathConfigurator.php` | Rebuilds Twig search paths (active theme → modules → base templates) each boot | Injected into kernel during boot |
 | `App\Asset\AssetStateTracker` | `src/Asset/AssetStateTracker.php` | Hashes module/theme asset trees and stores checksum cache in `var/cache/assets-state.json` | Depends on `ModuleRegistry`/`ThemeRegistry` plus kernel dir parameters |
-| `App\Asset\AssetPipelineRefresher` | `src/Asset/AssetPipelineRefresher.php` | Runs consolidated asset rebuild (sync → importmap → Tailwind → asset-map → cache warmup) and persists state hashes | Depends on `AssetStateTracker`, logger, kernel parameters |
+| `App\Asset\AssetPipelineRefresher` | `src/Asset/AssetPipelineRefresher.php` | Clears cache, purges mirrored asset targets, then runs sync → importmap → Tailwind → asset-map before warming cache and persisting state hashes | Depends on `AssetStateTracker`, logger, kernel parameters |
 | `App\Service\AssetRebuildScheduler` | `src/Service/AssetRebuildScheduler.php` | Orchestrates synchronous/asynchronous rebuilds; dispatches `AssetRebuildMessage` when changes detected | Uses tracker, Messenger bus, pipeline refresher |
 | `App\MessageHandler\AssetRebuildMessageHandler` | `src/MessageHandler/AssetRebuildMessageHandler.php` | Messenger handler executing queued asset rebuild jobs | Handles `App\Message\AssetRebuildMessage` |
 | `App\Security\User\AppUserProvider` | `src/Security/User/AppUserProvider.php` | Doctrine-backed user provider for authentication | Handles status checks, password upgrades, role loading |
