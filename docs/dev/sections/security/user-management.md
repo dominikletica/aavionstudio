@@ -28,6 +28,13 @@ The `/admin/users` area provides operators with a lightweight interface for revi
 - Submissions map to `ProjectMembershipRepository::assign()`/`revoke()` with permissions stored as `['capabilities' => [...]]`. Blank role = inheritance (revoke entry).
 - Functional coverage lives in `tests/Controller/Admin/UserControllerTest.php::testUpdateProjectMembership`.
 
+### Password reset trigger
+
+- Admins can issue a reset email via the dedicated form on `/admin/users/{id}`.
+- Route: `POST /admin/users/{id}/password-reset` with CSRF guard (`admin_user_password_reset_{id}`).
+- Implementation reuses `PasswordResetTokenManager`, sends `emails/password_reset.txt.twig`, and logs `auth.password.reset.requested` with the admin as actor.
+- Covered by `tests/Controller/Admin/UserControllerTest.php::testSendPasswordResetEmail` (token persisted, email queued, audit entry recorded).
+
 ## Tests
 
 - `tests/Controller/Admin/UserControllerTest.php` boots a sandbox schema, seeds roles/users, and asserts:

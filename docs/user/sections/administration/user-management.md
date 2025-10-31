@@ -19,6 +19,7 @@ Administrators can review and update user accounts directly from the **Admin →
 4. Save the form to persist changes. The system records profile and role updates in the audit log for traceability.
 5. Issue API keys by providing a label, optional scopes (space/comma separated), and an optional expiry date. Copy the generated secret immediately—it is only shown once. Revoke keys via the list when they are no longer needed.
 6. Adjust project access in the **Project access** panel. Choose a project, set a specific role, and (optionally) add extra capabilities that apply only within that project. Leave the role blank to inherit the user’s global permissions.
+7. Use **Send password reset email** to trigger a one-time reset link; the system emails the user and records the action in the audit log.
 
 ## Next steps
 

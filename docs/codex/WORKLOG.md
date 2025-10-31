@@ -244,3 +244,4 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Added API key manager service, CLI issuance command, and admin UI for creation/revocation with audit logging and tests; documented developer + user flows.
 - Enhanced `/admin/users/{id}` to manage per-project overrides (role + extra capabilities) with functional coverage and documentation updates.
 - Delivered security audit log viewer (`/admin/security/audit`) with filters, repository helper, Twig view, and functional coverage; updated developer/user documentation and roadmap tracking.
+- Added admin-triggered password reset flow with email delivery, audit logging, and functional coverage from the user detail screen.

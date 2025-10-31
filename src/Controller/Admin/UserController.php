@@ -7,9 +7,11 @@ namespace App\Controller\Admin;
 use App\Form\Security\ApiKeyCreateType;
 use App\Form\Security\ProjectMembershipCollectionType;
 use App\Form\Security\UserProfileType;
+use App\Security\Audit\SecurityAuditLogger;
 use App\Project\ProjectRepository;
 use App\Security\Authorization\ProjectMembershipRepository;
 use App\Security\Api\ApiKeyManager;
+use App\Security\Password\PasswordResetTokenManager;
 use App\Security\User\AppUser;
 use App\Security\User\UserAdminManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +20,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 final class UserController extends AbstractController
@@ -27,6 +32,10 @@ final class UserController extends AbstractController
         private readonly ApiKeyManager $apiKeyManager,
         private readonly ProjectRepository $projectRepository,
         private readonly ProjectMembershipRepository $projectMembershipRepository,
+        private readonly PasswordResetTokenManager $passwordResetTokenManager,
+        private readonly SecurityAuditLogger $auditLogger,
+        private readonly MailerInterface $mailer,
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -229,6 +238,52 @@ final class UserController extends AbstractController
         $this->addFlash('success', sprintf('API key "%s" revoked.', $apiKey->label));
 
         return $this->redirectToRoute('admin_users_edit', ['id' => $userId]);
+    }
+
+    #[Route('/admin/users/{id}/password-reset', name: 'admin_users_password_reset', requirements: ['id' => '[0-9A-Z]{26}'], methods: ['POST'])]
+    public function sendPasswordReset(string $id, Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('admin_user_password_reset_'.$id, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token for password reset.');
+
+            return $this->redirectToRoute('admin_users_edit', ['id' => $id]);
+        }
+
+        $user = $this->userAdminManager->getUser($id);
+
+        if ($user === null) {
+            $this->addFlash('error', 'User not found.');
+
+            return $this->redirectToRoute('admin_users_index');
+        }
+
+        $token = $this->passwordResetTokenManager->create($id, [
+            'initiator' => $this->getActorId(),
+        ]);
+
+        $resetUrl = $this->urlGenerator->generate('app_password_reset', [
+            'selector' => $token->selector,
+            'token' => $token->verifier,
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $message = (new Email())
+            ->subject('Reset your aavion Studio password')
+            ->to($user['email'])
+            ->text($this->renderView('emails/password_reset.txt.twig', [
+                'reset_url' => $resetUrl,
+                'display_name' => $user['display_name'],
+            ]));
+
+        $this->mailer->send($message);
+
+        $this->auditLogger->log('auth.password.reset.requested', [
+            'user_id' => $id,
+            'initiated_by' => $this->getActorId(),
+        ], actorId: $this->getActorId(), subjectId: $id);
+
+        $this->addFlash('success', sprintf('Password reset email sent to %s.', $user['email']));
+
+        return $this->redirectToRoute('admin_users_edit', ['id' => $id]);
     }
 
     private function getActorId(): ?string

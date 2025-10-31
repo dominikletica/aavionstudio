@@ -74,6 +74,13 @@
                 </div>
                 <button type="submit">Save changes</button>
             {{ form_end(form) }}
+
+            <hr style="margin:2rem 0;border:none;border-top:1px solid #e5e7eb;">
+            <form method="post" action="{{ path('admin_users_password_reset', { id: user.id }) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_user_password_reset_' ~ user.id) }}">
+                <p class="meta">Send a one-time password reset email to this user.</p>
+                <button type="submit" class="button-secondary">Send password reset email</button>
+            </form>
         </div>
 
         <div class="card">

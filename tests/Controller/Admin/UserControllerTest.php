@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Controller\Admin;
 
 use Doctrine\DBAL\Connection;
+use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class UserControllerTest extends WebTestCase
 {
+    use MailerAssertionsTrait;
     private Connection $connection;
     private \Symfony\Bundle\FrameworkBundle\KernelBrowser $client;
 
@@ -25,7 +27,7 @@ final class UserControllerTest extends WebTestCase
 
         $this->connection->executeStatement('PRAGMA foreign_keys = OFF');
 
-        foreach (['app_api_key', 'app_project_user', 'app_project', 'app_user_role', 'app_role', 'app_user', 'app_audit_log'] as $table) {
+        foreach (['app_password_reset_token', 'app_api_key', 'app_project_user', 'app_project', 'app_user_role', 'app_role', 'app_user', 'app_audit_log'] as $table) {
             $this->connection->executeStatement('DROP TABLE IF EXISTS '.$table);
         }
 
@@ -36,6 +38,7 @@ final class UserControllerTest extends WebTestCase
         $this->connection->executeStatement('CREATE TABLE app_api_key (id CHAR(26) PRIMARY KEY, user_id CHAR(26) NOT NULL, label VARCHAR(190) NOT NULL, hashed_key VARCHAR(128) NOT NULL, scopes TEXT NOT NULL, last_used_at DATETIME DEFAULT NULL, created_at DATETIME NOT NULL, revoked_at DATETIME DEFAULT NULL, expires_at DATETIME DEFAULT NULL)');
         $this->connection->executeStatement('CREATE TABLE app_project (id CHAR(26) PRIMARY KEY, slug VARCHAR(190) NOT NULL, name VARCHAR(190) NOT NULL)');
         $this->connection->executeStatement('CREATE TABLE app_project_user (project_id CHAR(26) NOT NULL, user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, permissions TEXT NOT NULL, created_at DATETIME NOT NULL, created_by CHAR(26), PRIMARY KEY (project_id, user_id))');
+        $this->connection->executeStatement('CREATE TABLE app_password_reset_token (id CHAR(26) PRIMARY KEY, user_id CHAR(26) NOT NULL, selector VARCHAR(24) NOT NULL UNIQUE, verifier_hash VARCHAR(128) NOT NULL, requested_at DATETIME NOT NULL, expires_at DATETIME NOT NULL, consumed_at DATETIME DEFAULT NULL, metadata TEXT NOT NULL)');
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
@@ -250,5 +253,28 @@ final class UserControllerTest extends WebTestCase
 
         $exists = $this->connection->fetchOne('SELECT COUNT(*) FROM app_project_user WHERE project_id = ? AND user_id = ?', ['01HXPROJECT0000000000000000', '01HXUSER000000000000000000']);
         self::assertSame(0, (int) $exists);
+    }
+
+    public function testSendPasswordResetEmail(): void
+    {
+        $this->loginAsAdmin();
+        $crawler = $this->client->request('GET', '/admin/users/01HXUSER000000000000000000');
+        self::assertResponseIsSuccessful();
+
+        $form = $crawler->filter('form[action$="/admin/users/01HXUSER000000000000000000/password-reset"]')->form();
+        $this->client->submit($form);
+
+        self::assertResponseRedirects('/admin/users/01HXUSER000000000000000000');
+        $this->client->followRedirect();
+
+        $count = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM app_password_reset_token WHERE user_id = ?', ['01HXUSER000000000000000000']);
+        self::assertSame(1, $count);
+
+        $this->assertEmailCount(1);
+        $email = $this->getMailerMessage();
+        self::assertSame(['user@example.com' => null], $email->getTo());
+
+        $auditCount = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM app_audit_log WHERE action = ?', ['auth.password.reset.requested']);
+        self::assertSame(1, $auditCount);
     }
 }

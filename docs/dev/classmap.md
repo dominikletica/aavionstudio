@@ -55,6 +55,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `admin_users_index` | `src/Controller/Admin/UserController.php` | Lists users for admin management | Core |
 | `admin_users_edit` | `src/Controller/Admin/UserController.php` | Edits user profile/roles | Core |
 | `admin_users_api_keys_revoke` | `src/Controller/Admin/UserController.php` | Revokes an API key for a user | Core |
+| `admin_users_password_reset` | `src/Controller/Admin/UserController.php` | Sends password reset email for a user | Core |
 | `admin_security_audit` | `src/Controller/Admin/SecurityAuditController.php` | Lists security audit log entries with filters | Core |
 | `app_frontend` | _TBD_ | Catch-all frontend controller | Core |
 | `app_admin_dashboard` | _TBD_ | Admin landing page | Core |
