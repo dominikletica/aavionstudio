@@ -21,6 +21,10 @@ final class ProjectMembershipRepository
     {
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
+        if (!isset($permissions['capabilities']) || !is_array($permissions['capabilities'])) {
+            $permissions['capabilities'] = [];
+        }
+
         $encodedPermissions = json_encode($permissions, JSON_THROW_ON_ERROR);
 
         $this->connection->executeStatement(
@@ -122,6 +126,10 @@ final class ProjectMembershipRepository
             if (is_array($decoded)) {
                 $permissions = $decoded;
             }
+        }
+
+        if (!isset($permissions['capabilities']) || !is_array($permissions['capabilities'])) {
+            $permissions['capabilities'] = [];
         }
 
         return new ProjectMembership(

@@ -334,7 +334,9 @@ final class UserController extends AbstractController
         $capabilities = $permissions['capabilities'] ?? [];
 
         if (!is_array($capabilities)) {
-            return [];
+            $legacy = array_keys(array_filter($permissions, static fn ($value): bool => $value === true));
+
+            return array_values($legacy);
         }
 
         return array_values(array_map(static fn ($value): string => (string) $value, $capabilities));

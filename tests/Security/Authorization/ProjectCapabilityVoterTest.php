@@ -79,7 +79,7 @@ final class ProjectCapabilityVoterTest extends TestCase
             'project_id' => '01HXPROJECT0000000000000000',
             'user_id' => '01HXUSER000000000000000003',
             'role_name' => 'ROLE_VIEWER',
-            'permissions' => json_encode(['content.publish' => true], JSON_THROW_ON_ERROR),
+            'permissions' => json_encode(['capabilities' => ['content.publish']], JSON_THROW_ON_ERROR),
             'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             'created_by' => null,
         ]);
@@ -100,6 +100,25 @@ final class ProjectCapabilityVoterTest extends TestCase
         $result = $this->voter->vote($token, new ProjectCapabilityRequirement('content.publish', '01HXPROJECT0000000000000000'), [ProjectCapabilityVoter::ATTRIBUTE]);
 
         self::assertSame(ProjectCapabilityVoter::ACCESS_DENIED, $result);
+    }
+
+    public function testLegacyPermissionsMapStillSupported(): void
+    {
+        $this->connection->insert('app_project_user', [
+            'project_id' => '01HXPROJECT0000000000000001',
+            'user_id' => '01HXUSER000000000000000005',
+            'role_name' => 'ROLE_VIEWER',
+            'permissions' => json_encode(['content.publish' => true], JSON_THROW_ON_ERROR),
+            'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'created_by' => null,
+        ]);
+
+        $user = $this->createUser('01HXUSER000000000000000005', ['ROLE_VIEWER']);
+        $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+
+        $result = $this->voter->vote($token, new ProjectCapabilityRequirement('content.publish', '01HXPROJECT0000000000000001'), [ProjectCapabilityVoter::ATTRIBUTE]);
+
+        self::assertSame(ProjectCapabilityVoter::ACCESS_GRANTED, $result);
     }
 
     private function createUser(string $id, array $roles): AppUser

@@ -44,8 +44,18 @@ final class ProjectCapabilityVoter extends Voter
             return false;
         }
 
-        if (($membership->permissions[$subject->capability] ?? false) === true) {
+        $permissions = $membership->permissions;
+
+        // Backwards compatibility: direct capability flag => bool true.
+        if (isset($permissions[$subject->capability]) && $permissions[$subject->capability] === true) {
             return true;
+        }
+
+        // Structured capabilities array.
+        if (is_array($permissions['capabilities'] ?? null)) {
+            if (in_array($subject->capability, $permissions['capabilities'], true)) {
+                return true;
+            }
         }
 
         return $this->roleCapabilityResolver->roleHasCapability($membership->roleName, $subject->capability);

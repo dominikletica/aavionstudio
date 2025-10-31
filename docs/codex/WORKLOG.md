@@ -245,3 +245,4 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Enhanced `/admin/users/{id}` to manage per-project overrides (role + extra capabilities) with functional coverage and documentation updates.
 - Delivered security audit log viewer (`/admin/security/audit`) with filters, repository helper, Twig view, and functional coverage; updated developer/user documentation and roadmap tracking.
 - Added admin-triggered password reset flow with email delivery, audit logging, and functional coverage from the user detail screen.
+- Updated project capability voter to support structured capability lists from the new project override UI and extended unit coverage for legacy + new permission formats.
