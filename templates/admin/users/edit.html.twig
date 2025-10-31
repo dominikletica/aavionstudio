@@ -153,6 +153,56 @@
                 <p class="meta">No API keys issued yet.</p>
             {% endif %}
         </div>
+
+        <div class="card">
+            <h2>Project access</h2>
+            <p class="meta">Override roles or add project-specific capabilities. Leave role empty to inherit global permissions.</p>
+
+            {% if projects is empty %}
+                <p class="meta">No projects available yet.</p>
+            {% else %}
+                {{ form_start(projectMembershipForm) }}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Project</th>
+                                <th style="width:18rem;">Role</th>
+                                <th>Extra capabilities</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assignment in projectMembershipForm.assignments %}
+                                {% set projectId = assignment.project_id.vars.value %}
+                                {% set project = {} %}
+                                {% for item in projects %}
+                                    {% if item.id == projectId %}
+                                        {% set project = item %}
+                                    {% endif %}
+                                {% endfor %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ project.name ?? 'Unknown project' }}</strong><br>
+                                        <span class="meta">{{ project.slug ?? projectId }}</span>
+                                        {{ form_widget(assignment.project_id) }}
+                                    </td>
+                                    <td>
+                                        {{ form_widget(assignment.role) }}
+                                        {{ form_errors(assignment.role) }}
+                                    </td>
+                                    <td>
+                                        {{ form_widget(assignment.capabilities) }}
+                                        {{ form_errors(assignment.capabilities) }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {{ form_errors(projectMembershipForm) }}
+                    <button type="submit">Save project access</button>
+                {{ form_end(projectMembershipForm) }}
+            {% endif %}
+        </div>
     </div>
 </body>
 </html>

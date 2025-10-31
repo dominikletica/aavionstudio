@@ -21,6 +21,13 @@ The `/admin/users` area provides operators with a lightweight interface for revi
   - Role updates automatically keep `ROLE_VIEWER` assigned as a baseline.
 - Templates render account metadata (email, timestamps) and the Symfony form widgets with simple styling consistent with invitations.
 
+### Project membership overrides
+
+- Additional form: `ProjectMembershipCollectionType` (collection of `ProjectMembershipEntryType`) renders one row per project.
+- Data source: `ProjectRepository::listProjects()` and `ProjectMembershipRepository::forUser()` hydrate default values.
+- Submissions map to `ProjectMembershipRepository::assign()`/`revoke()` with permissions stored as `['capabilities' => [...]]`. Blank role = inheritance (revoke entry).
+- Functional coverage lives in `tests/Controller/Admin/UserControllerTest.php::testUpdateProjectMembership`.
+
 ## Tests
 
 - `tests/Controller/Admin/UserControllerTest.php` boots a sandbox schema, seeds roles/users, and asserts:

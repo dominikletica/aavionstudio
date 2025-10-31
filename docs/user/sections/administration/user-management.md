@@ -18,6 +18,7 @@ Administrators can review and update user accounts directly from the **Admin →
 3. Toggle roles (viewer, editor, admin, super admin) to grant or revoke privileges. `ROLE_VIEWER` remains assigned automatically to ensure baseline access.
 4. Save the form to persist changes. The system records profile and role updates in the audit log for traceability.
 5. Issue API keys by providing a label, optional scopes (space/comma separated), and an optional expiry date. Copy the generated secret immediately—it is only shown once. Revoke keys via the list when they are no longer needed.
+6. Adjust project access in the **Project access** panel. Choose a project, set a specific role, and (optionally) add extra capabilities that apply only within that project. Leave the role blank to inherit the user’s global permissions.
 
 ## Next steps
 

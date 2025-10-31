@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Form\Security\ApiKeyCreateType;
+use App\Form\Security\ProjectMembershipCollectionType;
 use App\Form\Security\UserProfileType;
+use App\Project\ProjectRepository;
+use App\Security\Authorization\ProjectMembershipRepository;
 use App\Security\Api\ApiKeyManager;
 use App\Security\User\AppUser;
 use App\Security\User\UserAdminManager;
@@ -22,6 +25,8 @@ final class UserController extends AbstractController
     public function __construct(
         private readonly UserAdminManager $userAdminManager,
         private readonly ApiKeyManager $apiKeyManager,
+        private readonly ProjectRepository $projectRepository,
+        private readonly ProjectMembershipRepository $projectMembershipRepository,
     ) {
     }
 
@@ -53,6 +58,13 @@ final class UserController extends AbstractController
         }
 
         $roleChoices = $this->userAdminManager->getRoleChoices();
+
+        $projects = $this->projectRepository->listProjects();
+        $projectMemberships = $this->projectMembershipRepository->forUser($id);
+        $membershipByProject = [];
+        foreach ($projectMemberships as $membership) {
+            $membershipByProject[$membership->projectId] = $membership;
+        }
 
         $profileForm = $this->createForm(UserProfileType::class, [
             'display_name' => $user['display_name'],
@@ -126,6 +138,64 @@ final class UserController extends AbstractController
             $apiKeyForm->addError(new FormError('Please review the API key form.'));
         }
 
+        $projectAssignmentsData = [
+            'assignments' => array_map(function (array $project) use ($membershipByProject): array {
+                $membership = $membershipByProject[$project['id']] ?? null;
+
+                return [
+                    'project_id' => $project['id'],
+                    'role' => $membership?->roleName,
+                    'capabilities' => $membership !== null ? implode(', ', $this->extractCapabilities($membership->permissions)) : '',
+                ];
+            }, $projects),
+        ];
+
+        $projectMembershipForm = $this->createForm(ProjectMembershipCollectionType::class, $projectAssignmentsData, [
+            'role_choices' => $roleChoices,
+        ]);
+        $projectMembershipForm->handleRequest($request);
+
+        if ($projectMembershipForm->isSubmitted()) {
+            if ($projectMembershipForm->isValid()) {
+                /** @var array{assignments: list<array{project_id:string,role:?string,capabilities:?string}>} $data */
+                $data = $projectMembershipForm->getData();
+                $errors = false;
+
+                foreach ($data['assignments'] as $assignment) {
+                    $projectId = (string) $assignment['project_id'];
+                    $role = $assignment['role'] ?? '';
+                    $capabilities = $this->parseCapabilities((string) ($assignment['capabilities'] ?? ''));
+
+                    if ($role === '' && $capabilities !== []) {
+                        $projectMembershipForm->addError(new FormError(sprintf('Select a role for project assignment "%s" before adding capabilities.', $projectId)));
+                        $errors = true;
+                        continue;
+                    }
+
+                    if ($role === '') {
+                        $this->projectMembershipRepository->revoke($projectId, $id);
+                        continue;
+                    }
+
+                    $this->projectMembershipRepository->assign(
+                        $projectId,
+                        $id,
+                        $role,
+                        ['capabilities' => $capabilities],
+                        $this->getActorId()
+                    );
+                }
+
+                if (!$errors) {
+                    $this->addFlash('success', 'Project memberships updated.');
+
+                    return $this->redirectToRoute('admin_users_edit', ['id' => $id]);
+                }
+            } else {
+                $projectMembershipForm->addError(new FormError('Please review the project assignments.'));
+            }
+        }
+
         $apiKeys = $this->apiKeyManager->listForUser($id);
 
         return $this->render('admin/users/edit.html.twig', [
@@ -133,6 +203,8 @@ final class UserController extends AbstractController
             'user' => $user,
             'apiKeyForm' => $apiKeyForm->createView(),
             'apiKeys' => $apiKeys,
+            'projectMembershipForm' => $projectMembershipForm->createView(),
+            'projects' => $projects,
         ]);
     }
 
@@ -182,5 +254,34 @@ final class UserController extends AbstractController
         sort($unique);
 
         return $unique;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function parseCapabilities(string $capabilities): array
+    {
+        $parts = preg_split('/[\s,]+/', $capabilities) ?: [];
+        $parts = array_filter(array_map(static fn (string $capability): string => trim($capability), $parts), static fn (string $capability): bool => $capability !== '');
+
+        $unique = array_values(array_unique($parts));
+        sort($unique);
+
+        return $unique;
+    }
+
+    /**
+     * @param array<string, mixed> $permissions
+     * @return list<string>
+     */
+    private function extractCapabilities(array $permissions): array
+    {
+        $capabilities = $permissions['capabilities'] ?? [];
+
+        if (!is_array($capabilities)) {
+            return [];
+        }
+
+        return array_values(array_map(static fn ($value): string => (string) $value, $capabilities));
     }
 }

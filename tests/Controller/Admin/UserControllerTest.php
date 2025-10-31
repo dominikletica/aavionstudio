@@ -25,7 +25,7 @@ final class UserControllerTest extends WebTestCase
 
         $this->connection->executeStatement('PRAGMA foreign_keys = OFF');
 
-        foreach (['app_api_key', 'app_user_role', 'app_role', 'app_user', 'app_audit_log'] as $table) {
+        foreach (['app_api_key', 'app_project_user', 'app_project', 'app_user_role', 'app_role', 'app_user', 'app_audit_log'] as $table) {
             $this->connection->executeStatement('DROP TABLE IF EXISTS '.$table);
         }
 
@@ -34,6 +34,8 @@ final class UserControllerTest extends WebTestCase
         $this->connection->executeStatement('CREATE TABLE app_user_role (user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, assigned_at DATETIME NOT NULL, assigned_by CHAR(26), PRIMARY KEY (user_id, role_name))');
         $this->connection->executeStatement('CREATE TABLE app_audit_log (id CHAR(26) PRIMARY KEY, actor_id CHAR(26), action VARCHAR(128) NOT NULL, subject_id CHAR(26), context TEXT NOT NULL, ip_hash VARCHAR(128), occurred_at DATETIME NOT NULL)');
         $this->connection->executeStatement('CREATE TABLE app_api_key (id CHAR(26) PRIMARY KEY, user_id CHAR(26) NOT NULL, label VARCHAR(190) NOT NULL, hashed_key VARCHAR(128) NOT NULL, scopes TEXT NOT NULL, last_used_at DATETIME DEFAULT NULL, created_at DATETIME NOT NULL, revoked_at DATETIME DEFAULT NULL, expires_at DATETIME DEFAULT NULL)');
+        $this->connection->executeStatement('CREATE TABLE app_project (id CHAR(26) PRIMARY KEY, slug VARCHAR(190) NOT NULL, name VARCHAR(190) NOT NULL)');
+        $this->connection->executeStatement('CREATE TABLE app_project_user (project_id CHAR(26) NOT NULL, user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, permissions TEXT NOT NULL, created_at DATETIME NOT NULL, created_by CHAR(26), PRIMARY KEY (project_id, user_id))');
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
@@ -90,6 +92,12 @@ final class UserControllerTest extends WebTestCase
             'role_name' => 'ROLE_VIEWER',
             'assigned_at' => $now,
             'assigned_by' => '01HXADMINUSER0000000000000',
+        ]);
+
+        $this->connection->insert('app_project', [
+            'id' => '01HXPROJECT0000000000000000',
+            'slug' => 'default',
+            'name' => 'Default Project',
         ]);
 
         $this->connection->executeStatement('PRAGMA foreign_keys = ON');
@@ -206,5 +214,41 @@ final class UserControllerTest extends WebTestCase
         self::assertResponseRedirects('/admin/users/01HXUSER000000000000000000');
         $revokedAt = $this->connection->fetchOne('SELECT revoked_at FROM app_api_key WHERE id = ?', [$row['id']]);
         self::assertNotNull($revokedAt);
+    }
+
+    public function testUpdateProjectMembership(): void
+    {
+        $this->loginAsAdmin();
+        $crawler = $this->client->request('GET', '/admin/users/01HXUSER000000000000000000');
+        self::assertResponseIsSuccessful();
+
+        // Assign project role + capabilities.
+        $form = $crawler->selectButton('Save project access')->form();
+        $form['project_membership_collection[assignments][0][role]']->setValue('ROLE_EDITOR');
+        $form['project_membership_collection[assignments][0][capabilities]']->setValue('content.publish content.review');
+
+        $this->client->submit($form);
+
+        self::assertResponseRedirects('/admin/users/01HXUSER000000000000000000');
+        $this->client->followRedirect();
+
+        $membershipRow = $this->connection->fetchAssociative('SELECT role_name, permissions FROM app_project_user WHERE project_id = ? AND user_id = ?', ['01HXPROJECT0000000000000000', '01HXUSER000000000000000000']);
+        self::assertNotFalse($membershipRow);
+        self::assertSame('ROLE_EDITOR', $membershipRow['role_name']);
+        $permissions = json_decode((string) $membershipRow['permissions'], true, flags: JSON_THROW_ON_ERROR);
+        self::assertSame(['capabilities' => ['content.publish', 'content.review']], $permissions);
+
+        // Remove membership again (inherit global).
+        $crawler = $this->client->request('GET', '/admin/users/01HXUSER000000000000000000');
+        $form = $crawler->selectButton('Save project access')->form();
+        $form['project_membership_collection[assignments][0][role]']->setValue('');
+        $form['project_membership_collection[assignments][0][capabilities]']->setValue('');
+        $this->client->submit($form);
+
+        self::assertResponseRedirects('/admin/users/01HXUSER000000000000000000');
+        $this->client->followRedirect();
+
+        $exists = $this->connection->fetchOne('SELECT COUNT(*) FROM app_project_user WHERE project_id = ? AND user_id = ?', ['01HXPROJECT0000000000000000', '01HXUSER000000000000000000']);
+        self::assertSame(0, (int) $exists);
     }
 }

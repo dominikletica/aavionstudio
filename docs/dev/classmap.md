@@ -30,6 +30,7 @@
 | `App\Security\User\UserAdminManager` | `src/Security/User/UserAdminManager.php` | Lists/updates users for admin UI, persists role assignments, records audit logs | Exercised via `tests/Controller/Admin/UserControllerTest.php` |
 | `App\Security\Api\ApiKeyManager` | `src/Security/Api/ApiKeyManager.php` | Issues, lists, and revokes API keys with hashed secrets and audit logging | Unit coverage in `tests/Security/Api/ApiKeyManagerTest.php` |
 | `App\Security\Audit\SecurityAuditRepository` | `src/Security/Audit/SecurityAuditRepository.php` | Reads audit log entries with filtering and context decoding | Used by admin audit viewer (`tests/Controller/Admin/SecurityAuditControllerTest.php`) |
+| `App\Project\ProjectRepository` | `src/Project/ProjectRepository.php` | Lists core projects for admin tooling | Consumed by admin user controller |
 
 ### Suggested Structure
 - **Core Services:** Module loader, schema registry, draft manager, snapshot manager, resolver engine, media storage.
