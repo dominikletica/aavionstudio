@@ -46,7 +46,7 @@
 - [x] Surface audit log viewer for security events (auth attempts, role changes, API key updates) with filters.
 
 #### Testing & Tooling
-- [ ] Add unit/functional tests covering authentication success/failure, voter decisions, admin UI flows, and API key endpoints (invitation onboarding + login flow + admin user management + API key issuance/revoke covered; remaining: voter edge cases + HTTP API endpoints).
+- [ ] Add unit/functional tests covering voter decisions and API key HTTP endpoints (authentication success/failure + admin flows now covered; remaining: voter edge cases + HTTP API endpoints).
 - [x] Provide documentation updates (developer + user manuals) for login, roles, project membership, API keys, and troubleshooting; schedule follow-up smoke tests in release workflow. *(Docs updated alongside recent features; smoke-test automation still a later task.)*
 
 ### Feat: Admin Studio UI (P0 | L)
@@ -246,3 +246,5 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Delivered security audit log viewer (`/admin/security/audit`) with filters, repository helper, Twig view, and functional coverage; updated developer/user documentation and roadmap tracking.
 - Added admin-triggered password reset flow with email delivery, audit logging, and functional coverage from the user detail screen.
 - Updated project capability voter to support structured capability lists from the new project override UI and extended unit coverage for legacy + new permission formats.
+- Added functional coverage for login success/failure to ensure authentication flow and error handling remain deterministic.
+- Added project capability probe endpoint + functional tests to exercise voter decisions within HTTP requests.

@@ -57,6 +57,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `admin_users_api_keys_revoke` | `src/Controller/Admin/UserController.php` | Revokes an API key for a user | Core |
 | `admin_users_password_reset` | `src/Controller/Admin/UserController.php` | Sends password reset email for a user | Core |
 | `admin_security_audit` | `src/Controller/Admin/SecurityAuditController.php` | Lists security audit log entries with filters | Core |
+| `admin_project_capability_probe` | `src/Controller/Admin/ProjectCapabilityProbeController.php` | Simple endpoint verifying project capability access | Core |
 | `app_frontend` | _TBD_ | Catch-all frontend controller | Core |
 | `app_admin_dashboard` | _TBD_ | Admin landing page | Core |
 | ... |  |  |  |

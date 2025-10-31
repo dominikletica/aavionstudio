@@ -27,6 +27,7 @@ The `/admin/users` area provides operators with a lightweight interface for revi
 - Data source: `ProjectRepository::listProjects()` and `ProjectMembershipRepository::forUser()` hydrate default values.
 - Submissions map to `ProjectMembershipRepository::assign()`/`revoke()` with permissions stored as `['capabilities' => [...]]`. Blank role = inheritance (revoke entry).
 - Functional coverage lives in `tests/Controller/Admin/UserControllerTest.php::testUpdateProjectMembership`.
+- Capability enforcement is integration-tested via `ProjectCapabilityProbeController` (`/admin/projects/{projectId}/capability/{capability}/probe`) in `tests/Controller/Admin/ProjectCapabilityProbeControllerTest.php`.
 
 ### Password reset trigger
 
