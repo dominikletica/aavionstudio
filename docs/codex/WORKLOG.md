@@ -150,6 +150,7 @@
 ### Follow-up Tasks (Visit periodically)
 - [ ] Wire API key-based authentication/authorization into the public HTTP API once the write/read endpoints land (reuse `ApiKeyManager` issuance data).
 - [ ] Add smoke checks for `/admin/api/api-keys` in the release workflow to ensure serialization changes remain backwards compatible.
+- [ ] Hook future module-/theme-installers into the asset rebuild scheduler 
 
 ## Roadmap To Next Release
 Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
@@ -254,3 +255,22 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Added project capability probe endpoint + functional tests to exercise voter decisions within HTTP requests.
 - Exposed admin REST endpoints for API key listing/creation/revocation with functional coverage ensuring JSON contracts and audit logging.
 - Fixed admin API key issuance/revocation to log authenticated actor IDs instead of emails so audit records link to user IDs and respect foreign key constraints.
+
+### 2025-10-31 (Session 2)
+- Kick-off prep for Roadmap Step 4 (Admin Studio UI): evaluate icon/asset strategy without Node-based pipelines.
+- Compare Tabler SVG set vs webfont delivery; assess importmap + asset-map workflow for bundling icons under `public/assets/icons`.
+- Investigate importing `@tabler/icons-webfont` via importmap (404 encountered) and alternatives (pre-fetch via init script, local font hosting).
+- Brainstorm additional UI assets (font stacks, baseline CSS utilities, illustration packs) that stay compatible with the existing Tailwind/Twig setup.
+- Created outline [`feat-admin-assets`](notes/feat-admin-assets.md) to capture icon/font/utility asset decisions and implementation proposals.
+- Fixed `assets/styles/illustrations.css` to use direct SVG URLs, removing editor lint errors and verified via `php bin/console asset-map:compile`.
+- Downloaded and organized additional assets (fonts, illustrations, tabler-webfont + css-classes, alpine & apexcharts) `into assets/` and imported them so asset-map can compile.
+- Registered Alpine.js and ApexCharts in the import map and bootstrap so both libraries load via AssetMapper and expose globals for upcoming UI components.
+- Updated `bin/init` so production runs pass `--minify` to `tailwind:build`, keeping dev/test outputs readable while shipping compressed CSS for releases.
+- Added PHPUnit lint suites: `tests/Lint/InitPipelineTest.php` replays the full init pipeline (cleanup, asset builds, DB setup, cache warmup) and `tests/Lint/TwigLintTest.php` validates Twig templates (optionally themes) via `lint:twig`.
+- Refreshed asset strategy outline (`docs/codex/notes/feat-admin-assets.md`) to capture implemented fonts/icons/illustrations stack and remaining Roadmap Step 4 follow-ups.
+- Introduced `app:assets:sync` command plus pipeline/test integration to mirror module/theme assets into `assets/` before builds; Twig lint now includes `themes/*/templates` and `modules/*/templates`.
+- Added state-aware asset rebuild flow (`AssetStateTracker`, `AssetPipelineRefresher`, `AssetRebuildScheduler`) with new `app:assets:rebuild` command + Messenger handler, updated `bin/init` and lint suites to rely on it, and documented runtime rebuild strategy for theme/module installs.
+- Extended theme discovery pipeline: added `ThemeDiscovery`, `ThemeRegistry`, and manifest descriptions (`theme.php`/`theme.yaml`) so sync/rebuild logic mirrors module auto-discovery and future theme services share the same bootstrap path.
+- Aligned persistence by introducing `app_theme_state`, `ThemeStateSynchronizer`, and `ThemeStateRepository`, seeded the locked `base` theme, wired module/theme enable toggles + rebuild triggers into the admin UI, and documented the new Twig cascade (active theme → modules → base).
+- Cleared the Symfony cache before pipeline sync, purged stale mirrored assets, warmed the cache afterwards, and added regression coverage so rebuilds immediately reflect newly introduced module/theme manifests.
+- Updated `app:assets:sync` to clear the cache internally and respawn with a fresh container so direct console runs mirror newly added module/theme assets on the first pass; documented the command change and added regression coverage for the self-refresh flow.

@@ -14,6 +14,7 @@ final class ModuleManifest
     public function __construct(
         public readonly string $slug,
         public readonly string $name,
+        public readonly string $description,
         public readonly string $basePath,
         public readonly int $priority = 0,
         public readonly ?string $services = null,
@@ -34,6 +35,7 @@ final class ModuleManifest
         return new self(
             slug: (string) ($data['slug'] ?? throw new \InvalidArgumentException('Module slug missing.')),
             name: (string) ($data['name'] ?? throw new \InvalidArgumentException('Module name missing.')),
+            description: (string) ($data['description'] ?? throw new \InvalidArgumentException('Module description missing.')),
             basePath: $basePath,
             priority: (int) ($data['priority'] ?? 0),
             services: isset($data['services']) ? (string) $data['services'] : null,
@@ -56,6 +58,7 @@ final class ModuleManifest
         return new self(
             slug: (string) ($data['slug'] ?? throw new \InvalidArgumentException('Module slug missing.')),
             name: (string) ($data['name'] ?? throw new \InvalidArgumentException('Module name missing.')),
+            description: (string) ($data['description'] ?? throw new \InvalidArgumentException('Module description missing.')),
             basePath: $basePath,
             priority: (int) ($data['priority'] ?? 0),
             services: isset($data['services']) ? (string) $data['services'] : null,
@@ -76,6 +79,7 @@ final class ModuleManifest
         return [
             'slug' => $this->slug,
             'name' => $this->name,
+            'description' => $this->description,
             'base_path' => $this->basePath,
             'priority' => $this->priority,
             'services' => $this->services,
@@ -96,6 +100,7 @@ final class ModuleManifest
         return new self(
             slug: $this->slug,
             name: $this->name,
+            description: $this->description,
             basePath: $this->basePath,
             priority: $this->priority,
             services: $this->services,
@@ -124,6 +129,13 @@ final class ModuleManifest
         }
 
         return $this->resolve($this->routes);
+    }
+
+    public function assetsPath(): ?string
+    {
+        $assetsDir = $this->resolve('assets');
+
+        return is_dir($assetsDir) ? $assetsDir : null;
     }
 
     private function resolve(string $relative): string

@@ -102,6 +102,13 @@ final class Version20251030000100 extends AbstractMigration
             metadata TEXT NOT NULL,
             updated_at DATETIME NOT NULL
         )');
+        $this->addSql('CREATE TABLE IF NOT EXISTS app_theme_state (
+            name VARCHAR(190) NOT NULL PRIMARY KEY,
+            enabled INTEGER NOT NULL DEFAULT 1,
+            active INTEGER NOT NULL DEFAULT 0,
+            metadata TEXT NOT NULL,
+            updated_at DATETIME NOT NULL
+        )');
 
         // Content tables in the attached user database.
         $this->addSql('CREATE TABLE IF NOT EXISTS user_brain.app_entity (
@@ -155,6 +162,7 @@ final class Version20251030000100 extends AbstractMigration
         $this->seedSystemSettings();
         $this->seedDefaultProjects();
         $this->seedModuleStates();
+        $this->seedThemeStates();
     }
 
     public function down(Schema $schema): void
@@ -167,6 +175,7 @@ final class Version20251030000100 extends AbstractMigration
         $this->addSql('DROP TABLE IF EXISTS app_template');
         $this->addSql('DROP TABLE IF EXISTS app_schema');
         $this->addSql('DROP TABLE IF EXISTS app_project');
+        $this->addSql('DROP TABLE IF EXISTS app_theme_state');
 
         $this->addSql('DROP TABLE IF EXISTS user_brain.app_relation');
         $this->addSql('DROP TABLE IF EXISTS user_brain.app_draft');
@@ -241,6 +250,29 @@ final class Version20251030000100 extends AbstractMigration
             [
                 'name' => \PDO::PARAM_STR,
                 'enabled' => \PDO::PARAM_INT,
+                'metadata' => \PDO::PARAM_STR,
+                'updated_at' => \PDO::PARAM_STR,
+            ]
+        );
+    }
+
+    private function seedThemeStates(): void
+    {
+        $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+
+        $this->addSql(
+            'INSERT OR IGNORE INTO app_theme_state (name, enabled, active, metadata, updated_at) VALUES (:name, :enabled, :active, :metadata, :updated_at)',
+            [
+                'name' => 'base',
+                'enabled' => 1,
+                'active' => 1,
+                'metadata' => json_encode(['locked' => true], JSON_THROW_ON_ERROR),
+                'updated_at' => $now,
+            ],
+            [
+                'name' => \PDO::PARAM_STR,
+                'enabled' => \PDO::PARAM_INT,
+                'active' => \PDO::PARAM_INT,
                 'metadata' => \PDO::PARAM_STR,
                 'updated_at' => \PDO::PARAM_STR,
             ]

@@ -112,4 +112,10 @@ return [
     '@codemirror/text' => [
         'version' => '0.19.6',
     ],
+    'alpinejs' => [
+        'path' => './assets/js/alpinejs.min.js',
+    ],
+    'apexcharts' => [
+        'path' => './assets/js/apexcharts.min.js',
+    ],
 ];

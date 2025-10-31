@@ -7,6 +7,7 @@ use App\Module\ModuleManifest;
 return new ModuleManifest(
     slug: 'core',
     name: 'Core Platform',
+    description: 'Core services, infrastructure wiring, and shared defaults required by every installation.',
     basePath: __DIR__,
     priority: 1000,
     services: 'config/services.php',
