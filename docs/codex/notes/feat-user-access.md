@@ -40,7 +40,7 @@
 5. Password reset request stores selector/verifier hash; email includes signed URL; consuming token resets password, revokes remember-me tokens, and logs `auth.password.reset.completed`.
 6. Invitation flow optionally creates inactive users with temporary password token.
 
-### Capability Registry
+### Capability Registry & Project Memberships
 - Modules declare capabilities in manifest:
   ```yaml
   capabilities:
@@ -50,6 +50,7 @@
   ```
 - Registry merges all manifests, storing in `system.brain:capabilities`.
 - Installer seeds base roles with capability lists; admin UI allows toggling per role with safety checks for circular dependencies.
+- ProjectMembershipRepository reads/writes `app_project_user`, exposing helpers for voters/UI to resolve project-specific role overrides (future step: wire into voters).
 
 ## Admin UI
 - `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys; invitation management UI (`/admin/users/invitations`) already in place.

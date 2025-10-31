@@ -55,6 +55,7 @@ This guide summarises the core Symfony platform put in place during Roadmap Step
 - Database schema additions (roles, project memberships, audit log, password reset tokens) are introduced in `migrations/Version20251031000100.php` and tested via `tests/Security/AppUserProviderTest.php` / `tests/Security/Password/PasswordResetTokenManagerTest.php`.
 - Password reset flow uses `PasswordResetTokenManager`, `/password/forgot` + `/password/reset/{selector}` controllers, Twig views, and email templates.
 - Invitation backend (`UserInvitationManager`, `app_user_invitation`) seeds invitation tokens with audit entries; UI hooks will integrate later.
+- Project membership repository (`ProjectMembershipRepository`) abstracts `app_project_user` for upcoming voters and admin UI.
 - Capability registry integration, per-project voters, admin UI, and API key flows will build upon this foundation in subsequent milestones.
 
 ## Next Steps

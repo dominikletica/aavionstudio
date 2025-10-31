@@ -43,6 +43,9 @@ security:
         ROLE_ADMIN: ['ROLE_EDITOR']
         ROLE_SUPER_ADMIN: ['ROLE_ADMIN', 'ROLE_ALLOWED_TO_SWITCH']
 
+    access_decision_manager:
+        strategy: unanimous
+
     access_control:
         - { path: ^/login$, roles: PUBLIC_ACCESS }
         - { path: ^/password, roles: PUBLIC_ACCESS }
