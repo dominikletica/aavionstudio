@@ -1,7 +1,7 @@
 # Developer Manual
 
 Status: Draft  
-Updated: 2025-10-30
+Updated: 2025-10-31
 
 Welcome to the technical companion for aavion Studio. This manual outlines the development workflow, architecture conventions, and references to subsystem guides under `docs/dev/sections/`.
 
@@ -81,6 +81,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 - **Concept Outline & Feature Drafts:** [`docs/codex/notes/`](../codex/notes/)
 - **Developer Sections:** `docs/dev/sections/` (add guides per subsystem)
 - **Class Map:** [`docs/dev/classmap.md`](classmap.md)
+- **Security Guides:** [`docs/dev/sections/security/`](sections/security/) – invitation onboarding, upcoming capability registry deep dives.
 
 ---
 

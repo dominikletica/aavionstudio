@@ -74,9 +74,9 @@ final class UserInvitationManager
 
     public function accept(string $token): ?UserInvitation
     {
-        $invitation = $this->findByToken($token);
+        $invitation = $this->findPendingByToken($token);
 
-        if ($invitation === null || !$invitation->isPending()) {
+        if ($invitation === null) {
             return null;
         }
 
@@ -105,6 +105,17 @@ final class UserInvitationManager
             cancelledAt: null,
             metadata: $invitation->metadata,
         );
+    }
+
+    public function findPendingByToken(string $token): ?UserInvitation
+    {
+        $invitation = $this->findByToken($token);
+
+        if ($invitation === null || !$invitation->isPending()) {
+            return null;
+        }
+
+        return $invitation;
     }
 
     public function findByToken(string $token): ?UserInvitation

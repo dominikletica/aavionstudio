@@ -39,6 +39,7 @@
 4. Logout invalidates all remember-me tokens and session (`security.logout.handler`).
 5. Password reset request stores selector/verifier hash; email includes signed URL; consuming token resets password, revokes remember-me tokens, and logs `auth.password.reset.completed`.
 6. Invitation flow optionally creates inactive users with temporary password token.
+7. Invitation onboarding lets invitees choose display name/password via `/invite/{token}` before the account becomes active.
 
 ### Capability Registry & Project Memberships
 - Modules declare capabilities in manifest:
@@ -50,10 +51,10 @@
   ```
 - Registry merges all manifests, storing in `system.brain:capabilities`.
 - Installer seeds base roles with capability lists; admin UI allows toggling per role with safety checks for circular dependencies.
-- ProjectMembershipRepository reads/writes `app_project_user`, exposing helpers for voters/UI to resolve project-specific role overrides; `ProjectCapabilityVoter` merges global roles, project roles, and per-project permissions.
+- ProjectMembershipRepository reads/writes `app_project_user`, exposing helpers for voters/UI to resolve project-specific role overrides; `ProjectCapabilityVoter` merges global roles, project roles, and per-project permissions for authorization checks.
 
 ## Admin UI
-- `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys; invitation management UI (`/admin/users/invitations`) already in place.
+- `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys; invitation management UI (`/admin/users/invitations`) already in place with invitee onboarding form.
 - Form-driven editor with validation, optional invitation emails, password reset trigger.
 - Audit log integration: record login attempts, role changes, API key creation.
 - Bulk actions for enabling/disabling users, resetting 2FA (future), revoking sessions.

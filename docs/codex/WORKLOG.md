@@ -32,7 +32,7 @@
 - [x] Implement DB-backed user provider, user model, password hasher config, login/logout/remember-me controllers, and rate limiting for authentication attempts.
 - [x] Wire password reset flow (token storage, email delivery, controllers) and record audit events for credential changes.
 - [x] Provide invitation backend (tokens, persistence, audit logging) for administrators.
-- [ ] Implement invitation management UI and activation onboarding for administrators.
+- [x] Implement invitation management UI and activation onboarding for administrators.
 
 #### Roles, Capabilities & Project Memberships
 - [x] Materialise global role hierarchy + default seeds; expose capability registry service that hydrates from module manifests and persists defaults in the database.
@@ -46,7 +46,7 @@
 - [ ] Surface audit log viewer for security events (auth attempts, role changes, API key updates) with filters.
 
 #### Testing & Tooling
-- [ ] Add unit/functional tests covering authentication success/failure, voter decisions, admin UI flows, and API key endpoints.
+- [ ] Add unit/functional tests covering authentication success/failure, voter decisions, admin UI flows, and API key endpoints (invitation onboarding + login flow covered).
 - [ ] Provide documentation updates (developer + user manuals) for login, roles, project membership, API keys, and troubleshooting; schedule follow-up smoke tests in release workflow.
 
 ### Feat: Admin Studio UI (P0 | L)
@@ -237,3 +237,5 @@
 - Added admin invitation management screen (listing, create, cancel) with Twig UI, mail delivery, and functional coverage (`tests/Controller/Admin/UserInvitationControllerTest.php`).
 - Implemented project membership repository abstraction (`ProjectMembershipRepository`) with unit coverage, laying groundwork for project-scoped voters.
 - Added project capability voter (`ProjectCapabilityVoter`) resolving global roles + project overrides to grant capabilities, with unit coverage.
+- Completed invitation onboarding flow: invitees set profile/password via `/invite/{token}`, accounts are created and invitations marked accepted with coverage.
+- Extended invitation acceptance test to verify password hashing, role persistence, and a full login with the invited account; documented onboarding flow for developers and administrators.

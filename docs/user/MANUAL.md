@@ -1,7 +1,7 @@
 # aavion Studio – User Manual
 
 Status: Draft  
-Updated: 2025-10-30
+Updated: 2025-10-31
 
 Welcome! This manual will guide administrators, editors, and integrators through installing, configuring, and using aavion Studio. The content below provides an overview of the documentation structure; detailed guides live under `docs/user/sections/`.
 
@@ -25,7 +25,7 @@ Welcome! This manual will guide administrators, editors, and integrators through
 
 - **Dashboard Overview** – Navigating the Admin Studio UI, notifications, search palette.
 - **Modules** – Drop-in features live under `modules/` as `.aavmodule` bundles with update metadata; UI activation & update checks arrive with installer enhancements.
-- **Invitations** – Administrators can invite users via `/admin/users/invitations`; invites expire automatically after seven days.
+- **Invitations** – Administrators can invite users via `/admin/users/invitations`; invitees complete onboarding at `/invite/{token}` within seven days to set their password. [See detailed guide](sections/administration/invitations.md).
 - **Projects & Settings** – Managing projects, locales, error-page entities (default project provides fallback Twig templates).
 - **User & Access Management** – Creating users, assigning roles/permissions, managing API keys.
 - **Maintenance Tools** – Cache, snapshot rebuild, queue monitoring, health checks.

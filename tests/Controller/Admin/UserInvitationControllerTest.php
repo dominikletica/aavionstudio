@@ -122,10 +122,12 @@ final class UserInvitationControllerTest extends WebTestCase
 
         $this->loginAsAdmin();
         $crawler = $this->client->request('GET', '/admin/users/invitations');
-        $form = $crawler->filter('form')->reduce(function ($node) use ($invitation) {
+        $formNode = $crawler->filter('form')->reduce(function ($node) use ($invitation) {
             $action = $node->attr('action') ?? '';
-            return str_contains($action, $invitation->id);
-        })->form();
+            return str_contains($action, $invitation->id.'/cancel');
+        });
+        self::assertGreaterThan(0, $formNode->count());
+        $form = $formNode->form();
         $this->client->submit($form);
 
         self::assertResponseRedirects('/admin/users/invitations');
