@@ -1,7 +1,7 @@
 # Developer Manual
 
 Status: Draft  
-Updated: 2025-10-30
+Updated: 2025-10-31
 
 Welcome to the technical companion for aavion Studio. This manual outlines the development workflow, architecture conventions, and references to subsystem guides under `docs/dev/sections/`.
 
@@ -70,6 +70,10 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 - **Release Packaging**
   - Generate deployable archives with `bin/release <env> <version> <channel>`.
   - See [`docs/dev/sections/workflows/release.md`](sections/workflows/release.md) for details.
+- **Automation & Access**
+  - Issue API keys for integrations with `php bin/console app:api-key:issue <user>`; see [`docs/dev/sections/security/api-keys.md`](sections/security/api-keys.md) for usage details.
+- **Audit Trail**
+  - Inspect security events via `/admin/security/audit`; implementation notes live in [`docs/dev/sections/security/audit-log.md`](sections/security/audit-log.md).
 
 ---
 
@@ -81,6 +85,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 - **Concept Outline & Feature Drafts:** [`docs/codex/notes/`](../codex/notes/)
 - **Developer Sections:** `docs/dev/sections/` (add guides per subsystem)
 - **Class Map:** [`docs/dev/classmap.md`](classmap.md)
+- **Security Guides:** [`docs/dev/sections/security/`](sections/security/) – invitation onboarding, user management UI, upcoming capability registry deep dives.
 
 ---
 

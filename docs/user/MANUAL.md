@@ -1,7 +1,7 @@
 # aavion Studio – User Manual
 
 Status: Draft  
-Updated: 2025-10-30
+Updated: 2025-10-31
 
 Welcome! This manual will guide administrators, editors, and integrators through installing, configuring, and using aavion Studio. The content below provides an overview of the documentation structure; detailed guides live under `docs/user/sections/`.
 
@@ -15,6 +15,8 @@ Welcome! This manual will guide administrators, editors, and integrators through
 - **Quick Installation** – Using the browser installer vs. manual configuration.
   - Visit `/setup` after uploading the release archive; follow the on-screen steps for diagnostics, environment, storage, admin, and summary.
   - The diagnostics panel highlights missing PHP extensions and writable directory issues with remediation hints.
+- **Access & Login** – Sign in at `/login` with the administrator created during setup; accounts can be disabled or flagged for activation by other admins.
+- **Password Reset** – If credentials are forgotten, use the “Forgot password?” link on the login page; reset links expire after one hour for security.
 - **Post-Install Checklist** – Create first admin, configure email, set up backups, enable modules.
 
 ---
@@ -23,8 +25,10 @@ Welcome! This manual will guide administrators, editors, and integrators through
 
 - **Dashboard Overview** – Navigating the Admin Studio UI, notifications, search palette.
 - **Modules** – Drop-in features live under `modules/` as `.aavmodule` bundles with update metadata; UI activation & update checks arrive with installer enhancements.
+- **Invitations** – Administrators can invite users via `/admin/users/invitations`; invitees complete onboarding at `/invite/{token}` within seven days to set their password. [See detailed guide](sections/administration/invitations.md).
 - **Projects & Settings** – Managing projects, locales, error-page entities (default project provides fallback Twig templates).
-- **User & Access Management** – Creating users, assigning roles/permissions, managing API keys.
+- **User & Access Management** – Creating users, assigning roles/permissions, managing API keys. [See user management guide](sections/administration/user-management.md).
+- **Security Audit Log** – Review authentication and permission changes under `/admin/security/audit`; filter by action, actor, subject, or date to trace events quickly.
 - **Maintenance Tools** – Cache, snapshot rebuild, queue monitoring, health checks.
 
 ---

@@ -27,10 +27,27 @@
 - [x] Review `bin/release` workflow so new core-platform steps (manifest cache, installer assets) remain compatible with the existing prebuild process; adjust only if gaps emerge
 
 ### Feat: User Management & Access Control (P0 | L)
-- [ ] Create user entity, login flow, and password reset process
-- [ ] Seed role hierarchy + capability registry sourced from module manifests
-- [ ] Build admin UI for user/role/API key management with audit logging
-- [ ] Cover authentication, role assignment, and API-key flows with functional/security tests
+#### Authentication & Core Entities
+- [x] Add migration(s) to extend `app_user` (rename `password` → `password_hash`, add status/last login) and create supporting tables (`app_role`, `app_user_role`, `app_project_user`, `app_password_reset_token`, `app_remember_me_token`, `app_audit_log`, `app_user_invitation`).
+- [x] Implement DB-backed user provider, user model, password hasher config, login/logout/remember-me controllers, and rate limiting for authentication attempts.
+- [x] Wire password reset flow (token storage, email delivery, controllers) and record audit events for credential changes.
+- [x] Provide invitation backend (tokens, persistence, audit logging) for administrators.
+- [x] Implement invitation management UI and activation onboarding for administrators.
+
+#### Roles, Capabilities & Project Memberships
+- [x] Materialise global role hierarchy + default seeds; expose capability registry service that hydrates from module manifests and persists defaults in the database.
+- [x] Implement project membership repository (`app_project_user`) abstraction to supply voters/admin UI.
+- [x] Build project membership voters that combine global roles, project overrides, and capability requirements.
+
+#### Admin UI & API Keys
+- [x] Add invitation management screen (listing/create/cancel) under `/admin/users/invitations` with email delivery and audit logging.
+- [x] Build `/admin/users` management interface (listing, filters, detail view) with forms for profile edits, role assignments, project overrides, invitations, and password resets. *(Project overrides complete; password reset trigger still pending.)*
+- [x] Implement API key issuance/revocation (UI + CLI) with scoped capability enforcement and hashed storage. *(Scopes + expiry captured; capability enforcement middleware still pending once API surface lands.)*
+- [x] Surface audit log viewer for security events (auth attempts, role changes, API key updates) with filters.
+
+#### Testing & Tooling
+- [x] Add unit/functional tests covering voter decisions and API key HTTP endpoints (login + admin flows + voter probe + API key REST endpoints are now covered; remaining HTTP API auth enforcement will land with the write API).
+- [x] Provide documentation updates (developer + user manuals) for login, roles, project membership, API keys, and troubleshooting; schedule follow-up smoke tests in release workflow. *(Docs updated alongside recent features; smoke-test automation still a later task.)*
 
 ### Feat: Admin Studio UI (P0 | L)
 - [ ] Scaffold layout (sidebar, header, notifications) with Tailwind components
@@ -130,10 +147,15 @@
 - [ ] Cache diff results for common comparisons
 - [ ] Cover diff edge cases (large payloads, markdown comparison) with tests
 
+### Follow-up Tasks (Visit periodically)
+- [ ] Wire API key-based authentication/authorization into the public HTTP API once the write/read endpoints land (reuse `ApiKeyManager` issuance data).
+- [ ] Add smoke checks for `/admin/api/api-keys` in the release workflow to ensure serialization changes remain backwards compatible.
+
 ## Roadmap To Next Release
+Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - [x] **Step 1:** Discuss open questions & confirm hosting/security decisions
 - [x] **Step 2:** Implement Core Platform & architecture foundation
-- [ ] **Step 3:** Implement User Management & Access Control
+- [x] **Step 3:** Implement User Management & Access Control
 - [ ] **Step 4:** Build Admin Studio UI shell & navigation
 - [ ] **Step 5:** Deliver Schema/Template system & Draft/Commit workflow
 - [ ] **Step 6:** Implement Snapshot delivery, Frontend rendering, and Resolver pipeline
@@ -208,3 +230,27 @@
 - Routed SQLite busy-timeout env default through a container parameter so `bin/init` and release builds run without EnvVarProcessor fallback errors
 - Documented the implemented foundation in `docs/dev/sections/architecture/core-platform.md` for future contributors
 - Code-Review: Updated ModuleStateSynchronizer so new module rows honour the manifest’s default enabled flag unless the module is locked.
+
+### 2025-10-31
+- Kick-off: Roadmap Step 3 (User Management & Access Control) – audited feature outline, captured schema/auth updates, and expanded TODOs into implementation phases covering migrations, security wiring, admin UI, API keys, and testing.
+- Added initial user/access schema migration scaffolding (roles, project memberships, credential tokens, audit log) ready for implementation
+- Implemented core authentication stack (DB user provider, status checker, login/logout with remember-me, rate limiting) with Twig login template and unit coverage (`tests/Security/AppUserProviderTest.php`), refreshed architecture docs.
+- Added capability registry + synchronizer to seed `app_role_capability` from module manifests with audit trail, including unit coverage (`tests/Security/CapabilitySynchronizerTest.php`) and role hierarchy wiring.
+- Implemented password reset token manager with hashed selector/verifier storage, purge helper, and unit tests (`tests/Security/Password/PasswordResetTokenManagerTest.php`).
+- Wired password reset request/reset controllers, forms, email template, audit logging, and functional coverage (`tests/Controller/Security/PasswordResetControllerTest.php`); updated security layout/templates.
+- Built invitation infrastructure (DB schema, `UserInvitationManager`, audit logging, unit tests) to support admin-triggered onboarding flows.
+- Added admin invitation management screen (listing, create, cancel) with Twig UI, mail delivery, and functional coverage (`tests/Controller/Admin/UserInvitationControllerTest.php`).
+- Implemented project membership repository abstraction (`ProjectMembershipRepository`) with unit coverage, laying groundwork for project-scoped voters.
+- Added project capability voter (`ProjectCapabilityVoter`) resolving global roles + project overrides to grant capabilities, with unit coverage.
+- Completed invitation onboarding flow: invitees set profile/password via `/invite/{token}`, accounts are created and invitations marked accepted with coverage.
+- Extended invitation acceptance test to verify password hashing, role persistence, and a full login with the invited account; documented onboarding flow for developers and administrators.
+- Shipped `/admin/users` management UI with listing/search filters, profile + role editor, audit logging, and functional coverage; documented tooling for developers and administrators.
+- Added API key manager service, CLI issuance command, and admin UI for creation/revocation with audit logging and tests; documented developer + user flows.
+- Enhanced `/admin/users/{id}` to manage per-project overrides (role + extra capabilities) with functional coverage and documentation updates.
+- Delivered security audit log viewer (`/admin/security/audit`) with filters, repository helper, Twig view, and functional coverage; updated developer/user documentation and roadmap tracking.
+- Added admin-triggered password reset flow with email delivery, audit logging, and functional coverage from the user detail screen.
+- Updated project capability voter to support structured capability lists from the new project override UI and extended unit coverage for legacy + new permission formats.
+- Added functional coverage for login success/failure to ensure authentication flow and error handling remain deterministic.
+- Added project capability probe endpoint + functional tests to exercise voter decisions within HTTP requests.
+- Exposed admin REST endpoints for API key listing/creation/revocation with functional coverage ensuring JSON contracts and audit logging.
+- Fixed admin API key issuance/revocation to log authenticated actor IDs instead of emails so audit records link to user IDs and respect foreign key constraints.

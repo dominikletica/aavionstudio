@@ -5,6 +5,7 @@ namespace App;
 use App\Module\ModuleDiscovery;
 use App\Module\ModuleManifest;
 use App\Module\ModuleStateSynchronizer;
+use App\Security\Capability\CapabilitySynchronizer;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Tools\DsnParser;
@@ -106,13 +107,17 @@ class Kernel extends BaseKernel
     {
         parent::boot();
 
-        if (!$this->container->has(ModuleStateSynchronizer::class)) {
-            return;
+        if ($this->container->has(ModuleStateSynchronizer::class)) {
+            $synchronizer = $this->container->get(ModuleStateSynchronizer::class);
+            \assert($synchronizer instanceof ModuleStateSynchronizer);
+            $synchronizer->synchronize($this->discoverModules());
         }
 
-        $synchronizer = $this->container->get(ModuleStateSynchronizer::class);
-        \assert($synchronizer instanceof ModuleStateSynchronizer);
-        $synchronizer->synchronize($this->discoverModules());
+        if ($this->container->has(CapabilitySynchronizer::class)) {
+            $capabilitySynchronizer = $this->container->get(CapabilitySynchronizer::class);
+            \assert($capabilitySynchronizer instanceof CapabilitySynchronizer);
+            $capabilitySynchronizer->synchronize();
+        }
     }
 
     /**

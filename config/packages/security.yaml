@@ -1,29 +1,56 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+        App\Security\User\AppUser: 'auto'
+
     providers:
-        users_in_memory: { memory: null }
+        app_user_provider:
+            id: App\Security\User\AppUserProvider
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
-            provider: users_in_memory
+            provider: app_user_provider
+            user_checker: App\Security\User\AppUserStatusChecker
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                enable_csrf: true
+                default_target_path: /admin
+                username_parameter: email
+                password_parameter: password
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 2592000 # 30 days
+                path: /
+                token_provider: app.security.remember_me_token_provider
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+            logout:
+                path: app_logout
+                target: /
+
+            login_throttling:
+                max_attempts: 5
+                interval: '1 minute'
+
+    role_hierarchy:
+        ROLE_EDITOR: ['ROLE_VIEWER']
+        ROLE_ADMIN: ['ROLE_EDITOR']
+        ROLE_SUPER_ADMIN: ['ROLE_ADMIN', 'ROLE_ALLOWED_TO_SWITCH']
+
+    access_decision_manager:
+        strategy: unanimous
+
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/password, roles: PUBLIC_ACCESS }
+        - { path: ^/invite, roles: PUBLIC_ACCESS }
+        - { path: ^/admin, roles: ROLE_VIEWER }
 
 when@test:
     security:
