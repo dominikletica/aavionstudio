@@ -23,6 +23,10 @@
 - Apply automated formatters when available (e.g. `php-cs-fixer`); otherwise rely on IDE PSR-12 formatting and composer-normalized JSON.
 - Repository text (code comments, docs, commits) must remain English, even when collaboration happens in other languages.
 - Maintainers keep `docs/dev/classmap.md` up to date with every callable (services, commands, Twig components) so contributors can locate references without codewide searches.
+- Every code change must ship with corresponding documentation and tests:
+  - Update feature notes, manuals, and class map entries in the same commit when behaviour changes.
+  - Add or adjust PHPUnit/functional coverage that proves the new behaviour—never skip tests.
+  - Record the work and TODO state in `docs/codex/WORKLOG.md` as part of the change, not afterwards.
 
 ## Testing Guidelines
 - Use PHPUnit 12 with namespaces mirroring production code (`tests/Unit/App/...`, `tests/Integration/App/...`).
