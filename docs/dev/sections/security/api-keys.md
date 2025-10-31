@@ -45,6 +45,15 @@ php bin/console app:api-key:issue user@example.com --label="CI token" --scope=co
 
 The command resolves the user by ULID or active email, creates the key, and prints the secret once. Useful for bootstrap scripts or CI pipelines.
 
+## HTTP endpoints
+
+- Controller: `src/Controller/Admin/AdminApiKeyController.php`
+- Base path: `/admin/api/api-keys` (`ROLE_ADMIN` required)
+  - `GET ?user={ulid}` – returns the user's keys with status metadata.
+  - `POST` – creates a key (`user_id`, `label`, optional `scopes`, `expires_at`), returning the plaintext secret once.
+  - `DELETE /{id}` – revokes a key immediately.
+- Functional coverage: `tests/Controller/Admin/AdminApiKeyControllerTest.php`.
+
 ## Follow-up ideas
 
 - Track `last_used_at` updates via middleware once API authentication is implemented.

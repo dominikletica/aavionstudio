@@ -57,7 +57,7 @@ final class ProjectCapabilityProbeControllerTest extends WebTestCase
         ]);
 
         $this->connection->insert('app_project', [
-            'id' => '01HXPROJECTAAA0000000000000',
+            'id' => '01HXPROJECT0000000000000000',
             'slug' => 'default',
             'name' => 'Default Project',
         ]);
@@ -98,12 +98,19 @@ final class ProjectCapabilityProbeControllerTest extends WebTestCase
         ]);
 
         $this->connection->insert('app_project_user', [
-            'project_id' => '01HXPROJECTAAA0000000000000',
+            'project_id' => '01HXPROJECT0000000000000000',
             'user_id' => '01HXMEMBER0000000000000000',
             'role_name' => 'ROLE_VIEWER',
             'permissions' => json_encode(['capabilities' => ['project.manage']], JSON_THROW_ON_ERROR),
             'created_at' => $now,
             'created_by' => '01HXADMIN00000000000000000',
+        ]);
+
+        $this->connection->insert('app_user_role', [
+            'user_id' => '01HXMEMBER0000000000000000',
+            'role_name' => 'ROLE_VIEWER',
+            'assigned_at' => $now,
+            'assigned_by' => '01HXADMIN00000000000000000',
         ]);
 
         $this->connection->insert('app_user', [
@@ -120,6 +127,13 @@ final class ProjectCapabilityProbeControllerTest extends WebTestCase
             'last_login_at' => null,
         ]);
 
+        $this->connection->insert('app_user_role', [
+            'user_id' => '01HXOUTSIDER00000000000000',
+            'role_name' => 'ROLE_VIEWER',
+            'assigned_at' => $now,
+            'assigned_by' => '01HXADMIN00000000000000000',
+        ]);
+
         $this->connection->executeStatement('PRAGMA foreign_keys = ON');
         static::ensureKernelShutdown();
     }
@@ -131,7 +145,7 @@ final class ProjectCapabilityProbeControllerTest extends WebTestCase
         $admin = $userProvider->loadUserByIdentifier('admin@example.com');
         $client->loginUser($admin);
 
-        $client->request('GET', '/admin/projects/01HXPROJECTAAA0000000000000000/capability/project.manage/probe');
+        $client->request('GET', '/admin/projects/01HXPROJECT0000000000000000/capability/project.manage/probe');
         self::assertResponseIsSuccessful();
     }
 
@@ -142,7 +156,7 @@ final class ProjectCapabilityProbeControllerTest extends WebTestCase
         $member = $userProvider->loadUserByIdentifier('member@example.com');
         $client->loginUser($member);
 
-        $client->request('GET', '/admin/projects/01HXPROJECTAAA0000000000000000/capability/project.manage/probe');
+        $client->request('GET', '/admin/projects/01HXPROJECT0000000000000000/capability/project.manage/probe');
         self::assertResponseIsSuccessful();
     }
 
@@ -153,7 +167,7 @@ final class ProjectCapabilityProbeControllerTest extends WebTestCase
         $outsider = $userProvider->loadUserByIdentifier('outsider@example.com');
         $client->loginUser($outsider);
 
-        $client->request('GET', '/admin/projects/01HXPROJECTAAA0000000000000000/capability/project.manage/probe');
+        $client->request('GET', '/admin/projects/01HXPROJECT0000000000000000/capability/project.manage/probe');
         self::assertResponseStatusCodeSame(403);
     }
 }
