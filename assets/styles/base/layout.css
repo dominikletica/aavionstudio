@@ -1,0 +1,36 @@
+@layer base {
+    ::selection {
+        background-color: color-mix(in oklch, var(--color-primary) 75%, var(--color-surface));
+        color: var(--color-primary-foreground);
+    }
+
+    main {
+        @apply max-w-6xl px-6 md:px-8 mx-auto;
+    }
+}
+
+@layer components {
+    .surface {
+        @apply bg-surface border border-border rounded-md shadow-sm;
+    }
+
+    .surface-muted {
+        @apply bg-surface-muted rounded-md;
+    }
+
+    .surface-inverse {
+        @apply bg-surface-inverse text-text-inverse rounded-md shadow-lg;
+    }
+
+    .layout-stack {
+        @apply flex flex-col gap-6;
+    }
+
+    .layout-stack--tight {
+        @apply gap-4;
+    }
+
+    .divider {
+        @apply h-px bg-surface-border my-6;
+    }
+}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Asset\StylesheetImportsBuilder;
 use App\Module\ModuleRegistry;
 use App\Theme\ThemeRegistry;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -32,6 +33,7 @@ final class SyncDiscoveredAssetsCommand extends Command
         #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
         #[Autowire('%kernel.environment%')] private readonly string $environment,
         #[Autowire('%kernel.debug%')] private readonly bool $debug,
+        private readonly StylesheetImportsBuilder $importsBuilder,
     ) {
         parent::__construct();
     }
@@ -68,6 +70,8 @@ final class SyncDiscoveredAssetsCommand extends Command
 
         $this->cleanupStaleTargets($filesystem, $moduleTargetRoot, $syncedModuleTargets);
         $this->cleanupStaleTargets($filesystem, $themeTargetRoot, $syncedThemeTargets);
+
+        $this->importsBuilder->build();
 
         $io->success(\sprintf(
             'Synced %d module asset director%s and %d theme asset director%s.',

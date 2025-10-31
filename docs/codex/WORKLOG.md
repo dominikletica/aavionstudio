@@ -279,3 +279,6 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 ### 2025-10-31 (Session 3)
 - Consolidated theming/templating strategy into [`feat-theming-templating`](notes/feat-theming-templating.md), covering Twig cascade, CSS token plan without PostCSS, locale-aware template variants, and menu builder expectations.
 - Captured follow-up implementation steps (template restructure, menu builder, localization helper, CSS foundation) to unblock upcoming Roadmap Step 4 work.
+- Implemented CSS foundation: added base tokens/utilities under `assets/styles/base/`, introduced generated `imports.css`, hooked it into `tailwind:build`, and wired `StylesheetImportsBuilder` into asset rebuild/sync flows for theme/module overrides.
+- Extended asset rebuild to clear `public/assets` before generating new bundles, preventing hashed clutter during runtime rebuilds.
+- Added navigation, tables, overlays, feedback, loaders, and token utility layers under `assets/styles/base/`, ensuring all shared UI patterns rely on the new theme variables.

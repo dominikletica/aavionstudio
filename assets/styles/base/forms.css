@@ -1,0 +1,81 @@
+@layer components {
+    .form-field {
+        @apply flex flex-col gap-2;
+    }
+
+    .form-field--inline {
+        @apply flex-row items-center gap-4;
+    }
+
+    .form-label {
+        color: var(--color-text-strong);
+        @apply font-medium;
+    }
+
+    .form-help {
+        @apply text-sm text-text-muted;
+    }
+
+    input[type='text'],
+    input[type='password'],
+    input[type='email'],
+    input[type='url'],
+    input[type='search'],
+    input[type='number'],
+    input[type='tel'],
+    textarea,
+    select {
+        color: var(--color-text);
+        @apply w-full bg-surface text-sm rounded-sm border border-border px-4 py-3 transition duration-150 shadow-xs;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        @apply outline-none border-primary ring-2 ring-[color:var(--ring-primary)];
+    }
+
+    input:disabled,
+    textarea:disabled,
+    select:disabled {
+        @apply bg-surface-muted text-text-muted cursor-not-allowed;
+    }
+
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-sm font-medium leading-tight transition duration-150 ease-in-out;
+    }
+
+    .btn-primary {
+        color: var(--color-primary-foreground);
+        @apply bg-primary border border-primary shadow-sm hover:bg-primary-darker hover:border-primary-darker focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary;
+    }
+
+    .btn-secondary {
+        color: var(--color-text);
+        @apply bg-surface border border-border-strong hover:bg-surface-muted;
+    }
+
+    .btn-ghost {
+        @apply bg-transparent text-primary border border-transparent hover:bg-primary/10;
+    }
+
+    .form-field[data-state='error'] .form-label {
+        color: var(--color-danger);
+    }
+
+    .form-field[data-state='error'] input,
+    .form-field[data-state='error'] textarea,
+    .form-field[data-state='error'] select {
+        @apply border-danger text-danger ring-1 ring-[color:var(--color-danger-muted)];
+    }
+
+    .form-field[data-state='success'] .form-label {
+        color: var(--color-success);
+    }
+
+    .form-field[data-state='success'] input,
+    .form-field[data-state='success'] textarea,
+    .form-field[data-state='success'] select {
+        @apply border-success text-success ring-1 ring-[color:var(--color-success-muted)];
+    }
+}

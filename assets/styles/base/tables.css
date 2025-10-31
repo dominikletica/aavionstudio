@@ -1,0 +1,82 @@
+@layer components {
+    .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        color: var(--color-text);
+        @apply text-sm;
+    }
+
+    .table thead tr {
+        @apply text-xs uppercase tracking-wide text-text-muted;
+    }
+
+    .table thead th {
+        @apply bg-surface-muted font-semibold text-left px-4 py-3 border-b border-border;
+    }
+
+    .table tbody tr {
+        @apply border-b border-border transition;
+    }
+
+    .table tbody tr:last-child {
+        @apply border-b-0;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--color-surface-hover);
+    }
+
+    .table tbody td {
+        @apply px-4 py-3 align-middle;
+    }
+
+    .table tbody td:first-child,
+    .table thead th:first-child {
+        border-top-left-radius: var(--radius-sm);
+        border-bottom-left-radius: var(--radius-sm);
+    }
+
+    .table tbody td:last-child,
+    .table thead th:last-child {
+        border-top-right-radius: var(--radius-sm);
+        border-bottom-right-radius: var(--radius-sm);
+    }
+
+    .table--compact thead th {
+        @apply px-3 py-2;
+    }
+
+    .table--compact tbody td {
+        @apply px-3 py-2;
+    }
+
+    .table--zebra tbody tr:nth-child(even) {
+        background-color: var(--color-surface-zebra);
+    }
+
+    .table__empty {
+        @apply text-center text-sm text-text-muted py-10;
+    }
+
+    .table-toolbar {
+        @apply flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-surface px-4 py-3 shadow-xs;
+    }
+
+    .table-pagination {
+        @apply inline-flex items-center gap-2 text-sm text-text;
+    }
+
+    .table-pagination__button {
+        @apply inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-text transition;
+    }
+
+    .table-pagination__button:disabled {
+        @apply cursor-not-allowed text-text-muted;
+    }
+
+    .table-pagination__button:hover:not(:disabled),
+    .table-pagination__button:focus-visible:not(:disabled) {
+        @apply border-primary text-primary;
+    }
+}

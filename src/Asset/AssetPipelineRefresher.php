@@ -23,6 +23,7 @@ final class AssetPipelineRefresher
         #[Autowire('%kernel.debug%')]
         private readonly bool $debug,
         private readonly LoggerInterface $logger,
+        private readonly StylesheetImportsBuilder $importsBuilder,
     ) {
     }
 
@@ -45,9 +46,11 @@ final class AssetPipelineRefresher
         ]);
 
         try {
+            $this->cleanupBuiltAssetOutputs();
             $this->cleanupSyncedAssetTargets();
 
             $this->runConsoleCommand(['app:assets:sync']);
+            $this->importsBuilder->build();
             $this->runConsoleCommand(['importmap:install']);
 
             $tailwindCommand = ['tailwind:build'];
@@ -70,6 +73,18 @@ final class AssetPipelineRefresher
         $this->logger->info('[assets] Pipeline rebuild completed successfully.');
 
         return true;
+    }
+
+    private function cleanupBuiltAssetOutputs(): void
+    {
+        $assetsDir = $this->projectDir.'/public/assets';
+        if (!is_dir($assetsDir)) {
+            return;
+        }
+
+        $filesystem = new Filesystem();
+        $filesystem->remove($assetsDir);
+        $filesystem->mkdir($assetsDir);
     }
 
     private function cleanupSyncedAssetTargets(): void

@@ -1,0 +1,57 @@
+@layer components {
+    .backdrop {
+        background-color: color-mix(in oklch, var(--color-overlay) 80%, transparent);
+        @apply fixed inset-0 z-40 backdrop-blur-sm transition-opacity duration-150 ease-out;
+    }
+
+    .backdrop[data-state='hidden'] {
+        @apply pointer-events-none opacity-0;
+    }
+
+    .modal {
+        @apply fixed inset-0 z-50 flex items-center justify-center px-4 py-8;
+    }
+
+    .modal__panel {
+        @apply w-full max-w-3xl rounded-lg border border-border bg-surface shadow-lg transition-transform duration-150 ease-in-out;
+    }
+
+    .modal[data-state='hidden'] .modal__panel {
+        @apply translate-y-5 opacity-0;
+    }
+
+    .modal[data-state='visible'] .modal__panel {
+        @apply translate-y-0 opacity-100;
+    }
+
+    .drawer {
+        @apply fixed inset-y-0 z-50 flex w-full max-w-md flex-col border border-border bg-surface shadow-lg transition-transform duration-200 ease-in-out;
+    }
+
+    .drawer[data-side='left'] {
+        left: 0;
+        transform: translateX(-100%);
+    }
+
+    .drawer[data-side='right'] {
+        right: 0;
+        transform: translateX(100%);
+    }
+
+    .drawer[data-state='visible'][data-side='left'],
+    .drawer[data-state='visible'][data-side='right'] {
+        transform: translateX(0);
+    }
+
+    .drawer__header {
+        @apply flex items-center justify-between gap-3 border-b border-border px-5 py-4;
+    }
+
+    .drawer__body {
+        @apply flex-1 overflow-y-auto px-5 py-4;
+    }
+
+    .drawer__footer {
+        @apply border-t border-border bg-surface-muted px-5 py-4;
+    }
+}

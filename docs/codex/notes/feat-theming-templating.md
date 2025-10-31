@@ -53,19 +53,17 @@ Scope: Roadmap Step 4 prep (Session 3)
 - Update `app:assets:rebuild` to refresh `imports.css` before invoking the Tailwind compiler. Reuse mirrored paths under `assets/themes/<slug>/` & `assets/modules/<slug>/`.
 
 ### Design Tokens & Utilities
-- Define core design tokens in `assets/styles/base/tokens.css`:
+- Define core design tokens in `assets/styles/base/theme.css` using the Tailwind `@theme` directive so utilities (`bg-primary`, `font-heading`, etc.) are generated automatically:
   ```css
-  :root {
+  @theme {
       --color-primary: oklch(0.72 0.11 245);
       --color-primary-lighter: color-mix(in oklch, var(--color-primary) 75%, white 25%);
       --color-primary-darker: color-mix(in oklch, var(--color-primary) 75%, black 25%);
-      --font-family-base: "Inter", ui-sans-serif, system-ui;
-      --font-family-heading: "Raleway", ui-sans-serif, system-ui;
-      --radius-base: 0.75rem;
-      --spacing-unit: 0.25rem;
+      --font-heading: "Raleway", ui-sans-serif, system-ui;
+      --radius-md: 0.75rem;
   }
   ```
-- Supply complementary utilities in `@layer base` / `@layer components` files (`typography.css`, `layout.css`, `forms.css`) that map tokens to Tailwind utility classes using `@apply`.
+- Supply complementary utilities in `@layer base` / `@layer components` files (`typography.css`, `layout.css`, `forms.css`) composed from Tailwind classes via `@apply`, keeping overrides lightweight for themes.
 - Ensure defaults remain usable without theme overrides (base theme = metadata only).
 
 ### Project & Theme Overrides
@@ -120,6 +118,9 @@ Scope: Roadmap Step 4 prep (Session 3)
    - Implement Twig injection for project accent variables and persistence for user-configurable footer/social settings.
 7. **Theme Toolkit**
    - Document expected `theme.css` structure, update theme manifests to flag available overrides, and extend admin UI (future).
+
+## Progress
+- 2025-10-31: Seeded `assets/styles/base/*` with theme tokens plus typography, layout, form, navigation, table, overlay, feedback, loader, and utility layers; introduced generated `imports.css` via `StylesheetImportsBuilder` and hooked it into `app:assets:sync` / rebuild pipeline.
 
 ## Decisions
 - Locale-specific templates live under locale-prefixed directories (`templates/de/footer.html.twig`), falling back to the shared version when the locale folder is missing.
