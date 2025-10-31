@@ -172,6 +172,7 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - [Feat: Draft & Commit Workflow](./notes/feat-draft-commit.md)
 - [Feat: Resolver Pipeline](./notes/feat-resolver-pipeline.md)
 - [Feat: Snapshot & API Delivery](./notes/feat-snapshot-api.md)
+- [Feat: Theming & Templating](./notes/feat-theming-templating.md)
 - [Feat: Frontend Delivery & Rendering](./notes/feat-frontend-delivery.md)
 - [Feat: User Management & Access Control](./notes/feat-user-access.md)
 - [Feat: Admin Studio UI](./notes/feat-admin-studio.md)
