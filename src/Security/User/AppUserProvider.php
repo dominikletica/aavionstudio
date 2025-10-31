@@ -22,43 +22,7 @@ final class AppUserProvider implements UserProviderInterface, PasswordUpgraderIn
 
     public function loadUserByIdentifier(string $identifier): AppUser
     {
-        $row = $this->connection->fetchAssociative(
-            <<<'SQL'
-                SELECT
-                    id,
-                    email,
-                    password_hash,
-                    display_name,
-                    locale,
-                    timezone,
-                    status,
-                    flags,
-                    last_login_at
-                FROM app_user
-                WHERE LOWER(email) = LOWER(:email)
-            SQL,
-            [
-                'email' => $identifier,
-            ]
-        );
-
-        if ($row === false) {
-            throw new UserNotFoundException(sprintf('User "%s" not found.', $identifier));
-        }
-
-        $status = (string) ($row['status'] ?? 'active');
-
-        if ($status === 'disabled') {
-            throw new CustomUserMessageAccountStatusException('Your account has been disabled.');
-        }
-
-        if ($status === 'pending') {
-            throw new CustomUserMessageAccountStatusException('Your account is awaiting activation.');
-        }
-
-        if ($status === 'archived') {
-            throw new CustomUserMessageAccountStatusException('Your account has been archived.');
-        }
+        $row = $this->fetchUserRowByEmail($identifier);
 
         $roles = $this->fetchRoles((string) $row['id']);
 
@@ -93,6 +57,52 @@ final class AppUserProvider implements UserProviderInterface, PasswordUpgraderIn
                 'email' => $user->getUserIdentifier(),
             ]
         );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function fetchUserRowByEmail(string $email): array
+    {
+        $row = $this->connection->fetchAssociative(
+            <<<'SQL'
+                SELECT
+                    id,
+                    email,
+                    password_hash,
+                    display_name,
+                    locale,
+                    timezone,
+                    status,
+                    flags,
+                    last_login_at
+                FROM app_user
+                WHERE LOWER(email) = LOWER(:email)
+            SQL,
+            [
+                'email' => $email,
+            ]
+        );
+
+        if ($row === false) {
+            throw new UserNotFoundException(sprintf('User "%s" not found.', $email));
+        }
+
+        $status = (string) ($row['status'] ?? 'active');
+
+        if ($status === 'disabled') {
+            throw new CustomUserMessageAccountStatusException('Your account has been disabled.');
+        }
+
+        if ($status === 'pending') {
+            throw new CustomUserMessageAccountStatusException('Your account is awaiting activation.');
+        }
+
+        if ($status === 'archived') {
+            throw new CustomUserMessageAccountStatusException('Your account has been archived.');
+        }
+
+        return $row;
     }
 
     /**

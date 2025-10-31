@@ -39,6 +39,9 @@ For each service added to `config/services.yaml` or module manifests, document:
 
 | Route Name | Class | Description | Module |
 |------------|-------|-------------|--------|
+| `app_login` | `src/Controller/Security/LoginController.php` | Handles sign-in form | Core |
+| `app_password_forgot` | `src/Controller/Security/PasswordResetController.php` | Password reset request | Core |
+| `app_password_reset` | `src/Controller/Security/PasswordResetController.php` | Password reset confirmation | Core |
 | `app_frontend` | _TBD_ | Catch-all frontend controller | Core |
 | `app_admin_dashboard` | _TBD_ | Admin landing page | Core |
 | ... |  |  |  |

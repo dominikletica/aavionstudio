@@ -46,6 +46,10 @@ services:
 
     App\Security\Password\PasswordResetTokenManager: ~
 
+    App\Security\Audit\SecurityAuditLogger: ~
+
+    App\Security\User\AppUserRepository: ~
+
     App\Controller\Installer\InstallerController:
         autowire: true
         autoconfigure: true
