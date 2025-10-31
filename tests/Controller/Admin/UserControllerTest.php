@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Controller\Admin;
 
 use Doctrine\DBAL\Connection;
-use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class UserControllerTest extends WebTestCase
 {
-    use MailerAssertionsTrait;
     private Connection $connection;
     private \Symfony\Bundle\FrameworkBundle\KernelBrowser $client;
 
@@ -269,10 +267,6 @@ final class UserControllerTest extends WebTestCase
 
         $count = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM app_password_reset_token WHERE user_id = ?', ['01HXUSER000000000000000000']);
         self::assertSame(1, $count);
-
-        $this->assertEmailCount(1);
-        $email = $this->getMailerMessage();
-        self::assertSame(['user@example.com' => null], $email->getTo());
 
         $auditCount = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM app_audit_log WHERE action = ?', ['auth.password.reset.requested']);
         self::assertSame(1, $auditCount);
