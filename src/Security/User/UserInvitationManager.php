@@ -135,6 +135,37 @@ final class UserInvitationManager
     }
 
     /**
+     * @return list<UserInvitation>
+     */
+    public function list(?string $status = null, int $limit = 100): array
+    {
+        $sql = 'SELECT * FROM app_user_invitation';
+        $params = [];
+
+        if ($status !== null) {
+            $sql .= ' WHERE status = :status';
+            $params['status'] = $status;
+        }
+
+        $sql .= ' ORDER BY created_at DESC LIMIT '.(int) $limit;
+
+        $stmt = $this->connection->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $result = $stmt->executeQuery();
+
+        $invitations = [];
+
+        while ($row = $result->fetchAssociative()) {
+            $invitations[] = $this->hydrate($row, '');
+        }
+
+        return $invitations;
+    }
+
+    /**
      * @param array<string, mixed> $row
      */
     private function hydrate(array $row, string $token): UserInvitation

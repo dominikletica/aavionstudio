@@ -46,6 +46,7 @@ security:
     access_control:
         - { path: ^/login$, roles: PUBLIC_ACCESS }
         - { path: ^/password, roles: PUBLIC_ACCESS }
+        - { path: ^/invite, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_VIEWER }
 
 when@test:

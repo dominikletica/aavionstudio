@@ -52,7 +52,7 @@
 - Installer seeds base roles with capability lists; admin UI allows toggling per role with safety checks for circular dependencies.
 
 ## Admin UI
-- `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys.
+- `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys; invitation management UI (`/admin/users/invitations`) already in place.
 - Form-driven editor with validation, optional invitation emails, password reset trigger.
 - Audit log integration: record login attempts, role changes, API key creation.
 - Bulk actions for enabling/disabling users, resetting 2FA (future), revoking sessions.

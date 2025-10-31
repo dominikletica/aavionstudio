@@ -23,11 +23,14 @@ final class PasswordResetControllerTest extends WebTestCase
         $this->connection = static::getContainer()->get(Connection::class);
         $this->tokenManager = static::getContainer()->get(\App\Security\Password\PasswordResetTokenManager::class);
 
-        $this->connection->executeStatement('DROP TABLE IF EXISTS app_user');
-        $this->connection->executeStatement('DROP TABLE IF EXISTS app_password_reset_token');
-        $this->connection->executeStatement('DROP TABLE IF EXISTS app_audit_log');
+        $this->connection->executeStatement('PRAGMA foreign_keys = OFF');
+        foreach (['app_user_role', 'app_role', 'app_user', 'app_password_reset_token', 'app_audit_log'] as $table) {
+            $this->connection->executeStatement('DROP TABLE IF EXISTS '.$table);
+        }
 
         $this->connection->executeStatement('CREATE TABLE app_user (id CHAR(26) PRIMARY KEY, email VARCHAR(190) NOT NULL UNIQUE, password_hash VARCHAR(255) NOT NULL, display_name VARCHAR(190) NOT NULL, locale VARCHAR(12) NOT NULL, timezone VARCHAR(64) NOT NULL, status VARCHAR(16) NOT NULL DEFAULT "active", flags TEXT NOT NULL DEFAULT "{}", created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, last_login_at DATETIME DEFAULT NULL)');
+        $this->connection->executeStatement('CREATE TABLE app_role (name VARCHAR(64) PRIMARY KEY, label VARCHAR(190) NOT NULL, is_system INTEGER NOT NULL DEFAULT 1, metadata TEXT NOT NULL DEFAULT "{}")');
+        $this->connection->executeStatement('CREATE TABLE app_user_role (user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, assigned_at DATETIME NOT NULL, assigned_by CHAR(26), PRIMARY KEY (user_id, role_name))');
         $this->connection->executeStatement('CREATE TABLE app_password_reset_token (id CHAR(26) PRIMARY KEY, user_id CHAR(26) NOT NULL, selector VARCHAR(24) NOT NULL, verifier_hash VARCHAR(128) NOT NULL, requested_at DATETIME NOT NULL, expires_at DATETIME NOT NULL, consumed_at DATETIME DEFAULT NULL, metadata TEXT NOT NULL DEFAULT "{}")');
         $this->connection->executeStatement('CREATE TABLE app_audit_log (id CHAR(26) PRIMARY KEY, actor_id CHAR(26), action VARCHAR(128) NOT NULL, subject_id CHAR(26), context TEXT NOT NULL, ip_hash VARCHAR(128), occurred_at DATETIME NOT NULL)');
 
@@ -46,7 +49,28 @@ final class PasswordResetControllerTest extends WebTestCase
             'last_login_at' => $now,
         ]);
 
+        $this->connection->insert('app_role', [
+            'name' => 'ROLE_ADMIN',
+            'label' => 'Administrator',
+            'is_system' => 1,
+            'metadata' => '{}',
+        ]);
+
+        $this->connection->insert('app_user_role', [
+            'user_id' => '01HXRESETUSER00000000000000',
+            'role_name' => 'ROLE_ADMIN',
+            'assigned_at' => $now,
+            'assigned_by' => null,
+        ]);
+
+        $this->connection->executeStatement('PRAGMA foreign_keys = ON');
         static::ensureKernelShutdown();
+    }
+
+    protected function tearDown(): void
+    {
+        static::ensureKernelShutdown();
+        parent::tearDown();
     }
 
     public function testRequestCreatesTokenRecord(): void

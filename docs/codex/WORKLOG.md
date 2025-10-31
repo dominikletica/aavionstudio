@@ -39,6 +39,7 @@
 - [ ] Implement project membership repository (`app_project_user`) and access voters that combine global roles, project overrides, and capability requirements.
 
 #### Admin UI & API Keys
+- [x] Add invitation management screen (listing/create/cancel) under `/admin/users/invitations` with email delivery and audit logging.
 - [ ] Build `/admin/users` management interface (listing, filters, detail view) with forms for profile edits, role assignments, project overrides, invitations, and password resets.
 - [ ] Implement API key issuance/revocation (UI + CLI) with scoped capability enforcement and hashed storage.
 - [ ] Surface audit log viewer for security events (auth attempts, role changes, API key updates) with filters.
@@ -232,3 +233,4 @@
 - Implemented password reset token manager with hashed selector/verifier storage, purge helper, and unit tests (`tests/Security/Password/PasswordResetTokenManagerTest.php`).
 - Wired password reset request/reset controllers, forms, email template, audit logging, and functional coverage (`tests/Controller/Security/PasswordResetControllerTest.php`); updated security layout/templates.
 - Built invitation infrastructure (DB schema, `UserInvitationManager`, audit logging, unit tests) to support admin-triggered onboarding flows.
+- Added admin invitation management screen (listing, create, cancel) with Twig UI, mail delivery, and functional coverage (`tests/Controller/Admin/UserInvitationControllerTest.php`).

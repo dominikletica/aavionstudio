@@ -66,4 +66,13 @@ final class UserInvitationManagerTest extends TestCase
         $deleted = $this->manager->purgeExpired(new \DateTimeImmutable());
         self::assertSame(1, $deleted);
     }
+
+    public function testListReturnsInvitations(): void
+    {
+        $this->manager->create('list@example.com');
+        $collection = $this->manager->list();
+
+        self::assertNotEmpty($collection);
+        self::assertSame('list@example.com', $collection[0]->email);
+    }
 }
