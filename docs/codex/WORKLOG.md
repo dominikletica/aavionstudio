@@ -274,3 +274,7 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Aligned persistence by introducing `app_theme_state`, `ThemeStateSynchronizer`, and `ThemeStateRepository`, seeded the locked `base` theme, wired module/theme enable toggles + rebuild triggers into the admin UI, and documented the new Twig cascade (active theme → modules → base).
 - Cleared the Symfony cache before pipeline sync, purged stale mirrored assets, warmed the cache afterwards, and added regression coverage so rebuilds immediately reflect newly introduced module/theme manifests.
 - Updated `app:assets:sync` to clear the cache internally and respawn with a fresh container so direct console runs mirror newly added module/theme assets on the first pass; documented the command change and added regression coverage for the self-refresh flow.
+
+### 2025-10-31 (Session 3)
+- Consolidated theming/templating strategy into [`feat-theming-templating`](notes/feat-theming-templating.md), covering Twig cascade, CSS token plan without PostCSS, locale-aware template variants, and menu builder expectations.
+- Captured follow-up implementation steps (template restructure, menu builder, localization helper, CSS foundation) to unblock upcoming Roadmap Step 4 work.
