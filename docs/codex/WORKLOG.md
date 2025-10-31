@@ -253,3 +253,4 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Added functional coverage for login success/failure to ensure authentication flow and error handling remain deterministic.
 - Added project capability probe endpoint + functional tests to exercise voter decisions within HTTP requests.
 - Exposed admin REST endpoints for API key listing/creation/revocation with functional coverage ensuring JSON contracts and audit logging.
+- Fixed admin API key issuance/revocation to log authenticated actor IDs instead of emails so audit records link to user IDs and respect foreign key constraints.

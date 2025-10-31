@@ -18,8 +18,8 @@ final class AdminApiKeyControllerTest extends WebTestCase
 
     protected function setUp(): void
     {
-        static::bootKernel();
-        $container = static::getContainer();
+        $client = static::createClient();
+        $container = $client->getContainer();
         $this->connection = $container->get(Connection::class);
 
         $this->connection->executeStatement('PRAGMA foreign_keys = OFF');
@@ -115,6 +115,11 @@ final class AdminApiKeyControllerTest extends WebTestCase
         $list = json_decode($client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR);
         self::assertCount(1, $list);
         self::assertSame('Integration key', $list[0]['label']);
+
+        $auditEntry = $this->connection->fetchAssociative('SELECT action, actor_id FROM app_audit_log ORDER BY occurred_at DESC LIMIT 1');
+        self::assertNotFalse($auditEntry);
+        self::assertSame('api.key.issued', $auditEntry['action']);
+        self::assertSame('01HXADMINAPIKEY00000000000', $auditEntry['actor_id']);
     }
 
     public function testDeleteRevokesKey(): void
@@ -140,5 +145,10 @@ final class AdminApiKeyControllerTest extends WebTestCase
 
         $revokedAt = $this->connection->fetchOne('SELECT revoked_at FROM app_api_key WHERE id = ?', ['01HXAPIKEYTOREVOKE0000000000']);
         self::assertNotNull($revokedAt);
+
+        $auditEntry = $this->connection->fetchAssociative('SELECT action, actor_id FROM app_audit_log ORDER BY occurred_at DESC LIMIT 1');
+        self::assertNotFalse($auditEntry);
+        self::assertSame('api.key.revoked', $auditEntry['action']);
+        self::assertSame('01HXADMINAPIKEY00000000000', $auditEntry['actor_id']);
     }
 }

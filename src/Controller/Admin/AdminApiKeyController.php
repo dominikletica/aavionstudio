@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Security\Api\ApiKeyManager;
+use App\Security\User\AppUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -74,7 +75,7 @@ final class AdminApiKeyController extends AbstractController
             }
         }
 
-        $apiKey = $this->apiKeyManager->issue($userId, $label, $scopes, $expiresAt, $this->getUser()?->getUserIdentifier());
+        $apiKey = $this->apiKeyManager->issue($userId, $label, $scopes, $expiresAt, $this->getActorId());
 
         return $this->json([
             'id' => $apiKey['id'],
@@ -86,7 +87,7 @@ final class AdminApiKeyController extends AbstractController
     #[Route('/{id}', name: 'revoke', methods: ['DELETE'])]
     public function revoke(string $id): Response
     {
-        $this->apiKeyManager->revoke($id, $this->getUser()?->getUserIdentifier());
+        $this->apiKeyManager->revoke($id, $this->getActorId());
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
@@ -108,5 +109,16 @@ final class AdminApiKeyController extends AbstractController
         sort($unique);
 
         return $unique;
+    }
+
+    private function getActorId(): ?string
+    {
+        $user = $this->getUser();
+
+        if ($user instanceof AppUser) {
+            return $user->getId();
+        }
+
+        return null;
     }
 }
