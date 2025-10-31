@@ -267,3 +267,4 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Updated `bin/init` so production runs pass `--minify` to `tailwind:build`, keeping dev/test outputs readable while shipping compressed CSS for releases.
 - Added PHPUnit lint suites: `tests/Lint/InitPipelineTest.php` replays the full init pipeline (cleanup, asset builds, DB setup, cache warmup) and `tests/Lint/TwigLintTest.php` validates Twig templates (optionally themes) via `lint:twig`.
 - Refreshed asset strategy outline (`docs/codex/notes/feat-admin-assets.md`) to capture implemented fonts/icons/illustrations stack and remaining Roadmap Step 4 follow-ups.
+- Introduced `app:assets:sync` command plus pipeline/test integration to mirror module/theme assets into `assets/` before builds; Twig lint now includes `themes/*/templates` and `modules/*/templates`.

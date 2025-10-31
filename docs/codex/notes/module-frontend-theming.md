@@ -38,6 +38,11 @@ my-theme.aavtheme
   ```
   - `repository` allows the admin UI to surface latest release info via metadata JSON (offline friendly – fetched during packaging, cached locally).
 
+### Development Layout
+- Unpacked themes live under `/themes/<slug>/` during development. Their assets (`/themes/<slug>/assets`) are mirrored into `/assets/themes/<slug>/` via the `app:assets:sync` command so AssetMapper/ImportMap builds pick them up without adding new root paths.
+- Modules follow the same pattern: any `/modules/<slug>/assets` directory is mirrored into `/assets/modules/<slug>/`.
+- Lint/Test pipelines (PHPUnit lint suite) call `app:assets:sync` automatically before running Tailwind/AssetMapper to avoid stale mirrors.
+
 ## Architecture
 - Theme packs distributed as ZIP or Composer package containing:
   - `theme.yaml` manifest (name, version, author, supported modules)

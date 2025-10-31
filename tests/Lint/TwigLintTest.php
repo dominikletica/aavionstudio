@@ -20,13 +20,20 @@ final class TwigLintTest extends TestCase
         $projectDir = dirname(__DIR__, 2);
 
         $paths = ['templates'];
-        $optionalPaths = ['templates/themes'];
 
-        foreach ($optionalPaths as $path) {
-            if (is_dir($projectDir.'/'.$path)) {
-                $paths[] = $path;
-            }
+        $themeTemplateDirs = glob($projectDir.'/themes/*/templates', \GLOB_ONLYDIR) ?: [];
+        foreach ($themeTemplateDirs as $path) {
+            $relative = substr($path, \strlen($projectDir) + 1);
+            $paths[] = ltrim(str_replace('\\', '/', $relative), '/');
         }
+
+        $moduleTemplateDirs = glob($projectDir.'/modules/*/templates', \GLOB_ONLYDIR) ?: [];
+        foreach ($moduleTemplateDirs as $path) {
+            $relative = substr($path, \strlen($projectDir) + 1);
+            $paths[] = ltrim(str_replace('\\', '/', $relative), '/');
+        }
+
+        $paths = array_values(array_unique($paths));
 
         foreach ($paths as $path) {
             yield $path => [$path];

@@ -31,11 +31,11 @@
    - Future components can import these directly; consider lazy loading when building dashboards to keep baseline lightweight.
 
 ## Testing & Tooling
-- PHPUnit lint suite (`tests/Lint/InitPipelineTest.php`) replays the init pipeline (asset cleanup, importmap install, Tailwind build, AssetMapper compile, DB setup, cache warmup) to catch asset regressions.
-- Twig lint suite (`tests/Lint/TwigLintTest.php`) validates `templates/` (and `templates/themes` when present) via `lint:twig`.
+- Added `app:assets:sync` console command to mirror discovered `modules/*/assets` and `themes/*/assets` into `assets/{modules,themes}` so AssetMapper/ImportMap builds see third-party bundles.
+- PHPUnit lint suite (`tests/Lint/InitPipelineTest.php`) replays the init pipeline (asset sync, cleanup, importmap install, Tailwind build, AssetMapper compile, DB setup, cache warmup) to catch asset regressions.
+- Twig lint suite (`tests/Lint/TwigLintTest.php`) validates `templates/`, `themes/*/templates`, and `modules/*/templates` via `lint:twig`.
 - `bin/init` now adds `--minify` to Tailwind when targeting `prod`, ensuring release builds ship compressed CSS.
 
 ## Remaining Tasks
-- Implement Twig helper for icons and update documentation with usage examples.
 - Define shared CSS utility layer (tokens/components) and document override strategy for themes.
-- Provide developer guide covering asset contribution workflow (downloads, naming, testing).
+- Provide developer guide covering asset contribution workflow (downloads, naming, testing, running `app:assets:sync`).

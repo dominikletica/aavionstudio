@@ -88,6 +88,7 @@ run_console() {
   APP_ENV="$TARGET_ENV" APP_DEBUG="$TARGET_DEBUG" php bin/console "$@"
 }
 
+run_console "Synchronizing module/theme assets" app:assets:sync
 run_console "Installing importmap assets" importmap:install
 tailwind_args=()
 if [[ "$TARGET_ENV" == "prod" ]]; then

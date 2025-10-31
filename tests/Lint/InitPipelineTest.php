@@ -24,6 +24,7 @@ final class InitPipelineTest extends TestCase
     {
         $this->resetProjectState();
 
+        $this->runConsoleCommand(['app:assets:sync'], 'Asset sync');
         $this->runConsoleCommand(['importmap:install'], 'Importmap install');
         $this->runConsoleCommand(['tailwind:build'], 'Tailwind build');
         $this->runConsoleCommand(['asset-map:compile'], 'Asset map compile');
