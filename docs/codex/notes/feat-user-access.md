@@ -27,7 +27,7 @@
 - Middleware:
   - Voters for entity-level access (draft ownership, project membership).
   - Route attributes/attributes for capability checks (`#[IsGranted('export.run')]`, custom `#[RequiresCapability('content.publish')]`).
-- Password reset flow: signed URLs + selector/verifier tokens stored in `system.brain`.
+- Password reset flow: signed URLs + selector/verifier tokens stored in `system.brain` via `PasswordResetTokenManager`; tokens hashed, expiring (default 1h) with purge task.
 - `security.yaml` roles: `ROLE_VIEWER`, `ROLE_EDITOR`, `ROLE_ADMIN`, `ROLE_SUPER_ADMIN`; global role hierarchy for coarse permissions + capability-based voters.
 - Password hashing via Symfony password hasher config (`auto`, Argon2id preferred). Login listener rehashes when algorithm cost changes.
 - Rate limiting uses Symfony RateLimiter (IP- + email-based) backed by cache; optional DB table for audit.

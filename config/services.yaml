@@ -44,6 +44,8 @@ services:
 
     App\Security\Capability\CapabilitySynchronizer: ~
 
+    App\Security\Password\PasswordResetTokenManager: ~
+
     App\Controller\Installer\InstallerController:
         autowire: true
         autoconfigure: true

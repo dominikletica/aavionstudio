@@ -63,6 +63,7 @@ final class Version20251031000100 extends AbstractMigration
             requested_at DATETIME NOT NULL,
             expires_at DATETIME NOT NULL,
             consumed_at DATETIME DEFAULT NULL,
+            metadata TEXT NOT NULL DEFAULT '{}',
             FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE
         )');
 
