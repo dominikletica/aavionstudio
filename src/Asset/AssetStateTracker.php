@@ -91,6 +91,10 @@ final class AssetStateTracker
     {
         $hashes = [];
         foreach ($this->moduleRegistry->all() as $manifest) {
+            if (!$manifest->enabled) {
+                continue;
+            }
+
             $assetsPath = $manifest->assetsPath();
 
             if ($assetsPath === null || !is_dir($assetsPath)) {
@@ -112,6 +116,11 @@ final class AssetStateTracker
     {
         $hashes = [];
         foreach ($this->themeRegistry->all() as $manifest) {
+            $shouldInclude = $manifest->slug === 'base' || $manifest->active;
+            if (!$shouldInclude) {
+                continue;
+            }
+
             $assetsPath = $manifest->assetsPath();
 
             if ($assetsPath === null || !is_dir($assetsPath)) {

@@ -15,6 +15,7 @@ This guide summarises the core Symfony platform put in place during Roadmap Step
 - **Module manifest contract** (`App\Module\ModuleManifest`) supports services, routes, navigation, repository metadata, human-friendly descriptions, and capability declarations. Errors during discovery produce synthetic manifests with error metadata so diagnostics can surface the issue without fatal failure.
 - **Module registry** (`App\Module\ModuleRegistry`) exposes enabled manifests and capability metadata for later features (navigation, access control, etc.).
 - **Theme discovery** mirrors the module flow via `App\Theme\ThemeDiscovery`/`ThemeRegistry`/`ThemeStateSynchronizer`; manifests live in `/themes/*/theme.{php,yaml}` and the locked `base` theme (slug `base`) seeds `app_theme_state` as the default asset anchor.
+- **Twig template cascade** is reconfigured on boot by `App\Twig\TemplatePathConfigurator`, ensuring lookup order Active Theme → enabled modules (priority desc, slug asc) → base templates.
 
 ## Installer Pipeline
 

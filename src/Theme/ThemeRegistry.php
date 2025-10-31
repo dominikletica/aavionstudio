@@ -37,4 +37,15 @@ final class ThemeRegistry
 
         return null;
     }
+
+    public function active(): ?ThemeManifest
+    {
+        foreach ($this->manifests as $manifest) {
+            if ($manifest->active) {
+                return $manifest;
+            }
+        }
+
+        return null;
+    }
 }

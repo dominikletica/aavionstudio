@@ -37,7 +37,7 @@ final class ThemeStateSynchronizer
             $locked = (bool) ($metadata['locked'] ?? false);
 
             $existing = $this->connection->fetchAssociative(
-                'SELECT enabled FROM app_theme_state WHERE name = :name',
+                'SELECT enabled, active FROM app_theme_state WHERE name = :name',
                 ['name' => $manifest->slug],
             );
 
@@ -45,6 +45,7 @@ final class ThemeStateSynchronizer
                 $this->connection->insert('app_theme_state', [
                     'name' => $manifest->slug,
                     'enabled' => $locked ? 1 : (int) $manifest->enabled,
+                    'active' => $locked ? 1 : (int) $manifest->active,
                     'metadata' => $metadataJson,
                     'updated_at' => $now,
                 ]);
@@ -53,11 +54,13 @@ final class ThemeStateSynchronizer
             }
 
             $enabled = $locked ? 1 : (int) $existing['enabled'];
+            $active = $locked ? 1 : (int) $existing['active'];
 
             $this->connection->update(
                 'app_theme_state',
                 [
                     'enabled' => $enabled,
+                    'active' => $active,
                     'metadata' => $metadataJson,
                     'updated_at' => $now,
                 ],

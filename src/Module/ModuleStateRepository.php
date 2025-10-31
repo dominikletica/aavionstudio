@@ -97,4 +97,29 @@ final class ModuleStateRepository
 
         return $states;
     }
+
+    public function setEnabled(string $slug, bool $enabled): void
+    {
+        $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+
+        $existing = $this->connection->fetchAssociative('SELECT metadata FROM app_module_state WHERE name = :name', ['name' => $slug]);
+        $metadata = [];
+        if ($existing !== false && isset($existing['metadata'])) {
+            $decoded = json_decode((string) $existing['metadata'], true);
+            if (is_array($decoded)) {
+                $metadata = $decoded;
+            }
+        }
+
+        $this->connection->executeStatement(
+            'INSERT INTO app_module_state (name, enabled, metadata, updated_at) VALUES (:name, :enabled, :metadata, :updated_at)
+            ON CONFLICT(name) DO UPDATE SET enabled = excluded.enabled, updated_at = excluded.updated_at',
+            [
+                'name' => $slug,
+                'enabled' => $enabled ? 1 : 0,
+                'metadata' => json_encode($metadata, JSON_THROW_ON_ERROR),
+                'updated_at' => $now,
+            ]
+        );
+    }
 }

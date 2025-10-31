@@ -64,6 +64,10 @@ final class SyncDiscoveredAssetsCommand extends Command
         $syncedTargets = [];
 
         foreach ($this->moduleRegistry->all() as $manifest) {
+            if (!$manifest->enabled) {
+                continue;
+            }
+
             $source = $manifest->assetsPath();
             if ($source === null || !is_dir($source)) {
                 continue;
@@ -87,6 +91,10 @@ final class SyncDiscoveredAssetsCommand extends Command
         $syncedTargets = [];
 
         foreach ($this->themeRegistry->all() as $manifest) {
+            if (!$manifest->active && $manifest->slug !== 'base') {
+                continue;
+            }
+
             $source = $manifest->assetsPath();
 
             if ($source === null || !is_dir($source)) {

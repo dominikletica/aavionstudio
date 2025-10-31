@@ -54,24 +54,39 @@
                                 <th class="px-3 py-2">Slug</th>
                                 <th class="px-3 py-2">Name</th>
                                 <th class="px-3 py-2">Description</th>
-                                <th class="px-3 py-2">Enabled</th>
+                                <th class="px-3 py-2">Status</th>
+                                <th class="px-3 py-2">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200">
                         {% for module in modules %}
+                            {% set locked = module.metadata.locked ?? false %}
                             <tr>
                                 <td class="px-3 py-2 font-mono text-xs text-slate-700">{{ module.slug }}</td>
                                 <td class="px-3 py-2 text-slate-900">{{ module.name }}</td>
                                 <td class="px-3 py-2 text-slate-600">{{ module.description ?: '—' }}</td>
                                 <td class="px-3 py-2">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {{ module.enabled ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700' }}">
-                                        {{ module.enabled ? 'Enabled' : 'Disabled' }}
+                                        {{ module.enabled ? 'Enabled' : 'Disabled' }}{{ locked ? ' · Locked' : '' }}
                                     </span>
+                                </td>
+                                <td class="px-3 py-2">
+                                    {% if locked %}
+                                        <span class="text-xs text-slate-500">Locked</span>
+                                    {% else %}
+                                        <form method="post" action="{{ path('admin_assets_module_toggle', {slug: module.slug}) }}" class="inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('module_state_' ~ module.slug) }}">
+                                            <input type="hidden" name="action" value="{{ module.enabled ? 'disable' : 'enable' }}">
+                                            <button type="submit" class="text-xs font-medium underline text-slate-900 hover:text-slate-700">
+                                                {{ module.enabled ? 'Disable' : 'Enable' }}
+                                            </button>
+                                        </form>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="4" class="px-3 py-4 text-center text-sm text-slate-500">No modules discovered.</td>
+                                <td colspan="5" class="px-3 py-4 text-center text-sm text-slate-500">No modules discovered.</td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -89,24 +104,59 @@
                                 <th class="px-3 py-2">Slug</th>
                                 <th class="px-3 py-2">Name</th>
                                 <th class="px-3 py-2">Description</th>
-                                <th class="px-3 py-2">Enabled</th>
+                                <th class="px-3 py-2">Status</th>
+                                <th class="px-3 py-2">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200">
                         {% for theme in themes %}
+                            {% set locked = theme.metadata.locked ?? false %}
+                            {% set isActive = theme.active %}
                             <tr>
                                 <td class="px-3 py-2 font-mono text-xs text-slate-700">{{ theme.slug }}</td>
                                 <td class="px-3 py-2 text-slate-900">{{ theme.name }}</td>
                                 <td class="px-3 py-2 text-slate-600">{{ theme.description ?: '—' }}</td>
-                                <td class="px-3 py-2">
+                                <td class="px-3 py-2 space-y-1">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {{ theme.enabled ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700' }}">
                                         {{ theme.enabled ? 'Enabled' : 'Disabled' }}
                                     </span>
+                                    <div>
+                                        {% if theme.slug == 'base' %}
+                                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {{ isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700' }}">
+                                                {{ isActive ? 'Fallback (active)' : 'Fallback' }}
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {{ isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700' }}">
+                                                {{ isActive ? 'Active' : 'Inactive' }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-3 py-2 space-x-3">
+                                    {% if locked %}
+                                        <span class="text-xs text-slate-500">Locked</span>
+                                    {% else %}
+                                        <form method="post" action="{{ path('admin_assets_theme_toggle', {slug: theme.slug}) }}" class="inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('theme_state_' ~ theme.slug) }}">
+                                            <input type="hidden" name="action" value="{{ theme.enabled ? 'disable' : 'enable' }}">
+                                            <button type="submit" class="text-xs font-medium underline text-slate-900 hover:text-slate-700">
+                                                {{ theme.enabled ? 'Disable' : 'Enable' }}
+                                            </button>
+                                        </form>
+                                        {% if theme.enabled and theme.slug != 'base' %}
+                                            <form method="post" action="{{ path('admin_assets_theme_activate', {slug: theme.slug}) }}" class="inline">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('theme_activate_' ~ theme.slug) }}">
+                                                <button type="submit" class="text-xs font-medium underline text-slate-900 hover:text-slate-700">
+                                                    {{ theme.active ? 'Active' : 'Set active' }}
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="4" class="px-3 py-4 text-center text-sm text-slate-500">No themes discovered.</td>
+                                <td colspan="5" class="px-3 py-4 text-center text-sm text-slate-500">No themes discovered.</td>
                             </tr>
                         {% endfor %}
                         </tbody>

@@ -35,7 +35,7 @@ final class ThemeStateRepository
             return null;
         }
 
-        $row = $this->connection->fetchAssociative('SELECT enabled, metadata FROM app_theme_state WHERE name = :name', [
+        $row = $this->connection->fetchAssociative('SELECT enabled, active, metadata FROM app_theme_state WHERE name = :name', [
             'name' => $slug,
         ]);
 
@@ -55,12 +55,13 @@ final class ThemeStateRepository
 
         return [
             'enabled' => ((int) $row['enabled']) === 1,
+            'active' => ((int) $row['active']) === 1,
             'metadata' => $metadata,
         ];
     }
 
     /**
-     * @return array<string, array{enabled: bool, metadata: array<string, mixed>}>|null
+     * @return array<string, array{enabled: bool, active: bool, metadata: array<string, mixed>}>|null
      */
     public function all(): ?array
     {
@@ -74,7 +75,7 @@ final class ThemeStateRepository
             return null;
         }
 
-        $rows = $this->connection->fetchAllAssociative('SELECT name, enabled, metadata FROM app_theme_state');
+        $rows = $this->connection->fetchAllAssociative('SELECT name, enabled, active, metadata FROM app_theme_state');
 
         $states = [];
 
@@ -91,10 +92,67 @@ final class ThemeStateRepository
 
             $states[(string) $row['name']] = [
                 'enabled' => ((int) $row['enabled']) === 1,
+                'active' => ((int) $row['active']) === 1,
                 'metadata' => $metadata,
             ];
         }
 
         return $states;
+    }
+
+    public function setEnabled(string $slug, bool $enabled): void
+    {
+        $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+
+        $existing = $this->connection->fetchAssociative('SELECT metadata, active FROM app_theme_state WHERE name = :name', ['name' => $slug]);
+        $metadata = [];
+        $active = 0;
+        if ($existing !== false && isset($existing['metadata'])) {
+            $decoded = json_decode((string) $existing['metadata'], true);
+            if (is_array($decoded)) {
+                $metadata = $decoded;
+            }
+            $active = (int) ($existing['active'] ?? 0);
+        }
+
+        $this->connection->executeStatement(
+            'INSERT INTO app_theme_state (name, enabled, active, metadata, updated_at) VALUES (:name, :enabled, :active, :metadata, :updated_at)
+            ON CONFLICT(name) DO UPDATE SET enabled = excluded.enabled, updated_at = excluded.updated_at',
+            [
+                'name' => $slug,
+                'enabled' => $enabled ? 1 : 0,
+                'active' => $active,
+                'metadata' => json_encode($metadata, JSON_THROW_ON_ERROR),
+                'updated_at' => $now,
+            ]
+        );
+    }
+
+    public function activate(string $slug): void
+    {
+        $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+
+        $this->connection->executeStatement('UPDATE app_theme_state SET active = 0, updated_at = :updated_at WHERE active = 1', [
+            'updated_at' => $now,
+        ]);
+
+        $existing = $this->connection->fetchAssociative('SELECT metadata FROM app_theme_state WHERE name = :name', ['name' => $slug]);
+        $metadata = [];
+        if ($existing !== false && isset($existing['metadata'])) {
+            $decoded = json_decode((string) $existing['metadata'], true);
+            if (is_array($decoded)) {
+                $metadata = $decoded;
+            }
+        }
+
+        $this->connection->executeStatement(
+            'INSERT INTO app_theme_state (name, enabled, active, metadata, updated_at) VALUES (:name, 1, 1, :metadata, :updated_at)
+            ON CONFLICT(name) DO UPDATE SET active = 1, enabled = 1, updated_at = excluded.updated_at',
+            [
+                'name' => $slug,
+                'metadata' => json_encode($metadata, JSON_THROW_ON_ERROR),
+                'updated_at' => $now,
+            ]
+        );
     }
 }

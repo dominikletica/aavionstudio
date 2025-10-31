@@ -8,6 +8,7 @@ use App\Module\ModuleStateSynchronizer;
 use App\Theme\ThemeDiscovery;
 use App\Theme\ThemeManifest;
 use App\Theme\ThemeStateSynchronizer;
+use App\Twig\TemplatePathConfigurator;
 use App\Security\Capability\CapabilitySynchronizer;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -163,7 +164,7 @@ class Kernel extends BaseKernel
         }
 
         $states = [];
-        $rows = $connection->fetchAllAssociative('SELECT name, enabled, metadata FROM app_theme_state');
+        $rows = $connection->fetchAllAssociative('SELECT name, enabled, active, metadata FROM app_theme_state');
 
         foreach ($rows as $row) {
             $metadata = [];
@@ -178,6 +179,7 @@ class Kernel extends BaseKernel
 
             $states[(string) $row['name']] = [
                 'enabled' => ((int) $row['enabled']) === 1,
+                'active' => ((int) $row['active']) === 1,
                 'metadata' => $metadata,
             ];
         }
@@ -187,6 +189,7 @@ class Kernel extends BaseKernel
         foreach ($manifests as $manifest) {
             $state = $states[$manifest->slug] ?? null;
             $enabled = $state['enabled'] ?? true;
+            $active = $state['active'] ?? false;
             $metadata = array_merge($state['metadata'] ?? [], $manifest->metadata);
 
             if ($manifest->repository !== null) {
@@ -195,9 +198,22 @@ class Kernel extends BaseKernel
 
             if (!empty($metadata['locked'])) {
                 $enabled = true;
+                $active = $state['active'] ?? false;
             }
 
-            $result[] = $manifest->withState($enabled, $metadata);
+            $result[] = $manifest->withActivation($enabled, $active, $metadata);
+        }
+
+        $hasActive = array_reduce($result, static fn (bool $carry, ThemeManifest $manifest): bool => $carry || $manifest->active, false);
+
+        if (!$hasActive) {
+            foreach ($result as $index => $manifest) {
+                if ($manifest->slug === 'base') {
+                    $metadata = $manifest->metadata;
+                    $result[$index] = $manifest->withActivation(true, true, $metadata);
+                    break;
+                }
+            }
         }
 
         return $result;
@@ -217,6 +233,12 @@ class Kernel extends BaseKernel
             $themeSynchronizer = $this->container->get(ThemeStateSynchronizer::class);
             \assert($themeSynchronizer instanceof ThemeStateSynchronizer);
             $themeSynchronizer->synchronize($this->discoverThemes());
+        }
+
+        if ($this->container->has(TemplatePathConfigurator::class)) {
+            $configurator = $this->container->get(TemplatePathConfigurator::class);
+            \assert($configurator instanceof TemplatePathConfigurator);
+            $configurator->configure();
         }
 
         if ($this->container->has(CapabilitySynchronizer::class)) {

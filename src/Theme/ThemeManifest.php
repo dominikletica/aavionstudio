@@ -21,6 +21,7 @@ final class ThemeManifest
         public readonly ?string $repository = null,
         public readonly array $metadata = [],
         public readonly bool $enabled = true,
+        public readonly bool $active = false,
     ) {
     }
 
@@ -41,6 +42,7 @@ final class ThemeManifest
             repository: isset($data['repository']) ? (string) $data['repository'] : null,
             metadata: isset($data['metadata']) ? (array) $data['metadata'] : [],
             enabled: isset($data['enabled']) ? (bool) $data['enabled'] : true,
+            active: isset($data['active']) ? (bool) $data['active'] : false,
         );
     }
 
@@ -63,6 +65,7 @@ final class ThemeManifest
             repository: isset($data['repository']) ? (string) $data['repository'] : null,
             metadata: isset($data['metadata']) ? (array) $data['metadata'] : [],
             enabled: isset($data['enabled']) ? (bool) $data['enabled'] : true,
+            active: isset($data['active']) ? (bool) $data['active'] : false,
         );
     }
 
@@ -83,6 +86,7 @@ final class ThemeManifest
             'repository' => $this->repository,
             'metadata' => $this->metadata,
             'enabled' => $this->enabled,
+            'active' => $this->active,
         ];
     }
 
@@ -123,6 +127,25 @@ final class ThemeManifest
             repository: $this->repository,
             metadata: $metadata,
             enabled: $enabled,
+            active: $this->active,
+        );
+    }
+
+    public function withActivation(bool $enabled, bool $active, array $metadata): self
+    {
+        return new self(
+            slug: $this->slug,
+            name: $this->name,
+            description: $this->description,
+            basePath: $this->basePath,
+            version: $this->version,
+            priority: $this->priority,
+            services: $this->services,
+            assets: $this->assets,
+            repository: $this->repository,
+            metadata: $metadata,
+            enabled: $enabled,
+            active: $active,
         );
     }
 

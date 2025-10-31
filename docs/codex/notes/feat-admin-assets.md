@@ -42,6 +42,8 @@
 - Twig lint suite (`tests/Lint/TwigLintTest.php`) validates `templates/`, `themes/*/templates`, and `modules/*/templates` via `lint:twig`.
 - `bin/init` runs `app:assets:rebuild --force` for a single-source asset pipeline during environment bootstrap.
 - Admin console (`/admin/system/assets`) surfaces rebuild buttons (queue vs. run now) with live checksum snapshots for debugging.
+- `TemplatePathConfigurator` rebuilds Twig search order per request: Active Theme → enabled module templates (priority desc, slug asc) → base templates, ensuring drop-in overrides behave predictably.
+- Module/theme managers respect locked manifests, single active theme invariant, and trigger rebuild scheduling on state change.
 
 ## Runtime Rebuild Flow
 - Theme/module installations should call `AssetRebuildScheduler::schedule()` after extraction; checksum comparison prevents redundant rebuilds.

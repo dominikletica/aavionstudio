@@ -55,6 +55,7 @@ my-theme.aavtheme
   - `config/tailwind.extend.js` (compiled to CSS via Tailwind build)
 - Theme loader registers Twig namespace and AssetMapper paths at runtime.
 - Modules can expose theme slots (e.g., Exporter status widget) by referencing named Twig blocks.
+- Twig lookup cascade: Active Theme → enabled module templates (sorted by priority desc, slug asc) → base templates (`templates/`). Themes can override module-provided views; missing templates fall back automatically.
 
 ### Loader Sequence
 1. Read manifest metadata; ensure slug unique.
