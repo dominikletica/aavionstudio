@@ -37,7 +37,7 @@
 #### Roles, Capabilities & Project Memberships
 - [x] Materialise global role hierarchy + default seeds; expose capability registry service that hydrates from module manifests and persists defaults in the database.
 - [x] Implement project membership repository (`app_project_user`) abstraction to supply voters/admin UI.
-- [ ] Build project membership voters that combine global roles, project overrides, and capability requirements.
+- [x] Build project membership voters that combine global roles, project overrides, and capability requirements.
 
 #### Admin UI & API Keys
 - [x] Add invitation management screen (listing/create/cancel) under `/admin/users/invitations` with email delivery and audit logging.
@@ -236,3 +236,4 @@
 - Built invitation infrastructure (DB schema, `UserInvitationManager`, audit logging, unit tests) to support admin-triggered onboarding flows.
 - Added admin invitation management screen (listing, create, cancel) with Twig UI, mail delivery, and functional coverage (`tests/Controller/Admin/UserInvitationControllerTest.php`).
 - Implemented project membership repository abstraction (`ProjectMembershipRepository`) with unit coverage, laying groundwork for project-scoped voters.
+- Added project capability voter (`ProjectCapabilityVoter`) resolving global roles + project overrides to grant capabilities, with unit coverage.

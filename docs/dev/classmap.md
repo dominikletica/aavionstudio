@@ -24,6 +24,8 @@
 | `App\Security\Password\PasswordResetTokenManager` | `src/Security/Password/PasswordResetTokenManager.php` | Issues, validates, and purges password reset tokens | Stores selector/verifier hashes in `app_password_reset_token` |
 | `App\Security\User\UserInvitationManager` | `src/Security/User/UserInvitationManager.php` | Manages invitation tokens and audit logging | Powers admin onboarding flow |
 | `App\Security\Authorization\ProjectMembershipRepository` | `src/Security/Authorization/ProjectMembershipRepository.php` | Reads/writes project membership assignments | Backing store for project capability voters |
+| `App\Security\Authorization\RoleCapabilityResolver` | `src/Security/Authorization/RoleCapabilityResolver.php` | Resolves capability inheritance for roles | Used by project capability voter |
+| `App\Security\Authorization\ProjectCapabilityVoter` | `src/Security/Authorization/ProjectCapabilityVoter.php` | Evaluates project-scoped capability requirements | Registered as security voter |
 
 ### Suggested Structure
 - **Core Services:** Module loader, schema registry, draft manager, snapshot manager, resolver engine, media storage.

@@ -50,7 +50,7 @@
   ```
 - Registry merges all manifests, storing in `system.brain:capabilities`.
 - Installer seeds base roles with capability lists; admin UI allows toggling per role with safety checks for circular dependencies.
-- ProjectMembershipRepository reads/writes `app_project_user`, exposing helpers for voters/UI to resolve project-specific role overrides (future step: wire into voters).
+- ProjectMembershipRepository reads/writes `app_project_user`, exposing helpers for voters/UI to resolve project-specific role overrides; `ProjectCapabilityVoter` merges global roles, project roles, and per-project permissions.
 
 ## Admin UI
 - `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys; invitation management UI (`/admin/users/invitations`) already in place.

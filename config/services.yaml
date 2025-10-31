@@ -40,6 +40,9 @@ services:
             $manifestsData: '%app.modules%'
         public: true
 
+    App\Security\Authorization\ProjectCapabilityVoter:
+        tags: ['security.voter']
+
     App\Security\Capability\CapabilityRegistry: ~
 
     App\Security\Capability\CapabilitySynchronizer: ~

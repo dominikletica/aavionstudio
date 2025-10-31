@@ -56,6 +56,7 @@ This guide summarises the core Symfony platform put in place during Roadmap Step
 - Password reset flow uses `PasswordResetTokenManager`, `/password/forgot` + `/password/reset/{selector}` controllers, Twig views, and email templates.
 - Invitation backend (`UserInvitationManager`, `app_user_invitation`) seeds invitation tokens with audit entries; UI hooks will integrate later.
 - Project membership repository (`ProjectMembershipRepository`) abstracts `app_project_user` for upcoming voters and admin UI.
+- Project capability voter (`ProjectCapabilityVoter`) combines global roles, membership roles, and explicit permissions when authorization checks require project context.
 - Capability registry integration, per-project voters, admin UI, and API key flows will build upon this foundation in subsequent milestones.
 
 ## Next Steps
