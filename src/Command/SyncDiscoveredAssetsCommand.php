@@ -6,13 +6,16 @@ namespace App\Command;
 
 use App\Module\ModuleRegistry;
 use App\Theme\ThemeRegistry;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 #[AsCommand(
     name: 'app:assets:sync',
@@ -20,18 +23,39 @@ use Symfony\Component\Filesystem\Filesystem;
 )]
 final class SyncDiscoveredAssetsCommand extends Command
 {
+    private const OPTION_AFTER_CACHE_CLEAR = 'after-cache-clear';
+    private const COMMAND_TIMEOUT = 300;
+
     public function __construct(
         private readonly ModuleRegistry $moduleRegistry,
         private readonly ThemeRegistry $themeRegistry,
         #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
+        #[Autowire('%kernel.environment%')] private readonly string $environment,
+        #[Autowire('%kernel.debug%')] private readonly bool $debug,
     ) {
         parent::__construct();
+    }
+
+    protected function configure(): void
+    {
+        $this->addOption(
+            self::OPTION_AFTER_CACHE_CLEAR,
+            null,
+            InputOption::VALUE_NONE,
+            'Internal flag used to rerun the command after clearing the cache.',
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $filesystem = new Filesystem();
+
+        if (!$input->getOption(self::OPTION_AFTER_CACHE_CLEAR)) {
+            $this->refreshContainer($input, $io);
+
+            return Command::SUCCESS;
+        }
 
         $assetRoot = $this->projectDir.'/assets';
         $moduleTargetRoot = $assetRoot.'/modules';
@@ -54,6 +78,46 @@ final class SyncDiscoveredAssetsCommand extends Command
         ));
 
         return Command::SUCCESS;
+    }
+
+    private function refreshContainer(InputInterface $input, SymfonyStyle $io): void
+    {
+        $io->comment('Refreshing Symfony cache before syncing assets.');
+
+        $this->runSubProcess(['cache:clear', '--no-warmup'], $input);
+        $this->runSubProcess(['app:assets:sync', '--'.self::OPTION_AFTER_CACHE_CLEAR], $input);
+    }
+
+    /**
+     * @param list<string> $arguments
+     */
+    private function runSubProcess(array $arguments, InputInterface $input): void
+    {
+        $command = array_merge(
+            [PHP_BINARY, $this->projectDir.'/bin/console'],
+            $arguments,
+            ['--no-ansi', '--no-interaction'],
+        );
+
+        if ($input->getOption('quiet')) {
+            $command[] = '--quiet';
+        }
+
+        $process = new Process(
+            $command,
+            $this->projectDir,
+            [
+                'APP_ENV' => $this->environment,
+                'APP_DEBUG' => $this->debug ? '1' : '0',
+            ],
+        );
+
+        $process->setTimeout(self::COMMAND_TIMEOUT);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
     }
 
     /**

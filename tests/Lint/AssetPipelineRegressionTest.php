@@ -52,11 +52,49 @@ final class AssetPipelineRegressionTest extends TestCase
         self::assertDirectoryExists($themesRoot, 'Theme asset mirror root should be recreated.');
     }
 
+    public function testSyncCommandRefreshesContainerForNewModule(): void
+    {
+        $moduleSlug = 'regression-sync-module';
+        $modulesRoot = $this->projectDir.'/modules';
+        $moduleDir = $modulesRoot.'/'.$moduleSlug;
+
+        $this->clearDirectory($moduleDir, true);
+        $this->clearDirectory($this->projectDir.'/assets/modules/'.$moduleSlug, true);
+
+        $this->runConsoleCommand(['cache:warmup'], 'Baseline warmup without regression module');
+
+        $this->filesystem->mkdir($moduleDir.'/assets');
+        $moduleDefinition = <<<'PHP'
+<?php
+
+return [
+    'slug' => 'regression-sync-module',
+    'name' => 'Regression Sync Module',
+    'description' => 'Ensures app:assets:sync refreshes its container.',
+];
+PHP;
+        file_put_contents($moduleDir.'/module.php', $moduleDefinition);
+        file_put_contents($moduleDir.'/assets/example.txt', 'regression');
+
+        $this->runConsoleCommand(['app:assets:sync'], 'Direct sync should refresh cache for new module');
+
+        $mirrored = $this->projectDir.'/assets/modules/'.$moduleSlug.'/example.txt';
+        self::assertFileExists(
+            $mirrored,
+            'Newly introduced module assets should be mirrored without a manual cache clear.',
+        );
+
+        $this->clearDirectory($moduleDir, true);
+        $this->clearDirectory(dirname($mirrored), true);
+    }
+
     private function resetProjectState(): void
     {
         $this->clearDirectory($this->projectDir.'/public/assets', true);
         $this->clearDirectory($this->projectDir.'/var/cache');
         $this->clearDirectory($this->projectDir.'/var/log');
+        $this->clearDirectory($this->projectDir.'/modules/regression-sync-module', true);
+        $this->clearDirectory($this->projectDir.'/assets/modules/regression-sync-module', true);
     }
 
     private function clearDirectory(string $path, bool $removeRoot = false): void

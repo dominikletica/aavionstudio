@@ -45,7 +45,6 @@ final class AssetPipelineRefresher
         ]);
 
         try {
-            $this->runConsoleCommand(['cache:clear']);
             $this->cleanupSyncedAssetTargets();
 
             $this->runConsoleCommand(['app:assets:sync']);

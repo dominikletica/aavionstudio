@@ -85,7 +85,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `app:snapshot:rebuild` | _TBD_ | Rebuild published snapshots | SnapshotManager |
 | `app:backup:run` | _TBD_ | Create backup archive | BackupManager |
 | `app:api-key:issue` | `src/Command/IssueApiKeyCommand.php` | Issue API key for a user and print the secret | `ApiKeyManager`, `AppUserRepository` |
-| `app:assets:sync` | `src/Command/SyncDiscoveredAssetsCommand.php` | Mirrors `modules/*/assets` and `themes/*/assets` into the core `assets/` tree for builds/tests | `ModuleRegistry`, `%kernel.project_dir%`, `Filesystem` |
+| `app:assets:sync` | `src/Command/SyncDiscoveredAssetsCommand.php` | Clears the cache, respawns itself, then mirrors `modules/*/assets` and `themes/*/assets` into the core `assets/` tree so builds/tests see new manifests on the first run | `ModuleRegistry`, `ThemeRegistry`, `%kernel.project_dir%`, `Filesystem`, `Symfony\Component\Process\Process` |
 | `app:assets:rebuild` | `src/Command/RebuildAssetsCommand.php` | Runs or queues the full asset pipeline rebuild; supports `--force` and `--async` | `AssetRebuildScheduler` |
 | ... |  |  |  |
 
