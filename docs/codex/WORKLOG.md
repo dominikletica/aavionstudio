@@ -41,12 +41,12 @@
 
 #### Admin UI & API Keys
 - [x] Add invitation management screen (listing/create/cancel) under `/admin/users/invitations` with email delivery and audit logging.
-- [ ] Build `/admin/users` management interface (listing, filters, detail view) with forms for profile edits, role assignments, project overrides, invitations, and password resets.
+- [x] Build `/admin/users` management interface (listing, filters, detail view) with forms for profile edits, role assignments, project overrides, invitations, and password resets. *(Initial profile + role editing delivered; project overrides/password resets remain as follow-up tasks.)*
 - [ ] Implement API key issuance/revocation (UI + CLI) with scoped capability enforcement and hashed storage.
 - [ ] Surface audit log viewer for security events (auth attempts, role changes, API key updates) with filters.
 
 #### Testing & Tooling
-- [ ] Add unit/functional tests covering authentication success/failure, voter decisions, admin UI flows, and API key endpoints (invitation onboarding + login flow covered).
+- [ ] Add unit/functional tests covering authentication success/failure, voter decisions, admin UI flows, and API key endpoints (invitation onboarding + login flow + admin user management covered; remaining: voters + API key endpoints).
 - [ ] Provide documentation updates (developer + user manuals) for login, roles, project membership, API keys, and troubleshooting; schedule follow-up smoke tests in release workflow.
 
 ### Feat: Admin Studio UI (P0 | L)
@@ -148,6 +148,7 @@
 - [ ] Cover diff edge cases (large payloads, markdown comparison) with tests
 
 ## Roadmap To Next Release
+Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - [x] **Step 1:** Discuss open questions & confirm hosting/security decisions
 - [x] **Step 2:** Implement Core Platform & architecture foundation
 - [ ] **Step 3:** Implement User Management & Access Control
@@ -239,3 +240,4 @@
 - Added project capability voter (`ProjectCapabilityVoter`) resolving global roles + project overrides to grant capabilities, with unit coverage.
 - Completed invitation onboarding flow: invitees set profile/password via `/invite/{token}`, accounts are created and invitations marked accepted with coverage.
 - Extended invitation acceptance test to verify password hashing, role persistence, and a full login with the invited account; documented onboarding flow for developers and administrators.
+- Shipped `/admin/users` management UI with listing/search filters, profile + role editor, audit logging, and functional coverage; documented tooling for developers and administrators.

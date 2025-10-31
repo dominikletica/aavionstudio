@@ -81,7 +81,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 - **Concept Outline & Feature Drafts:** [`docs/codex/notes/`](../codex/notes/)
 - **Developer Sections:** `docs/dev/sections/` (add guides per subsystem)
 - **Class Map:** [`docs/dev/classmap.md`](classmap.md)
-- **Security Guides:** [`docs/dev/sections/security/`](sections/security/) – invitation onboarding, upcoming capability registry deep dives.
+- **Security Guides:** [`docs/dev/sections/security/`](sections/security/) – invitation onboarding, user management UI, upcoming capability registry deep dives.
 
 ---
 

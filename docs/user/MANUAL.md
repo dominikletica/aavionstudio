@@ -27,7 +27,7 @@ Welcome! This manual will guide administrators, editors, and integrators through
 - **Modules** – Drop-in features live under `modules/` as `.aavmodule` bundles with update metadata; UI activation & update checks arrive with installer enhancements.
 - **Invitations** – Administrators can invite users via `/admin/users/invitations`; invitees complete onboarding at `/invite/{token}` within seven days to set their password. [See detailed guide](sections/administration/invitations.md).
 - **Projects & Settings** – Managing projects, locales, error-page entities (default project provides fallback Twig templates).
-- **User & Access Management** – Creating users, assigning roles/permissions, managing API keys.
+- **User & Access Management** – Creating users, assigning roles/permissions, managing API keys. [See user management guide](sections/administration/user-management.md).
 - **Maintenance Tools** – Cache, snapshot rebuild, queue monitoring, health checks.
 
 ---

@@ -27,6 +27,7 @@
 | `App\Security\Authorization\RoleCapabilityResolver` | `src/Security/Authorization/RoleCapabilityResolver.php` | Resolves capability inheritance for roles | Used by project capability voter |
 | `App\Security\Authorization\ProjectCapabilityVoter` | `src/Security/Authorization/ProjectCapabilityVoter.php` | Evaluates project-scoped capability requirements | Registered as security voter |
 | `App\Security\User\UserCreator` | `src/Security/User/UserCreator.php` | Creates users (e.g. invitation onboarding) with hashed passwords and audit logging | Consumed by invitation acceptance; functional coverage in `tests/Controller/Security/InvitationAcceptControllerTest.php` |
+| `App\Security\User\UserAdminManager` | `src/Security/User/UserAdminManager.php` | Lists/updates users for admin UI, persists role assignments, records audit logs | Exercised via `tests/Controller/Admin/UserControllerTest.php` |
 
 ### Suggested Structure
 - **Core Services:** Module loader, schema registry, draft manager, snapshot manager, resolver engine, media storage.
@@ -48,6 +49,8 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `app_password_forgot` | `src/Controller/Security/PasswordResetController.php` | Password reset request | Core |
 | `app_password_reset` | `src/Controller/Security/PasswordResetController.php` | Password reset confirmation | Core |
 | `app_invitation_accept` | `src/Controller/Security/InvitationAcceptController.php` | Handles invitation acceptance redirect | Core; covered by `tests/Controller/Security/InvitationAcceptControllerTest.php` |
+| `admin_users_index` | `src/Controller/Admin/UserController.php` | Lists users for admin management | Core |
+| `admin_users_edit` | `src/Controller/Admin/UserController.php` | Edits user profile/roles | Core |
 | `app_frontend` | _TBD_ | Catch-all frontend controller | Core |
 | `app_admin_dashboard` | _TBD_ | Admin landing page | Core |
 | ... |  |  |  |

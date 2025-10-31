@@ -54,7 +54,7 @@
 - ProjectMembershipRepository reads/writes `app_project_user`, exposing helpers for voters/UI to resolve project-specific role overrides; `ProjectCapabilityVoter` merges global roles, project roles, and per-project permissions for authorization checks.
 
 ## Admin UI
-- `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys; invitation management UI (`/admin/users/invitations`) already in place with invitee onboarding form.
+- `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys; initial listing + profile/role editor implemented, invitation management UI (`/admin/users/invitations`) already in place with invitee onboarding form.
 - Form-driven editor with validation, optional invitation emails, password reset trigger.
 - Audit log integration: record login attempts, role changes, API key creation.
 - Bulk actions for enabling/disabling users, resetting 2FA (future), revoking sessions.

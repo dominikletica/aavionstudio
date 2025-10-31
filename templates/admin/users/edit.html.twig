@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Edit {{ user.display_name }} · Admin · aavion Studio</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 2rem; background: #f5f7fb; color: #111827; }
+        h1 { margin-top: 0; }
+        .card { background: #fff; padding: 1.75rem; border-radius: 12px; box-shadow: 0 18px 36px rgba(15,23,42,.08); max-width: 720px; }
+        label { display: block; font-weight: 600; margin-bottom: .35rem; }
+        input[type="text"] { width: 100%; padding: .7rem 1rem; border-radius: 10px; border: 1px solid #cbd5f5; margin-bottom: 1rem; }
+        select { padding: .7rem 1rem; border-radius: 10px; border: 1px solid #cbd5f5; width: 100%; margin-bottom: 1rem; }
+        .roles { display: grid; gap: .5rem; margin-bottom: 1.25rem; }
+        .roles label { display: flex; align-items: center; gap: .6rem; font-weight: 500; }
+        .roles input { width: 16px; height: 16px; }
+        button { padding: .75rem 1.5rem; border: none; border-radius: 10px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-weight: 600; cursor: pointer; }
+        .meta { margin-bottom: 1.5rem; color: #6b7280; font-size: .9rem; }
+        a.back { display: inline-block; margin-bottom: 1.5rem; color: #2563eb; text-decoration: none; font-weight: 600; }
+        .flash-success { margin-bottom: 1rem; padding: .75rem 1rem; border-radius: 10px; background: rgba(34,197,94,.1); color: #15803d; }
+        .flash-error { margin-bottom: 1rem; padding: .75rem 1rem; border-radius: 10px; background: rgba(239,68,68,.1); color: #b91c1c; }
+        .field { margin-bottom: 1.25rem; }
+    </style>
+</head>
+<body>
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="flash-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <a class="back" href="{{ path('admin_users_index') }}">← Back to users</a>
+
+    <div class="card">
+        <h1>Edit user</h1>
+        <p class="meta">
+            Email: <strong>{{ user.email }}</strong><br>
+            Created: {{ user.created_at ? user.created_at|date('Y-m-d H:i') : '—' }}<br>
+            Last updated: {{ user.updated_at ? user.updated_at|date('Y-m-d H:i') : '—' }}
+        </p>
+
+        {{ form_start(form) }}
+            <div class="field">
+                {{ form_label(form.display_name) }}
+                {{ form_widget(form.display_name) }}
+                {{ form_errors(form.display_name) }}
+            </div>
+            <div class="field">
+                {{ form_label(form.locale) }}
+                {{ form_widget(form.locale) }}
+                {{ form_errors(form.locale) }}
+            </div>
+            <div class="field">
+                {{ form_label(form.timezone) }}
+                {{ form_widget(form.timezone) }}
+                {{ form_errors(form.timezone) }}
+            </div>
+            <div class="field">
+                {{ form_label(form.status) }}
+                {{ form_widget(form.status) }}
+                {{ form_errors(form.status) }}
+            </div>
+            <div class="field">
+                <label>Roles</label>
+                <div class="roles">
+                    {{ form_widget(form.roles) }}
+                </div>
+                {{ form_errors(form.roles) }}
+            </div>
+            <button type="submit">Save changes</button>
+        {{ form_end(form) }}
+    </div>
+</body>
+</html>
