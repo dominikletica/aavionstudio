@@ -25,7 +25,7 @@ final class UserControllerTest extends WebTestCase
 
         $this->connection->executeStatement('PRAGMA foreign_keys = OFF');
 
-        foreach (['app_user_role', 'app_role', 'app_user', 'app_audit_log'] as $table) {
+        foreach (['app_api_key', 'app_user_role', 'app_role', 'app_user', 'app_audit_log'] as $table) {
             $this->connection->executeStatement('DROP TABLE IF EXISTS '.$table);
         }
 
@@ -33,6 +33,7 @@ final class UserControllerTest extends WebTestCase
         $this->connection->executeStatement('CREATE TABLE app_role (name VARCHAR(64) PRIMARY KEY, label VARCHAR(190) NOT NULL, is_system INTEGER NOT NULL DEFAULT 1, metadata TEXT NOT NULL DEFAULT "{}")');
         $this->connection->executeStatement('CREATE TABLE app_user_role (user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, assigned_at DATETIME NOT NULL, assigned_by CHAR(26), PRIMARY KEY (user_id, role_name))');
         $this->connection->executeStatement('CREATE TABLE app_audit_log (id CHAR(26) PRIMARY KEY, actor_id CHAR(26), action VARCHAR(128) NOT NULL, subject_id CHAR(26), context TEXT NOT NULL, ip_hash VARCHAR(128), occurred_at DATETIME NOT NULL)');
+        $this->connection->executeStatement('CREATE TABLE app_api_key (id CHAR(26) PRIMARY KEY, user_id CHAR(26) NOT NULL, label VARCHAR(190) NOT NULL, hashed_key VARCHAR(128) NOT NULL, scopes TEXT NOT NULL, last_used_at DATETIME DEFAULT NULL, created_at DATETIME NOT NULL, revoked_at DATETIME DEFAULT NULL, expires_at DATETIME DEFAULT NULL)');
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
@@ -154,7 +155,7 @@ final class UserControllerTest extends WebTestCase
         $this->client->submit($form);
 
         self::assertResponseRedirects('/admin/users/01HXUSER000000000000000000');
-        $this->client->followRedirect();
+        $crawler = $this->client->followRedirect();
 
         $row = $this->connection->fetchAssociative('SELECT display_name, locale, timezone, status FROM app_user WHERE id = ?', ['01HXUSER000000000000000000']);
         self::assertNotFalse($row);
@@ -169,5 +170,41 @@ final class UserControllerTest extends WebTestCase
 
         $auditCount = $this->connection->fetchOne('SELECT COUNT(*) FROM app_audit_log WHERE subject_id = ?', ['01HXUSER000000000000000000']);
         self::assertGreaterThanOrEqual(1, (int) $auditCount);
+    }
+
+    public function testCreateAndRevokeApiKey(): void
+    {
+        $this->loginAsAdmin();
+        $crawler = $this->client->request('GET', '/admin/users/01HXUSER000000000000000000');
+        self::assertResponseIsSuccessful();
+
+        $form = $crawler->selectButton('Create API key')->form();
+        $form['api_key_create[label]']->setValue('Automation');
+        $form['api_key_create[scopes]']->setValue('content.read content.write');
+        $form['api_key_create[expires_at]']->setValue('2030-01-01');
+
+        $this->client->submit($form);
+
+        self::assertResponseRedirects('/admin/users/01HXUSER000000000000000000');
+        $crawler = $this->client->followRedirect();
+
+        $row = $this->connection->fetchAssociative('SELECT id, label, scopes, revoked_at FROM app_api_key WHERE user_id = ?', ['01HXUSER000000000000000000']);
+        self::assertNotFalse($row);
+        $manager = $this->client->getContainer()->get(\App\Security\Api\ApiKeyManager::class);
+        $listedKeys = $manager->listForUser('01HXUSER000000000000000000');
+        self::assertSame('Automation', $row['label']);
+
+        $decodedScopes = json_decode((string) $row['scopes'], true, flags: JSON_THROW_ON_ERROR);
+        self::assertSame(['content.read', 'content.write'], $decodedScopes);
+        self::assertNull($row['revoked_at']);
+
+        $revokeFormNode = $crawler->filterXPath(sprintf('//form[contains(@action, "%s")]','/api-keys/'.$row['id'].'/revoke'));
+        self::assertGreaterThan(0, $revokeFormNode->count());
+        $revokeForm = $revokeFormNode->form();
+        $this->client->submit($revokeForm);
+
+        self::assertResponseRedirects('/admin/users/01HXUSER000000000000000000');
+        $revokedAt = $this->connection->fetchOne('SELECT revoked_at FROM app_api_key WHERE id = ?', [$row['id']]);
+        self::assertNotNull($revokedAt);
     }
 }

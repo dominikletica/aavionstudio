@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Form\Security\ApiKeyCreateType;
 use App\Form\Security\UserProfileType;
+use App\Security\Api\ApiKeyManager;
 use App\Security\User\AppUser;
 use App\Security\User\UserAdminManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,6 +21,7 @@ final class UserController extends AbstractController
 {
     public function __construct(
         private readonly UserAdminManager $userAdminManager,
+        private readonly ApiKeyManager $apiKeyManager,
     ) {
     }
 
@@ -33,13 +36,10 @@ final class UserController extends AbstractController
             $status !== '' ? $status : null
         );
 
-        $roleChoices = $this->userAdminManager->getRoleChoices();
-
         return $this->render('admin/users/index.html.twig', [
             'users' => $users,
             'query' => $query,
             'status' => $status,
-            'roleChoices' => $roleChoices,
         ]);
     }
 
@@ -54,7 +54,7 @@ final class UserController extends AbstractController
 
         $roleChoices = $this->userAdminManager->getRoleChoices();
 
-        $form = $this->createForm(UserProfileType::class, [
+        $profileForm = $this->createForm(UserProfileType::class, [
             'display_name' => $user['display_name'],
             'locale' => $user['locale'],
             'timezone' => $user['timezone'],
@@ -64,11 +64,11 @@ final class UserController extends AbstractController
             'role_choices' => $roleChoices,
         ]);
 
-        $form->handleRequest($request);
+        $profileForm->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            if ($form->isValid()) {
-                $data = $form->getData();
+        if ($profileForm->isSubmitted()) {
+            if ($profileForm->isValid()) {
+                $data = $profileForm->getData();
 
                 $roles = array_map(static fn ($role): string => (string) $role, $data['roles'] ?? []);
 
@@ -84,13 +84,79 @@ final class UserController extends AbstractController
                 return $this->redirectToRoute('admin_users_edit', ['id' => $id]);
             }
 
-            $form->addError(new FormError('Please review the highlighted fields.'));
+            $profileForm->addError(new FormError('Please review the highlighted fields.'));
         }
 
+        $apiKeyForm = $this->createForm(ApiKeyCreateType::class);
+        $apiKeyForm->handleRequest($request);
+
+        if ($apiKeyForm->isSubmitted()) {
+            if ($apiKeyForm->isValid()) {
+                $data = $apiKeyForm->getData();
+
+                $expiresAt = null;
+                if (!empty($data['expires_at'])) {
+                    try {
+                        $expiresAt = new \DateTimeImmutable((string) $data['expires_at']);
+                    } catch (\Exception $exception) {
+                        $apiKeyForm->get('expires_at')->addError(new FormError('Invalid date/time format.'));
+
+                        return $this->render('admin/users/edit.html.twig', [
+                            'form' => $profileForm->createView(),
+                            'user' => $user,
+                            'apiKeyForm' => $apiKeyForm->createView(),
+                            'apiKeys' => $this->apiKeyManager->listForUser($id),
+                        ]);
+                    }
+                }
+
+                $apiKey = $this->apiKeyManager->issue(
+                    $id,
+                    (string) $data['label'],
+                    $this->parseScopes((string) ($data['scopes'] ?? '')),
+                    $expiresAt,
+                    $this->getActorId()
+                );
+
+                $this->addFlash('success', sprintf('API key "%s" created. Secret: %s (copy now).', $apiKey['label'], $apiKey['secret']));
+
+                return $this->redirectToRoute('admin_users_edit', ['id' => $id]);
+            }
+
+            $apiKeyForm->addError(new FormError('Please review the API key form.'));
+        }
+
+        $apiKeys = $this->apiKeyManager->listForUser($id);
+
         return $this->render('admin/users/edit.html.twig', [
-            'form' => $form->createView(),
+            'form' => $profileForm->createView(),
             'user' => $user,
+            'apiKeyForm' => $apiKeyForm->createView(),
+            'apiKeys' => $apiKeys,
         ]);
+    }
+
+    #[Route('/admin/users/{userId}/api-keys/{apiKeyId}/revoke', name: 'admin_users_api_keys_revoke', requirements: ['userId' => '[0-9A-Z]{26}', 'apiKeyId' => '[0-9A-Z]{26}'], methods: ['POST'])]
+    public function revokeApiKey(string $userId, string $apiKeyId, Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('revoke_api_key_'.$apiKeyId, (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token for API key revoke.');
+
+            return $this->redirectToRoute('admin_users_edit', ['id' => $userId]);
+        }
+
+        $apiKey = $this->apiKeyManager->get($apiKeyId);
+
+        if ($apiKey === null || $apiKey->userId !== $userId) {
+            $this->addFlash('error', 'API key not found.');
+
+            return $this->redirectToRoute('admin_users_edit', ['id' => $userId]);
+        }
+
+        $this->apiKeyManager->revoke($apiKeyId, $this->getActorId());
+        $this->addFlash('success', sprintf('API key "%s" revoked.', $apiKey->label));
+
+        return $this->redirectToRoute('admin_users_edit', ['id' => $userId]);
     }
 
     private function getActorId(): ?string
@@ -102,5 +168,19 @@ final class UserController extends AbstractController
         }
 
         return null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function parseScopes(string $scopes): array
+    {
+        $parts = preg_split('/[\s,]+/', $scopes) ?: [];
+        $parts = array_filter(array_map(static fn (string $scope): string => trim($scope), $parts), static fn (string $scope): bool => $scope !== '');
+
+        $unique = array_values(array_unique($parts));
+        sort($unique);
+
+        return $unique;
     }
 }

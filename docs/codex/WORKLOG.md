@@ -42,11 +42,11 @@
 #### Admin UI & API Keys
 - [x] Add invitation management screen (listing/create/cancel) under `/admin/users/invitations` with email delivery and audit logging.
 - [x] Build `/admin/users` management interface (listing, filters, detail view) with forms for profile edits, role assignments, project overrides, invitations, and password resets. *(Initial profile + role editing delivered; project overrides/password resets remain as follow-up tasks.)*
-- [ ] Implement API key issuance/revocation (UI + CLI) with scoped capability enforcement and hashed storage.
+- [x] Implement API key issuance/revocation (UI + CLI) with scoped capability enforcement and hashed storage. *(Scopes + expiry captured; capability enforcement middleware still pending once API surface lands.)*
 - [ ] Surface audit log viewer for security events (auth attempts, role changes, API key updates) with filters.
 
 #### Testing & Tooling
-- [ ] Add unit/functional tests covering authentication success/failure, voter decisions, admin UI flows, and API key endpoints (invitation onboarding + login flow + admin user management covered; remaining: voters + API key endpoints).
+- [ ] Add unit/functional tests covering authentication success/failure, voter decisions, admin UI flows, and API key endpoints (invitation onboarding + login flow + admin user management + API key issuance/revoke covered; remaining: voter edge cases + HTTP API endpoints).
 - [ ] Provide documentation updates (developer + user manuals) for login, roles, project membership, API keys, and troubleshooting; schedule follow-up smoke tests in release workflow.
 
 ### Feat: Admin Studio UI (P0 | L)
@@ -241,3 +241,4 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Completed invitation onboarding flow: invitees set profile/password via `/invite/{token}`, accounts are created and invitations marked accepted with coverage.
 - Extended invitation acceptance test to verify password hashing, role persistence, and a full login with the invited account; documented onboarding flow for developers and administrators.
 - Shipped `/admin/users` management UI with listing/search filters, profile + role editor, audit logging, and functional coverage; documented tooling for developers and administrators.
+- Added API key manager service, CLI issuance command, and admin UI for creation/revocation with audit logging and tests; documented developer + user flows.

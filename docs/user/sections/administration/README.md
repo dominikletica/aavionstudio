@@ -6,6 +6,7 @@ Updated: 2025-10-31
 Topics to cover:
 - Invitation management & onboarding
 - User management dashboard
+- API key issuance & revocation
 - Projects & settings management
 - User roles, permissions, API keys
 - Module management & feature toggles

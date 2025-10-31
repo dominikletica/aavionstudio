@@ -70,6 +70,8 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 - **Release Packaging**
   - Generate deployable archives with `bin/release <env> <version> <channel>`.
   - See [`docs/dev/sections/workflows/release.md`](sections/workflows/release.md) for details.
+- **Automation & Access**
+  - Issue API keys for integrations with `php bin/console app:api-key:issue <user>`; see [`docs/dev/sections/security/api-keys.md`](sections/security/api-keys.md) for usage details.
 
 ---
 

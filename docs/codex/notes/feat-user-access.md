@@ -54,8 +54,8 @@
 - ProjectMembershipRepository reads/writes `app_project_user`, exposing helpers for voters/UI to resolve project-specific role overrides; `ProjectCapabilityVoter` merges global roles, project roles, and per-project permissions for authorization checks.
 
 ## Admin UI
-- `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys; initial listing + profile/role editor implemented, invitation management UI (`/admin/users/invitations`) already in place with invitee onboarding form.
-- Form-driven editor with validation, optional invitation emails, password reset trigger.
+- `/admin/users` module (core) lists accounts, role assignments, per-project overrides, API keys; profile/role editor and API key management implemented, invitation management UI (`/admin/users/invitations`) already in place with invitee onboarding form.
+- Form-driven editor with validation, optional invitation emails, password reset trigger, API key issuance/revocation.
 - Audit log integration: record login attempts, role changes, API key creation.
 - Bulk actions for enabling/disabling users, resetting 2FA (future), revoking sessions.
 - Table filters by role, project, status; search by email/display name.
@@ -89,7 +89,7 @@
 2. Role hierarchy + capability registry integration; seed defaults; expose capability parameter/service.
 3. Project membership model + voters; ensure module capability checks use voters; augment audit log events.
 4. Admin UI for accounts, project assignments, API keys; invitation + password reset flows; CLI helpers (backend invitation manager already in place).
-5. API key issuance + scope enforcement (HTTP + CLI); document usage; cover with tests.
+5. API key issuance + scope enforcement (HTTP + CLI); document usage; cover with tests. *(Issuance + CLI/UI complete; scope enforcement for HTTP endpoints pending once API surface lands.)*
 6. Optional enhancements: 2FA, account lockout, session revocation dashboards, webhook notifications.
 
 ## Decisions (2025-10-30)
