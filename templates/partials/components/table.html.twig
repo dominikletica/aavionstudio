@@ -35,7 +35,23 @@
     {% set table_classes = table_classes|merge(['table--zebra']) %}
 {% endif %}
 {% set table_attr_class = table_attributes.class|default('') %}
-{% set table_attributes = table_attributes|merge({
+{% set cleaned_attributes = {} %}
+{% for attr_name, attr_value in table_attributes %}
+    {% set current = attr_value %}
+    {% if current is same as(false) or current is same as(true) or current is same as(null) %}
+        {% set cleaned_attributes = cleaned_attributes|merge({ (attr_name): current }) %}
+    {% elseif current is iterable %}
+        {% set cleaned_attributes = cleaned_attributes|merge({ (attr_name): current }) %}
+    {% else %}
+        {% set current = current ~ '' %}
+        {% if current starts with '"' and current ends with '"' %}
+            {% set current = current|slice(1, current|length - 2) %}
+        {% endif %}
+        {% set cleaned_attributes = cleaned_attributes|merge({ (attr_name): current }) %}
+    {% endif %}
+{% endfor %}
+
+{% set table_attributes = cleaned_attributes|merge({
     class: (table_classes|join(' ') ~ ' ' ~ table_attr_class)|trim
 }) %}
 

@@ -1,22 +1,43 @@
 {% extends 'layouts/installer.html.twig' %}
 
 {% block content %}
-    <h2 class="text-heading text-xl">{{ 'Environment defaults'|trans }}</h2>
-    <p>{{ 'The installer will generate <code>.env.local.php</code> using these defaults. Adjust values before proceeding.'|trans|raw }}</p>
-    <table class="table table--compact">
-        <thead>
-        <tr>
-            <th>{{ 'Key'|trans }}</th>
-            <th>{{ 'Value'|trans }}</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for key, value in default_settings %}
-            <tr>
-                <td>{{ key }}</td>
-                <td>{{ value is iterable ? value|json_encode(constant('JSON_PRETTY_PRINT')) : value }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    {% include 'partials/components/section_heading.html.twig' with {
+        title: 'Environment defaults'|trans,
+        subtitle: 'The installer writes a fresh <code>.env.local.php</code> using these values. Adjust anything before proceeding.'|trans|raw
+    } only %}
+
+    {% set settings_rows = [] %}
+    {% for key, value in default_settings %}
+        {% set formatted = value is iterable ? value|json_encode(constant('JSON_PRETTY_PRINT')) : value %}
+        {% set settings_rows = settings_rows|merge([{
+            key: key,
+            value: formatted
+        }]) %}
+    {% endfor %}
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div>
+            {% include 'partials/components/table.html.twig' with {
+                columns: [
+                    { label: 'Key'|trans, key: 'key', class: 'font-mono text-xs' },
+                    { label: 'Value'|trans, key: 'value', template: 'partials/components/table/value_preformatted.html.twig' }
+                ],
+                rows: settings_rows,
+                compact: true
+            } only %}
+        </div>
+        <div class="layout-stack layout-stack--tight">
+            {% include 'partials/components/illustration.html.twig' with {
+                name: 'adjustments',
+                variant: 'lg',
+                attributes: { class: 'w-full' },
+                alt: 'Configuration illustration'|trans
+            } only %}
+            {% include 'partials/components/card.html.twig' with {
+                variant: 'muted',
+                title: 'Tip'|trans,
+                body: '<p class="text-sm text-text-muted">' ~ 'Values can be fine-tuned later in the admin UI; keep secrets out of version control.'|trans ~ '</p>'
+            } only %}
+        </div>
+    </div>
 {% endblock %}

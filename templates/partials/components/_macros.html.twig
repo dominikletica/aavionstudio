@@ -3,9 +3,9 @@
         {%- if value is same as(false) or value is same as(null) -%}
             {# skip falsey attributes #}
         {%- elseif value is same as(true) -%}
-            {{- ' ' ~ name -}}
+            {{- (' ' ~ name)|raw -}}
         {%- else -%}
-            {{- ' ' ~ name ~ '="' ~ value|e('html_attr') ~ '"' -}}
+            {{- (' ' ~ name ~ '="' ~ value|e('html_attr') ~ '"')|raw -}}
         {%- endif -%}
     {%- endfor -%}
 {% endmacro %}

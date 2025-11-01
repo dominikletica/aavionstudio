@@ -1,113 +1,173 @@
 {% extends 'layouts/installer.html.twig' %}
 
 {% block content %}
-    <section>
-        <h2 class="text-heading text-xl">{{ 'Environment diagnostics'|trans }}</h2>
-        <p>{{ 'PHP version:'|trans }} <strong>{{ diagnostics.php_version }}</strong></p>
-    </section>
+    {% include 'partials/components/section_heading.html.twig' with {
+        title: 'Environment diagnostics'|trans,
+        subtitle: 'Installer helpers verify server requirements before you continue.'|trans
+    } only %}
 
-    <section class="layout-stack">
-        <h3 class="text-heading text-lg">{{ 'Docroot & rewrite status'|trans }}</h3>
-        <p>
-            {{ 'Rewrite engine:'|trans }} <strong>{{ diagnostics.rewrite.enabled ? 'enabled'|trans : 'compatibility mode'|trans }}</strong>
-            {% if diagnostics.rewrite.mode == 'forced' %}
-                ({{ 'forced via %env%'|trans({ '%env%': '<code>APP_FORCE_ROOT_ENTRY</code>' })|raw }})
-            {% elseif not diagnostics.rewrite.enabled %}
-                – {{ 'request served by compatibility fallback'|trans }}
-            {% endif %}
-        </p>
-        {% if not diagnostics.rewrite.enabled and not diagnostics.rewrite.forced %}
-            <p role="alert" class="alert alert--warning">
-                {{ 'Configure the web server to use the <code>public/</code> directory as document root and enable URL rewrites to avoid exposing sensitive files.'|trans|raw }}
-            </p>
-        {% elseif diagnostics.rewrite.mode == 'forced' %}
-            <p class="alert">
-                {{ 'Compatibility mode is intentionally forced; disable <code>APP_FORCE_ROOT_ENTRY</code> after testing the fallback.'|trans|raw }}
-            </p>
-        {% endif %}
-        <dl class="grid gap-1 text-sm">
-            <dt>{{ 'Effective route'|trans }}</dt>
-            <dd><code>{{ diagnostics.rewrite.route }}</code></dd>
-            <dt>{{ 'Original request URI'|trans }}</dt>
-            <dd><code>{{ diagnostics.rewrite.original_uri }}</code></dd>
-            <dt>{{ 'Effective request URI'|trans }}</dt>
-            <dd><code>{{ diagnostics.rewrite.request_uri }}</code></dd>
-        </dl>
-    </section>
+    {% set summary_body %}
+        <p class="text-sm leading-relaxed text-text">{{ 'PHP version:'|trans }} <strong>{{ diagnostics.php_version }}</strong></p>
+    {% endset %}
 
-    <section class="layout-stack">
-        <h3 class="text-heading text-lg">{{ 'Required extensions'|trans }}</h3>
-        <table class="table table--compact" data-testid="diagnostics-extensions">
-            <thead>
-            <tr>
-                <th>{{ 'Extension'|trans }}</th>
-                <th>{{ 'Status'|trans }}</th>
-                <th>{{ 'Hint'|trans }}</th>
-            </tr>
-            </thead>
-            <tbody>
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div class="layout-stack layout-stack--loose">
+            {% set rewrite_body %}
+                <div class="layout-stack--tight text-sm leading-relaxed text-text">
+                    <p>
+                        {{ 'Rewrite engine:'|trans }} <strong>{{ diagnostics.rewrite.enabled ? 'enabled'|trans : 'compatibility mode'|trans }}</strong>
+                        {% if diagnostics.rewrite.mode == 'forced' %}
+                            ({{ 'forced via %env%'|trans({ '%env%': '<code>APP_FORCE_ROOT_ENTRY</code>' })|raw }})
+                        {% elseif not diagnostics.rewrite.enabled %}
+                            – {{ 'request served by compatibility fallback'|trans }}
+                        {% endif %}
+                    </p>
+                    {% if not diagnostics.rewrite.enabled and not diagnostics.rewrite.forced %}
+                        {{ include('partials/components/alert.html.twig', {
+                            variant: 'warning',
+                            title: 'Enable URL rewrites'|trans,
+                            description: 'Configure the web server to use the <code>public/</code> directory as document root and enable URL rewrites to avoid exposing sensitive files.'|trans|raw,
+                            attributes: { role: 'alert' }
+                        }) }}
+                        <p role="alert" class="sr-only">{{ 'Configure the web server to use the public directory as document root and enable URL rewrites to avoid exposing sensitive files.'|trans }}</p>
+                    {% elseif diagnostics.rewrite.mode == 'forced' %}
+                        {{ include('partials/components/alert.html.twig', {
+                            variant: 'info',
+                            title: 'Compatibility mode enabled'|trans,
+                            description: 'Compatibility mode is intentionally forced; disable <code>APP_FORCE_ROOT_ENTRY</code> after testing the fallback.'|trans|raw
+                        }) }}
+                    {% endif %}
+                    <dl class="grid gap-2 text-xs">
+                        <div class="flex items-center justify-between gap-3">
+                            <dt class="font-semibold text-text-muted">{{ 'Effective route'|trans }}</dt>
+                            <dd><code>{{ diagnostics.rewrite.route }}</code></dd>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <dt class="font-semibold text-text-muted">{{ 'Original request URI'|trans }}</dt>
+                            <dd><code>{{ diagnostics.rewrite.original_uri }}</code></dd>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <dt class="font-semibold text-text-muted">{{ 'Effective request URI'|trans }}</dt>
+                            <dd><code>{{ diagnostics.rewrite.request_uri }}</code></dd>
+                        </div>
+                    </dl>
+                </div>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                title: 'Docroot & rewrite status'|trans,
+                subtitle: 'Validate that requests are routed through the public front controller.'|trans,
+                body: rewrite_body,
+                eyebrow: 'Routing'|trans
+            } only %}
+
+            {% set extension_rows = [] %}
             {% for extension in diagnostics.extensions %}
-                <tr>
-                    <td>{{ extension.label }}</td>
-                    <td>{{ extension.available ? 'available'|trans : 'missing'|trans }}</td>
-                    <td>
-                        {% if not extension.available %}
-                            {{ extension.hint }}
-                        {% else %}
-                            —
-                        {% endif %}
-                    </td>
-                </tr>
+                {% set extension_rows = extension_rows|merge([{
+                    label: extension.label,
+                    status: extension.available ? 'available'|trans : 'missing'|trans,
+                    hint: extension.available ? '—' : extension.hint
+                }]) %}
             {% endfor %}
-            </tbody>
-        </table>
-    </section>
 
-    <section class="layout-stack">
-        <h3 class="text-heading text-lg">{{ 'SQLite health'|trans }}</h3>
-        <dl class="grid gap-1 text-sm">
-            <dt>{{ 'Primary path'|trans }}</dt><dd>{{ diagnostics.sqlite.primary_path ?: 'n/a'|trans }}</dd>
-            <dt>{{ 'Secondary path'|trans }}</dt><dd>{{ diagnostics.sqlite.secondary_path ?: 'n/a'|trans }}</dd>
-            <dt>{{ 'Primary exists'|trans }}</dt><dd>{{ diagnostics.sqlite.primary_exists ? 'yes'|trans : 'no'|trans }}</dd>
-            <dt>{{ 'Secondary exists'|trans }}</dt><dd>{{ diagnostics.sqlite.secondary_exists ? 'yes'|trans : 'no'|trans }}</dd>
-            <dt>{{ 'Secondary attached'|trans }}</dt><dd>{{ diagnostics.sqlite.secondary_attached ? 'yes'|trans : 'no'|trans }}</dd>
-            <dt>{{ 'busy_timeout (ms)'|trans }}</dt><dd>{{ diagnostics.sqlite.busy_timeout_ms }}</dd>
-        </dl>
-    </section>
+            {% include 'partials/components/card.html.twig' with {
+                title: 'PHP extensions'|trans,
+                subtitle: 'Required extensions must be available before installation can continue.'|trans,
+                body: include('partials/components/table.html.twig', {
+                    columns: [
+                        { label: 'Extension'|trans, key: 'label', class: 'font-mono text-xs' },
+                        { label: 'Status'|trans, key: 'status' },
+                        { label: 'Hint'|trans, key: 'hint' }
+                    ],
+                    rows: extension_rows,
+                    compact: true,
+                    table_attributes: { 'data-testid': 'diagnostics-extensions' }
+                }, with_context = false)|raw
+            } only %}
 
-    <section class="layout-stack">
-        <h3 class="text-heading text-lg">{{ 'Filesystem checks'|trans }}</h3>
-        <table class="table table--compact" data-testid="diagnostics-filesystem">
-            <thead>
-            <tr>
-                <th>{{ 'Directory'|trans }}</th>
-                <th>{{ 'Exists'|trans }}</th>
-                <th>{{ 'Writable'|trans }}</th>
-                <th>{{ 'Hint'|trans }}</th>
-            </tr>
-            </thead>
-            <tbody>
+            {% set filesystem_rows = [] %}
             {% for directory in diagnostics.filesystem %}
-                <tr>
-                    <td><code>{{ directory.path }}</code></td>
-                    <td>{{ directory.exists ? 'yes'|trans : 'no'|trans }}</td>
-                    <td>
-                        {% if directory.writable %}
-                            {{ 'yes'|trans }}
-                        {% elseif directory.exists %}
-                            {{ 'no'|trans }}
-                        {% else %}
-                            {% if directory.parent_writable %}
-                                {{ 'parent writable'|trans }}
-                            {% else %}
-                                {{ 'no'|trans }}
-                            {% endif %}
-                        {% endif %}
-                    </td>
-                    <td>{% if directory.writable %}—{% else %}{{ directory.hint }}{% endif %}</td>
-                </tr>
+                {% set writable_text = directory.writable
+                    ? 'yes'|trans
+                    : (directory.exists
+                        ? (directory.parent_writable ? 'parent writable'|trans : 'no'|trans)
+                        : 'no'|trans)
+                %}
+                {% set filesystem_rows = filesystem_rows|merge([{
+                    path: directory.path,
+                    exists: directory.exists ? 'yes'|trans : 'no'|trans,
+                    writable: writable_text,
+                    hint: directory.writable ? '—' : directory.hint
+                }]) %}
             {% endfor %}
-            </tbody>
-        </table>
-    </section>
+
+            {% include 'partials/components/card.html.twig' with {
+                title: 'Filesystem checks'|trans,
+                subtitle: 'Verify that critical directories exist and are writable by PHP.'|trans,
+                body: include('partials/components/table.html.twig', {
+                    columns: [
+                        { label: 'Directory'|trans, key: 'path', class: 'font-mono text-xs' },
+                        { label: 'Exists'|trans, key: 'exists', class: 'text-center' },
+                        { label: 'Writable'|trans, key: 'writable', class: 'text-center' },
+                        { label: 'Hint'|trans, key: 'hint' }
+                    ],
+                    rows: filesystem_rows,
+                    compact: true,
+                    table_attributes: { 'data-testid': 'diagnostics-filesystem' }
+                }, with_context = false)|raw
+            } only %}
+        </div>
+
+        <div class="layout-stack layout-stack--loose">
+            {% include 'partials/components/card.html.twig' with {
+                variant: 'emphasis',
+                title: 'Environment summary'|trans,
+                body: summary_body,
+                eyebrow: 'System'|trans
+            } only %}
+
+            {% include 'partials/components/illustration.html.twig' with {
+                name: 'active-support',
+                variant: 'lg',
+                attributes: { class: 'w-full' },
+                alt: 'Support team illustration'|trans
+            } only %}
+
+            {% set sqlite_body %}
+                <dl class="grid gap-2 text-sm">
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="text-text-muted">{{ 'Primary path'|trans }}</dt>
+                        <dd class="font-mono text-xs">{{ diagnostics.sqlite.primary_path ?: 'n/a'|trans }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="text-text-muted">{{ 'Secondary path'|trans }}</dt>
+                        <dd class="font-mono text-xs">{{ diagnostics.sqlite.secondary_path ?: 'n/a'|trans }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="text-text-muted">{{ 'Primary exists'|trans }}</dt>
+                        <dd>{{ diagnostics.sqlite.primary_exists ? 'yes'|trans : 'no'|trans }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="text-text-muted">{{ 'Secondary exists'|trans }}</dt>
+                        <dd>{{ diagnostics.sqlite.secondary_exists ? 'yes'|trans : 'no'|trans }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="text-text-muted">{{ 'Secondary attached'|trans }}</dt>
+                        <dd>{{ diagnostics.sqlite.secondary_attached ? 'yes'|trans : 'no'|trans }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="text-text-muted">{{ 'busy_timeout (ms)'|trans }}</dt>
+                        <dd>{{ diagnostics.sqlite.busy_timeout_ms }}</dd>
+                    </div>
+                </dl>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                title: 'SQLite health'|trans,
+                body: sqlite_body,
+                eyebrow: 'Database'|trans
+            } only %}
+        </div>
+    </div>
+
 {% endblock %}

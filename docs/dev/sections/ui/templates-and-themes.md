@@ -96,6 +96,10 @@ Form controls now ship with dedicated Twig snippets:
 
 Each field accepts `label`, `help`, `state`, `required`, and additional HTML attributes. Combine them with the component buttons/card partials to assemble full forms and tables quickly.
 
+### 3.3 Component showcase route
+
+Developers can preview the base component library at `/_themedemo` (handled by `App\Controller\DemoController`). The page renders the buttons, alerts, cards, tables, form fields, empty states, typography, and illustration helpers included with the default theme. Use it when building new themes or verifying Tailwind overrides—clone the template under `templates/pages/demo.html.twig` into your theme to ship custom showcases.
+
 ## 4. Theme tokens & Tailwind utilities
 
 - Theme tokens are defined in `assets/styles/base/theme.css` using Tailwind’s `@theme` directive. They expose colors, typography, radii, shadows, transitions, etc.

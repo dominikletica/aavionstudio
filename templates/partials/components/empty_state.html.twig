@@ -25,7 +25,7 @@
 }) %}
 
 <section{{ component.attributes(attributes) }}>
-    {% if illustration %}
+    {% if illustration is defined and illustration %}
         <figure class="empty-state__illustration">
             <img src="{{ illustration }}" alt="{{ illustration_alt|default('') }}">
         </figure>

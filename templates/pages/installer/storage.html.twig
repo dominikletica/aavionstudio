@@ -1,6 +1,23 @@
 {% extends 'layouts/installer.html.twig' %}
 
 {% block content %}
-    <h2 class="text-heading text-xl">{{ 'Storage configuration'|trans }}</h2>
-    <p class="text-text-muted">{{ 'Storage step placeholder. Implementation pending.'|trans }}</p>
+    {% include 'partials/components/section_heading.html.twig' with {
+        title: 'Storage configuration'|trans,
+        subtitle: 'Connect persistent stores for media and backups. This step will arrive in a later iteration.'|trans
+    } only %}
+
+    <div class="layout-stack items-center gap-6">
+        {% include 'partials/components/illustration.html.twig' with {
+            name: 'add-files',
+            variant: 'lg',
+            attributes: { class: 'w-full max-w-md' },
+            alt: 'Storage illustration'|trans
+        } only %}
+
+        {% include 'partials/components/empty_state.html.twig' with {
+            variant: 'muted',
+            title: 'Storage wizard coming soon'|trans,
+            description: 'We are designing an interactive flow to pick storage backends, credentials, and replication strategies.'|trans
+        } only %}
+    </div>
 {% endblock %}

@@ -1,6 +1,23 @@
 {% extends 'layouts/installer.html.twig' %}
 
 {% block content %}
-    <h2 class="text-heading text-xl">{{ 'Administrator account'|trans }}</h2>
-    <p class="text-text-muted">{{ 'Admin account setup UI will be implemented in a later iteration.'|trans }}</p>
+    {% include 'partials/components/section_heading.html.twig' with {
+        title: 'Administrator account'|trans,
+        subtitle: 'Invite the first administrator, configure MFA, and seed recovery contacts.'|trans
+    } only %}
+
+    <div class="layout-stack items-center gap-6">
+        {% include 'partials/components/illustration.html.twig' with {
+            name: 'add-user',
+            variant: 'lg',
+            attributes: { class: 'w-full max-w-md' },
+            alt: 'Admin invitation illustration'|trans
+        } only %}
+
+        {% include 'partials/components/empty_state.html.twig' with {
+            variant: 'muted',
+            title: 'Admin onboarding in progress'|trans,
+            description: 'Admin account setup UI will be implemented in a later iteration.'|trans
+        } only %}
+    </div>
 {% endblock %}

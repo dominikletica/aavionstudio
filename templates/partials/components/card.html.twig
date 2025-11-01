@@ -39,7 +39,7 @@
 {% set body = body|default(content|default(null)) %}
 
 <article{{ component.attributes(attributes) }}>
-    {% if illustration %}
+    {% if illustration is defined and illustration %}
         <figure class="card__media">
             <img src="{{ illustration }}" alt="{{ illustration_alt|default('') }}">
         </figure>

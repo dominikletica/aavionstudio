@@ -31,7 +31,7 @@
 {% set description = description|default(content|default(null)) %}
 
 <div{{ component.attributes(attributes) }}>
-    {% if illustration %}
+{% if illustration is defined and illustration %}
         <figure class="alert__illustration">
             <img src="{{ illustration }}" alt="{{ illustration_alt|default('') }}">
         </figure>

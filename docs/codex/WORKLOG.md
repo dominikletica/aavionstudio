@@ -295,3 +295,6 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Refined the global hero header with background image support, admin body class, translated hero headings/subtitles, and a contrast navigation variant that doubles as the styling baseline for future admin/project/entity theming.
 - Replaced the deprecated Doctrine `postConnect` listener with a DBAL middleware so SQLite busy-timeouts and the `user_brain` attachment run without deprecation noise and are reused by the installer diagnostics.
 - Seeded a component library (`templates/partials/components/…`) covering buttons, alerts, cards, and empty states with optional illustration slots plus matching CSS tokens for card and empty-state layouts.
+- Hardened the table component macro so generated attributes remain raw HTML (fixes `data-testid` selectors) and brought the installer diagnostics test back in sync with the new markup.
+- Introduced the `_theme_demo` route (`App\Controller\DemoController`) rendering `templates/pages/demo.html.twig` to showcase Tailwind-driven components, plus functional coverage to guard the preview.
+- Updated developer docs (`docs/dev/sections/ui/templates-and-themes.md`) and the class map with the demo route, ensuring theming contributors can discover the showcase page quickly.

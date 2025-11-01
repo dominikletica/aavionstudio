@@ -1,6 +1,28 @@
 {% extends 'layouts/installer.html.twig' %}
 
 {% block content %}
-    <h2 class="text-heading text-xl">{{ 'Summary'|trans }}</h2>
-    <p class="text-text-muted">{{ 'Installation summary placeholder. Display configuration details here.'|trans }}</p>
+    {% include 'partials/components/section_heading.html.twig' with {
+        title: 'Summary'|trans,
+        subtitle: 'A consolidated overview of environment, storage, and admin choices will appear here.'|trans
+    } only %}
+
+    {% set card_body %}
+        <p class="text-sm text-text-muted">{{ 'Installation summary placeholder. Display configuration details here.'|trans }}</p>
+    {% endset %}
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        {% include 'partials/components/card.html.twig' with {
+            title: 'Configuration recap'|trans,
+            subtitle: 'We will surface all collected answers once the wizard is complete.'|trans,
+            body: card_body,
+            eyebrow: 'Overview'|trans
+        } only %}
+
+        {% include 'partials/components/illustration.html.twig' with {
+            name: 'about-us-page',
+            variant: 'lg',
+            attributes: { class: 'w-full' },
+            alt: 'Summary illustration'|trans
+        } only %}
+    </div>
 {% endblock %}
