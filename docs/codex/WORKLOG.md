@@ -302,3 +302,4 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Extended `_theme_demo` with Stimulus, Turbo, CodeMirror, and Alpine samples (including the `_theme_demo_tip` fragment) and refreshed tests/documentation accordingly.
 - Filled installer environment, storage, admin, and summary pages with actionable guidance so the new layouts are exercised with realistic copy.
 - Mapped the Codemirror `twig` option to the built-in HTML highlighter so the showcase editor renders without missing-module errors.
+- Refreshed admin user, invitation, security, and asset pipeline templates to reuse the new cards, tables, and form components for consistent styling ahead of Roadmap #4.

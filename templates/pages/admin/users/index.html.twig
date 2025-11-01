@@ -3,86 +3,136 @@
 {% set admin_title = 'Admin: Users'|trans %}
 
 {% block content %}
-    <header class="surface layout-stack shadow-sm p-6">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div class="layout-stack--tight">
-                <h1 class="text-heading text-2xl">{{ 'User management'|trans }}</h1>
-                <p class="text-text-muted">{{ 'Search, filter, and manage user accounts.'|trans }}</p>
-            </div>
-            <a class="btn btn-primary" href="{{ path('admin_user_invitations') }}">{{ 'Manage invitations'|trans }}</a>
-        </div>
-        <form class="layout-stack" method="get" action="{{ path('admin_users_index') }}">
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                    <label class="form-label" for="q">{{ 'Search'|trans }}</label>
-                    <input class="w-full rounded-sm border border-border px-4 py-3" type="text" id="q" name="q" value="{{ query }}" placeholder="{{ 'Email or name'|trans }}">
-                </div>
-                <div>
-                    <label class="form-label" for="status">{{ 'Status'|trans }}</label>
-                    <select class="w-full rounded-sm border border-border px-4 py-3" id="status" name="status">
-                        <option value="">{{ 'All statuses'|trans }}</option>
-                        {% set statuses = {
-                            'active': 'Active'|trans,
-                            'pending': 'Pending'|trans,
-                            'disabled': 'Disabled'|trans,
-                            'archived': 'Archived'|trans
-                        } %}
-                        {% for key, labelText in statuses %}
-                            <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ labelText }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="flex justify-end">
-                <button class="btn btn-primary" type="submit">{{ 'Apply filters'|trans }}</button>
-            </div>
-        </form>
-    </header>
+    {% include 'partials/components/section_heading.html.twig' with {
+        title: 'User management'|trans,
+        subtitle: 'Search, filter, and manage user accounts.'|trans,
+        actions: [
+            {
+                label: 'Manage invitations'|trans,
+                tag: 'a',
+                url: path('admin_user_invitations'),
+                icon: 'mail',
+            }
+        ]
+    } only %}
 
-    <section class="surface shadow-sm">
+    <div class="layout-stack layout-stack--loose">
+        {% set filter_form %}
+            <form class="layout-stack layout-stack--tight" method="get" action="{{ path('admin_users_index') }}">
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {% include 'partials/forms/fields/input.html.twig' with {
+                        id: 'admin-users-filter-q',
+                        name: 'q',
+                        label: 'Search'|trans,
+                        value: query,
+                        placeholder: 'Email or name'|trans,
+                        autocomplete: 'off'
+                    } only %}
+
+                    {% set statuses = [
+                        { value: '', label: 'All statuses'|trans },
+                        { value: 'active', label: 'Active'|trans },
+                        { value: 'pending', label: 'Pending'|trans },
+                        { value: 'disabled', label: 'Disabled'|trans },
+                        { value: 'archived', label: 'Archived'|trans }
+                    ] %}
+
+                    {% include 'partials/forms/fields/select.html.twig' with {
+                        id: 'admin-users-filter-status',
+                        name: 'status',
+                        label: 'Status'|trans,
+                        value: status,
+                        options: statuses
+                    } only %}
+                </div>
+                <div class="flex justify-end gap-3">
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'Clear filters'|trans,
+                        variant: 'ghost',
+                        tag: 'a',
+                        url: path('admin_users_index')
+                    }, with_context = false) }}
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'Apply filters'|trans,
+                        type: 'submit',
+                        icon: 'filter'
+                    }, with_context = false) }}
+                </div>
+            </form>
+        {% endset %}
+
+        {% include 'partials/components/card.html.twig' with {
+            title: 'Filters'|trans,
+            body: filter_form
+        } only %}
+
         {% if users is empty %}
-            <div class="table__empty">{{ 'No users found for the selected filters.'|trans }}</div>
+            {% include 'partials/components/card.html.twig' with {
+                variant: 'muted',
+                title: 'No users found'|trans,
+                body: include('partials/components/empty_state.html.twig', {
+                    title: 'No users match your filters'|trans,
+                    description: 'Adjust search terms or invite a new administrator.'|trans,
+                    actions: [
+                        {
+                            label: 'Invite administrator'|trans,
+                            tag: 'a',
+                            url: path('admin_user_invitations'),
+                            icon: 'mail'
+                        }
+                    ]
+                }, with_context = false)|raw
+            } only %}
         {% else %}
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>{{ 'Email'|trans }}</th>
-                    <th>{{ 'Name'|trans }}</th>
-                    <th>{{ 'Status'|trans }}</th>
-                    <th>{{ 'Roles'|trans }}</th>
-                    <th>{{ 'Last login'|trans }}</th>
-                    <th class="w-24"></th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for user in users %}
-                    <tr>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.display_name }}</td>
-                        <td><span class="badge badge--info">{{ user.status|trans }}</span></td>
-                        <td>
-                            {% if user.roles is empty %}
-                                <span class="badge badge--info">{{ 'ROLE_VIEWER'|trans }}</span>
-                            {% else %}
-                                {% for role in user.roles %}
-                                    <span class="badge badge--info">{{ role|trans }}</span>
-                                {% endfor %}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if user.last_login_at %}
-                                {{ user.last_login_at|date('Y-m-d H:i') }}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </td>
-                        <td class="text-right">
-                            <a class="text-primary hover:text-primary-darker font-medium" href="{{ path('admin_users_edit', { id: user.id }) }}">{{ 'Edit'|trans }}</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+            {% set user_rows = [] %}
+            {% for user in users %}
+                {% set status_badge %}
+                    <span class="badge badge--info">{{ user.status|trans }}</span>
+                {% endset %}
+                {% set roles_markup %}
+                    {% if user.roles is empty %}
+                        <span class="badge badge--info">{{ 'ROLE_VIEWER'|trans }}</span>
+                    {% else %}
+                        {% for role in user.roles %}
+                            <span class="badge badge--info">{{ role|trans }}</span>
+                        {% endfor %}
+                    {% endif %}
+                {% endset %}
+                {% set actions_markup = include('partials/components/button.html.twig', {
+                    label: 'Edit'|trans,
+                    tag: 'a',
+                    size: 'sm',
+                    variant: 'ghost',
+                    icon: 'edit',
+                    url: path('admin_users_edit', { id: user.id })
+                }, with_context = false) %}
+                {% set last_login = user.last_login_at ? user.last_login_at|date('Y-m-d H:i') : '—' %}
+                {% set user_rows = user_rows|merge([{
+                    email: user.email,
+                    name: user.display_name,
+                    status: status_badge,
+                    roles: roles_markup,
+                    last_login: last_login,
+                    actions: actions_markup
+                }]) %}
+            {% endfor %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Results'|trans,
+                title: 'Users'|trans,
+                body: include('partials/components/table.html.twig', {
+                    columns: [
+                        { label: 'Email'|trans, key: 'email', class: 'font-medium' },
+                        { label: 'Name'|trans, key: 'name' },
+                        { label: 'Status'|trans, key: 'status', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'Roles'|trans, key: 'roles', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'Last login'|trans, key: 'last_login', class: 'whitespace-nowrap text-sm text-text-muted' },
+                        { label: 'Actions'|trans, key: 'actions', template: 'partials/components/table/value_raw.html.twig', class: 'text-right whitespace-nowrap' }
+                    ],
+                    rows: user_rows,
+                    compact: true
+                }, with_context = false)|raw
+            } only %}
         {% endif %}
-    </section>
+    </div>
 {% endblock %}

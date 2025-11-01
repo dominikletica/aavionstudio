@@ -3,146 +3,205 @@
 {% set admin_title = 'Admin: Edit user'|trans %}
 
 {% block content %}
-    <a class="text-primary hover:text-primary-darker" href="{{ path('admin_users_index') }}">← {{ 'Back to users'|trans }}</a>
+    {% include 'partials/components/section_heading.html.twig' with {
+        title: 'Edit user'|trans,
+        subtitle: 'Update profile, credentials, and project access.'|trans,
+        actions: [
+            {
+                label: 'Back to users'|trans,
+                tag: 'a',
+                url: path('admin_users_index'),
+                icon: 'arrow-left'
+            }
+        ]
+    } only %}
 
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
-        <section class="surface shadow-sm layout-stack p-6">
-            <header class="layout-stack--tight">
-                <h1 class="text-heading text-2xl">{{ 'Edit user'|trans }}</h1>
-                <p class="text-text-muted">
-                    {{ 'Email:'|trans }} <strong class="text-text">{{ user.email }}</strong><br>
-                    {{ 'Created:'|trans }} {{ user.created_at ? user.created_at|date('Y-m-d H:i') : '—' }}<br>
-                    {{ 'Last updated:'|trans }} {{ user.updated_at ? user.updated_at|date('Y-m-d H:i') : '—' }}
-                </p>
-            </header>
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        {% set profile_body %}
+            <div class="layout-stack layout-stack--tight">
+                <dl class="grid gap-2 text-sm text-text-muted">
+                    <div class="flex items-center justify-between gap-3">
+                        <dt>{{ 'Email'|trans }}</dt>
+                        <dd class="font-medium text-text">{{ user.email }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt>{{ 'Created'|trans }}</dt>
+                        <dd>{{ user.created_at ? user.created_at|date('Y-m-d H:i') : '—' }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt>{{ 'Last updated'|trans }}</dt>
+                        <dd>{{ user.updated_at ? user.updated_at|date('Y-m-d H:i') : '—' }}</dd>
+                    </div>
+                </dl>
 
-            {{ form_start(form, { attr: { class: 'layout-stack' } }) }}
-                {{ form_row(form.display_name) }}
-                {{ form_row(form.locale) }}
-                {{ form_row(form.timezone) }}
-                {{ form_row(form.status) }}
-                {{ form_row(form.roles) }}
-                {% include 'partials/forms/buttons/primary.html.twig' with {
-                    label: 'Save changes'|trans
-                } %}
-            {{ form_end(form) }}
+                {{ form_start(form, { attr: { class: 'layout-stack layout-stack--tight' } }) }}
+                    {{ form_row(form.display_name) }}
+                    {{ form_row(form.locale) }}
+                    {{ form_row(form.timezone) }}
+                    {{ form_row(form.status) }}
+                    {{ form_row(form.roles) }}
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'Save changes'|trans,
+                        type: 'submit',
+                        icon: 'device-floppy'
+                    }, with_context = false) }}
+                {{ form_end(form) }}
+            </div>
+        {% endset %}
 
-            <hr class="divider">
-
+        {% set password_footer %}
             <form method="post" action="{{ path('admin_users_password_reset', { id: user.id }) }}" class="layout-stack--tight">
                 <input type="hidden" name="_token" value="{{ csrf_token('admin_user_password_reset_' ~ user.id) }}">
-                <p class="text-text-muted">{{ 'Send a one-time password reset email to this user.'|trans }}</p>
-                <button type="submit" class="btn btn-secondary">{{ 'Send password reset email'|trans }}</button>
+                <p class="text-sm text-text-muted">{{ 'Send a one-time password reset email to this user.'|trans }}</p>
+                {{ include('partials/components/button.html.twig', {
+                    label: 'Send password reset email'|trans,
+                    type: 'submit',
+                    variant: 'secondary',
+                    icon: 'mail'
+                }, with_context = false) }}
             </form>
-        </section>
+        {% endset %}
 
-        <section class="surface shadow-sm layout-stack p-6">
-            <h2 class="text-heading text-xl">{{ 'API keys'|trans }}</h2>
-            <p class="text-text-muted">{{ 'Generate scoped API keys for integrations. Secrets are shown once—store them securely.'|trans }}</p>
+        {% include 'partials/components/card.html.twig' with {
+            eyebrow: 'Profile'|trans,
+            title: 'User details'|trans,
+            body: profile_body,
+            footer: password_footer
+        } only %}
 
-            {{ form_start(apiKeyForm, { attr: { class: 'layout-stack--tight' } }) }}
+        {% set api_key_form %}
+            {{ form_start(apiKeyForm, { attr: { class: 'layout-stack layout-stack--tight' } }) }}
                 {{ form_row(apiKeyForm.label) }}
                 {{ form_row(apiKeyForm.expires_at) }}
                 {{ form_row(apiKeyForm.scopes) }}
-                {% include 'partials/forms/buttons/primary.html.twig' with {
-                    label: 'Create API key'|trans
-                } %}
+                {{ include('partials/components/button.html.twig', {
+                    label: 'Create API key'|trans,
+                    type: 'submit',
+                    icon: 'key'
+                }, with_context = false) }}
             {{ form_end(apiKeyForm) }}
+        {% endset %}
 
+        {% set api_key_table %}
             {% if apiKeys is not empty %}
-                <table class="table table--compact">
-                    <thead>
-                        <tr>
-                            <th>{{ 'Label'|trans }}</th>
-                            <th>{{ 'Created'|trans }}</th>
-                            <th>{{ 'Status'|trans }}</th>
-                            <th class="w-32 text-right">{{ 'Actions'|trans }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for key in apiKeys %}
-                            <tr>
-                                <td>{{ key.label }}</td>
-                                <td>{{ key.createdAt|date('Y-m-d H:i') }}</td>
-                                <td>
-                                    {% if key.revokedAt %}
-                                        <span class="badge badge--danger">{{ 'revoked'|trans }}</span>
-                                    {% elseif key.expiresAt and key.expiresAt < date() %}
-                                        <span class="badge badge--warning">{{ 'expired'|trans }}</span>
-                                    {% elseif key.isActive %}
-                                        <span class="badge badge--success">{{ 'active'|trans }}</span>
-                                    {% else %}
-                                        <span class="badge">{{ 'inactive'|trans }}</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-right">
-                                    {% if key.revokedAt is null %}
-                                        <form method="post" action="{{ path('admin_users_api_keys_revoke', { userId: user.id, apiKeyId: key.id }) }}">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('revoke_api_key_' ~ key.id) }}">
-                                            <button class="btn btn-secondary" type="submit">{{ 'Revoke'|trans }}</button>
-                                        </form>
-                                    {% else %}
-                                        <small class="text-text-muted">{{ key.revokedAt|date('Y-m-d H:i') }}</small>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                {% set api_rows = [] %}
+                {% for key in apiKeys %}
+                    {% set status_badge %}
+                        {% if key.revokedAt %}
+                            <span class="badge badge--danger">{{ 'revoked'|trans }}</span>
+                        {% elseif key.expiresAt and key.expiresAt < date() %}
+                            <span class="badge badge--warning">{{ 'expired'|trans }}</span>
+                        {% elseif key.isActive %}
+                            <span class="badge badge--success">{{ 'active'|trans }}</span>
+                        {% else %}
+                            <span class="badge">{{ 'inactive'|trans }}</span>
+                        {% endif %}
+                    {% endset %}
+                    {% if key.revokedAt is null %}
+                        {% set revoke_button %}
+                            <form method="post" action="{{ path('admin_users_api_keys_revoke', { userId: user.id, apiKeyId: key.id }) }}" class="inline-flex">
+                                <input type="hidden" name="_token" value="{{ csrf_token('revoke_api_key_' ~ key.id) }}">
+                                <button class="btn btn-secondary btn--sm" type="submit">{{ 'Revoke'|trans }}</button>
+                            </form>
+                        {% endset %}
+                    {% else %}
+                        {% set revoke_button %}
+                            <small class="text-text-muted whitespace-nowrap">{{ key.revokedAt|date('Y-m-d H:i') }}</small>
+                        {% endset %}
+                    {% endif %}
+                    {% set api_rows = api_rows|merge([{
+                        label: key.label,
+                        created: key.createdAt|date('Y-m-d H:i'),
+                        status: status_badge,
+                        actions: revoke_button
+                    }]) %}
+                {% endfor %}
+
+                {{ include('partials/components/table.html.twig', {
+                    columns: [
+                        { label: 'Label'|trans, key: 'label', class: 'font-medium' },
+                        { label: 'Created'|trans, key: 'created', class: 'text-sm text-text-muted whitespace-nowrap' },
+                        { label: 'Status'|trans, key: 'status', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'Actions'|trans, key: 'actions', template: 'partials/components/table/value_raw.html.twig', class: 'text-right whitespace-nowrap' }
+                    ],
+                    rows: api_rows,
+                    compact: true
+                }, with_context = false) }}
             {% else %}
-                <p class="text-text-muted">{{ 'No API keys issued yet.'|trans }}</p>
+                {{ include('partials/components/empty_state.html.twig', {
+                    title: 'No API keys yet'|trans,
+                    description: 'Create an API key to integrate with external services.'|trans
+                }, with_context = false) }}
             {% endif %}
-        </section>
+        {% endset %}
 
-        <section class="surface shadow-sm layout-stack p-6 lg:col-span-2">
-            <h2 class="text-heading text-xl">{{ 'Project access'|trans }}</h2>
-            <p class="text-text-muted">{{ 'Override roles or add project-specific capabilities. Leave role empty to inherit global permissions.'|trans }}</p>
+        {% include 'partials/components/card.html.twig' with {
+            eyebrow: 'Integrations'|trans,
+            title: 'API keys'|trans,
+            subtitle: 'Secrets are shown once—store them securely.'|trans,
+            body: api_key_form,
+            footer: api_key_table
+        } only %}
 
+        {% set project_body %}
             {% if projects is empty %}
-                <p class="text-text-muted">{{ 'No projects available yet.'|trans }}</p>
+                <p class="text-sm text-text-muted">{{ 'No projects available yet.'|trans }}</p>
             {% else %}
-                {{ form_start(projectMembershipForm) }}
-                    <table class="table table--compact">
-                        <thead>
-                        <tr>
-                            <th>{{ 'Project'|trans }}</th>
-                            <th>{{ 'Role'|trans }}</th>
-                            <th>{{ 'Extra capabilities'|trans }}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for assignment in projectMembershipForm.assignments %}
-                            {% set projectId = assignment.project_id.vars.value %}
-                            {% set project = null %}
-                            {% for item in projects %}
-                                {% if item.id == projectId %}
-                                    {% set project = item %}
-                                {% endif %}
-                            {% endfor %}
-                            <tr>
-                                {% set projectName = project is not null ? project.name : 'Unknown project' %}
-                                {% set projectSlug = project is not null ? project.slug : projectId %}
-                                <td>
-                                    <strong>{{ projectName }}</strong><br>
-                                    <span class="text-text-muted text-sm">{{ projectSlug }}</span>
-                                    {{ form_widget(assignment.project_id) }}
-                                </td>
-                                <td>
-                                    {{ form_widget(assignment.role) }}
-                                    {{ form_errors(assignment.role) }}
-                                </td>
-                                <td>
-                                    {{ form_widget(assignment.capabilities) }}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                    <div class="flex justify-end mt-4">
-                        <button class="btn btn-primary" type="submit">{{ 'Save project access'|trans }}</button>
+                {{ form_start(projectMembershipForm, { attr: { class: 'layout-stack layout-stack--tight' } }) }}
+                    <div class="overflow-x-auto">
+                        <table class="table table--compact">
+                            <thead>
+                                <tr>
+                                    <th>{{ 'Project'|trans }}</th>
+                                    <th>{{ 'Role'|trans }}</th>
+                                    <th>{{ 'Extra capabilities'|trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in projectMembershipForm.assignments %}
+                                    {% set projectId = assignment.project_id.vars.value %}
+                                    {% set project = null %}
+                                    {% for item in projects %}
+                                        {% if item.id == projectId %}
+                                            {% set project = item %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% set projectName = project is not null ? project.name : 'Unknown project' %}
+                                    {% set projectSlug = project is not null ? project.slug : projectId %}
+                                    <tr>
+                                        <td class="align-top">
+                                            <strong>{{ projectName }}</strong><br>
+                                            <span class="text-text-muted text-xs uppercase tracking-wide">{{ projectSlug }}</span>
+                                            {{ form_widget(assignment.project_id) }}
+                                        </td>
+                                        <td class="align-top">
+                                            {{ form_widget(assignment.role) }}
+                                            {{ form_errors(assignment.role) }}
+                                        </td>
+                                        <td class="align-top">
+                                            {{ form_widget(assignment.capabilities) }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-end">
+                        {{ include('partials/components/button.html.twig', {
+                            label: 'Save project access'|trans,
+                            type: 'submit',
+                            icon: 'device-floppy'
+                        }, with_context = false) }}
                     </div>
                 {{ form_end(projectMembershipForm) }}
             {% endif %}
-        </section>
+        {% endset %}
+
+        {% include 'partials/components/card.html.twig' with {
+            eyebrow: 'Projects'|trans,
+            title: 'Project access'|trans,
+            subtitle: 'Override roles or add project-specific capabilities.'|trans,
+            body: project_body
+        } only %}
     </div>
 {% endblock %}
