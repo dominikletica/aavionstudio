@@ -26,7 +26,13 @@ final class InstallerController extends AbstractController
         $requestedStep = (string) $request->query->get('step', self::STEPS[0]);
         $currentStep = \in_array($requestedStep, self::STEPS, true) ? $requestedStep : self::STEPS[0];
 
-        return $this->render('installer/wizard.html.twig', [
+        $template = sprintf('pages/installer/%s.html.twig', $currentStep);
+        $templatePath = $this->getParameter('kernel.project_dir').'/templates/'.$template;
+        if (!is_file($templatePath)) {
+            $template = 'pages/installer/diagnostics.html.twig';
+        }
+
+        return $this->render($template, [
             'steps' => self::STEPS,
             'current_step' => $currentStep,
             'diagnostics' => $this->gatherDiagnostics(),

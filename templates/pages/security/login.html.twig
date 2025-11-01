@@ -1,0 +1,53 @@
+{% extends 'layouts/security.html.twig' %}
+
+{% block security_title 'Sign in · aavion Studio' %}
+
+{% block security_main %}
+    <div class="layout-stack">
+        <header class="layout-stack--tight">
+            <h1 class="text-heading text-2xl">Welcome back</h1>
+            <p class="text-text-muted">Sign in with your administrator credentials.</p>
+        </header>
+
+        {% if error %}
+            <div class="alert alert--danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {% endif %}
+
+        <form action="{{ path('app_login') }}" method="post" class="layout-stack" novalidate>
+            {% include 'partials/forms/fields/input.html.twig' with {
+                label: 'Email address',
+                id: 'email',
+                name: 'email',
+                type: 'email',
+                value: last_username,
+                autocomplete: 'email',
+                required: true
+            } %}
+
+            {% include 'partials/forms/fields/input.html.twig' with {
+                label: 'Password',
+                id: 'password',
+                name: 'password',
+                type: 'password',
+                autocomplete: 'current-password',
+                required: true
+            } %}
+
+            <label class="flex items-center gap-2 text-sm text-text">
+                <input type="checkbox" name="_remember_me" value="1" class="h-4 w-4">
+                <span>Remember this device</span>
+            </label>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            {% include 'partials/forms/buttons/primary.html.twig' with {
+                label: 'Sign in'
+            } %}
+        </form>
+
+        <p class="text-sm text-text-muted">
+            Need access? Contact an administrator.<br>
+            <a class="text-primary hover:text-primary-darker" href="{{ path('app_password_forgot') }}">Forgot password?</a>
+        </p>
+    </div>
+{% endblock %}

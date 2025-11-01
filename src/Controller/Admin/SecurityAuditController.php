@@ -14,6 +14,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 final class SecurityAuditController extends AbstractController
 {
+    use AdminNavigationTrait;
+
     public function __construct(
         private readonly SecurityAuditRepository $auditRepository,
     ) {
@@ -36,7 +38,7 @@ final class SecurityAuditController extends AbstractController
             $to,
         );
 
-        return $this->render('admin/security/audit.html.twig', [
+        return $this->render('pages/admin/security/audit.html.twig', array_merge([
             'entries' => $entries,
             'actions' => $this->auditRepository->getAvailableActions(),
             'filters' => [
@@ -46,7 +48,7 @@ final class SecurityAuditController extends AbstractController
                 'from' => $request->query->get('from'),
                 'to' => $request->query->get('to'),
             ],
-        ]);
+        ], $this->adminNavigation('security', 'audit')));
     }
 
     private function parseDate(string $value): ?\DateTimeImmutable

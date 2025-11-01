@@ -281,4 +281,5 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Captured follow-up implementation steps (template restructure, menu builder, localization helper, CSS foundation) to unblock upcoming Roadmap Step 4 work.
 - Implemented CSS foundation: added base tokens/utilities under `assets/styles/base/`, introduced generated `imports.css`, hooked it into `tailwind:build`, and wired `StylesheetImportsBuilder` into asset rebuild/sync flows for theme/module overrides.
 - Extended asset rebuild to clear `public/assets` before generating new bundles, preventing hashed clutter during runtime rebuilds.
+- Migrated Twig structure to layered layouts/partials/pages, updated controllers to supply navigation context, and refreshed installer/admin/security pages to use the new design tokens. Aligned PHPUnut-tests accordingly.
 - Added navigation, tables, overlays, feedback, loaders, and token utility layers under `assets/styles/base/`, ensuring all shared UI patterns rely on the new theme variables.

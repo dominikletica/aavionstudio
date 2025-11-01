@@ -121,6 +121,7 @@ Scope: Roadmap Step 4 prep (Session 3)
 
 ## Progress
 - 2025-10-31: Seeded `assets/styles/base/*` with theme tokens plus typography, layout, form, navigation, table, overlay, feedback, loader, and utility layers; introduced generated `imports.css` via `StylesheetImportsBuilder` and hooked it into `app:assets:sync` / rebuild pipeline.
+- 2025-10-31: Added developer documentation for the template cascade, partial contracts, and theming workflow (`docs/dev/sections/ui/templates-and-themes.md`) and linked it from the developer manual.
 
 ## Decisions
 - Locale-specific templates live under locale-prefixed directories (`templates/de/footer.html.twig`), falling back to the shared version when the locale folder is missing.

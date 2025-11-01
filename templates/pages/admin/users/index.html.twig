@@ -1,0 +1,94 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block admin_title 'Users · Admin · aavion Studio' %}
+
+{% block main %}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert--{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <header class="surface layout-stack shadow-sm p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="layout-stack--tight">
+                <h1 class="text-heading text-2xl">User management</h1>
+                <p class="text-text-muted">Search, filter, and manage user accounts.</p>
+            </div>
+            <a class="btn btn-primary" href="{{ path('admin_user_invitations') }}">Manage invitations</a>
+        </div>
+        <form class="layout-stack" method="get" action="{{ path('admin_users_index') }}">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                    <label class="form-label" for="q">Search</label>
+                    <input class="w-full rounded-sm border border-border px-4 py-3" type="text" id="q" name="q" value="{{ query }}" placeholder="Email or name">
+                </div>
+                <div>
+                    <label class="form-label" for="status">Status</label>
+                    <select class="w-full rounded-sm border border-border px-4 py-3" id="status" name="status">
+                        <option value="">All statuses</option>
+                        {% set statuses = {
+                            'active': 'Active',
+                            'pending': 'Pending',
+                            'disabled': 'Disabled',
+                            'archived': 'Archived'
+                        } %}
+                        {% for key, labelText in statuses %}
+                            <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ labelText }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <button class="btn btn-primary" type="submit">Apply filters</button>
+            </div>
+        </form>
+    </header>
+
+    <section class="surface shadow-sm">
+        {% if users is empty %}
+            <div class="table__empty">No users found for the selected filters.</div>
+        {% else %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Roles</th>
+                    <th>Last login</th>
+                    <th class="w-24"></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.display_name }}</td>
+                        <td><span class="badge badge--info">{{ user.status }}</span></td>
+                        <td>
+                            {% if user.roles is empty %}
+                                <span class="badge badge--info">ROLE_VIEWER</span>
+                            {% else %}
+                                {% for role in user.roles %}
+                                    <span class="badge badge--info">{{ role }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.last_login_at %}
+                                {{ user.last_login_at|date('Y-m-d H:i') }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            <a class="text-primary hover:text-primary-darker font-medium" href="{{ path('admin_users_edit', { id: user.id }) }}">Edit</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </section>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block admin_title 'User invitations · Admin · aavion Studio' %}
+
+{% block main %}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert--{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+        <header class="surface shadow-sm layout-stack p-6">
+        <div class="layout-stack--tight">
+            <h1 class="text-heading text-2xl">User Invitations</h1>
+            <p class="text-text-muted">Invite administrators and manage pending tokens.</p>
+        </div>
+    </header>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        <section class="surface shadow-sm layout-stack p-6">
+            <div class="layout-stack--tight">
+                <h1 class="text-heading text-2xl">Create invitation</h1>
+                <p class="text-text-muted">Send an email invitation to a new administrator.</p>
+            </div>
+            {{ form_start(createForm, { attr: { class: 'layout-stack' } }) }}
+                {{ form_row(createForm.email) }}
+                {% include 'partials/forms/buttons/primary.html.twig' with {
+                    label: 'Send invitation'
+                } %}
+            {{ form_end(createForm) }}
+        </section>
+
+        <section class="surface shadow-sm layout-stack p-6">
+            <div class="layout-stack--tight">
+                <h2 class="text-heading text-xl">Pending invitations</h2>
+                <p class="text-text-muted">Invitations expire automatically after the configured window.</p>
+            </div>
+            {% if invitations is empty %}
+                <p class="text-text-muted">No invitations have been sent yet.</p>
+            {% else %}
+                <table class="table table--compact">
+                    <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Expires</th>
+                        <th class="w-24"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for invitation in invitations %}
+                        <tr>
+                            <td>{{ invitation.email }}</td>
+                            <td><span class="badge badge--info">{{ invitation.status }}</span></td>
+                            <td>{{ invitation.createdAt|date('Y-m-d H:i') }}</td>
+                            <td>{{ invitation.expiresAt|date('Y-m-d H:i') }}</td>
+                            <td class="text-right">
+                                {% if invitation.status == 'pending' %}
+                                    <form method="post" action="{{ path('admin_user_invitations_cancel', { id: invitation.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('cancel_invite_' ~ invitation.id) }}">
+                                        <button class="btn btn-secondary" type="submit">Cancel</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

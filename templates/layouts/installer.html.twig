@@ -1,0 +1,26 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block title 'aavion Studio Setup Wizard' %}
+
+{% block main %}
+    <div class="max-w-4xl mx-auto py-12 layout-stack">
+        <header class="layout-stack--tight text-center">
+            <h1 class="text-heading text-3xl">aavion Studio • Setup Wizard</h1>
+            <p class="text-text-muted">This guided flow prepares the core platform. Styling is minimal so themes can extend it later.</p>
+        </header>
+        <nav aria-label="Wizard Steps" class="surface shadow-sm p-4 rounded-md">
+            <ol class="flex flex-wrap items-center justify-center gap-4">
+                {% for step in steps %}
+                    <li>
+                        <a class="btn {{ step == current_step ? 'btn-primary' : 'btn-secondary' }}" href="{{ path('app_installer', { step: step }) }}">
+                            {{ step|title }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ol>
+        </nav>
+        <section class="surface shadow-sm p-6 layout-stack">
+            {% block installer_content %}{% endblock %}
+        </section>
+    </div>
+{% endblock %}

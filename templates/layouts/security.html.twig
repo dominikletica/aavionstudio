@@ -1,0 +1,18 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block title %}{% block security_title %}Sign in · aavion Studio{% endblock %}{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex flex-col items-center justify-center bg-surface">
+    <main class="w-full max-w-md">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert--{{ label }} mb-4">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+        <div class="surface shadow-md layout-stack">
+            {% block security_main %}{% endblock %}
+        </div>
+    </main>
+</div>
+{% endblock %}

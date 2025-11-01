@@ -1,0 +1,14 @@
+<div class="form-field" data-state="{{ state|default('default') }}">
+    {% if label is defined %}<label class="form-label" for="{{ id }}">{{ label }}</label>{% endif %}
+    <input
+        type="{{ type|default('text') }}"
+        id="{{ id }}"
+        name="{{ name }}"
+        value="{{ value|default('') }}"
+        {% if placeholder is defined %}placeholder="{{ placeholder }}"{% endif %}
+        class="{{ classes|default('') }}"
+        {% if required|default(false) %}required{% endif %}
+        {% if autocomplete is defined %}autocomplete="{{ autocomplete }}"{% endif %}
+    >
+    {% if help is defined %}<p class="form-help">{{ help }}</p>{% endif %}
+</div>

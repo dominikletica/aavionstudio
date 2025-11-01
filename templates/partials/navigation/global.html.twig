@@ -1,0 +1,10 @@
+<nav class="nav-bar" aria-label="Main navigation">
+    {% for item in menu.items %}
+        <a class="nav-bar__item" href="{{ item.url }}" aria-current="{{ item.active ? 'page' : 'false' }}">
+            {% if item.icon %}
+                <i class="ti ti-{{ item.icon }}"></i>
+            {% endif %}
+            <span>{{ item.label }}</span>
+        </a>
+    {% endfor %}
+</nav>

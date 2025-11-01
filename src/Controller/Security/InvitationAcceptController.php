@@ -68,7 +68,7 @@ final class InvitationAcceptController extends AbstractController
 
         render:
 
-        return $this->render('invitation/accept.html.twig', [
+        return $this->render('pages/security/invitation/accept.html.twig', [
             'acceptForm' => $form->createView(),
             'email' => $invitation->email,
         ]);

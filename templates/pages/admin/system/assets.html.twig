@@ -1,0 +1,167 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block admin_title 'Asset Pipeline · Admin · aavion Studio' %}
+
+{% block main %}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert--{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <section class="surface shadow-sm layout-stack p-6">
+        <header class="layout-stack--tight">
+            <h1 class="text-heading text-2xl">Asset pipeline</h1>
+            <p class="text-text-muted">Synchronise mirrored assets and trigger Tailwind/importmap rebuilds without CLI access.</p>
+        </header>
+
+        <div class="grid gap-4 md:grid-cols-2">
+            <form method="post" action="{{ path('admin_assets_rebuild') }}" class="surface-muted rounded-md p-4 layout-stack--tight">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_assets_rebuild') }}">
+                <input type="hidden" name="mode" value="queue">
+                <h2 class="text-heading text-lg">Queue rebuild</h2>
+                <p class="text-sm text-text-muted">Dispatches a Messenger job. The rebuild runs in the background.</p>
+                <label class="inline-flex items-center gap-2 text-sm text-text">
+                    <input type="checkbox" name="force" value="1" class="h-4 w-4">
+                    Force rebuild even if state hashes match
+                </label>
+                <button class="btn btn-secondary" type="submit">Queue background job</button>
+            </form>
+
+            <form method="post" action="{{ path('admin_assets_rebuild') }}" class="surface-muted rounded-md p-4 layout-stack--tight">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_assets_rebuild') }}">
+                <input type="hidden" name="mode" value="sync">
+                <h2 class="text-heading text-lg">Run now</h2>
+                <p class="text-sm text-text-muted">Executes the pipeline in this request. Use sparingly to avoid long wait times.</p>
+                <label class="inline-flex items-center gap-2 text-sm text-text">
+                    <input type="checkbox" name="force" value="1" class="h-4 w-4">
+                    Force rebuild even if state hashes match
+                </label>
+                <button class="btn btn-primary" type="submit">Rebuild immediately</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="surface shadow-sm p-6 layout-stack">
+        <h2 class="text-heading text-xl">Discovered modules</h2>
+        <p class="text-text-muted text-sm">Manifests registered under <code>/modules</code>. Locked modules cannot be toggled.</p>
+        <div class="overflow-x-auto">
+            <table class="table table--compact">
+                <thead>
+                <tr>
+                    <th>Slug</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th class="w-32 text-right">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for module in modules %}
+                    {% set locked = module.metadata.locked ?? false %}
+                    <tr>
+                        <td class="font-mono text-xs text-text-muted">{{ module.slug }}</td>
+                        <td>{{ module.name }}</td>
+                        <td>{{ module.description ?: '—' }}</td>
+                        <td>
+                            {% if module.enabled %}
+                                <span class="badge badge--success">enabled</span>
+                            {% else %}
+                                <span class="badge">disabled</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right text-sm">
+                            {% if locked %}
+                                <span class="text-text-muted">locked</span>
+                            {% else %}
+                                <form method="post" action="{{ path('admin_assets_module_toggle', { slug: module.slug }) }}" class="inline-flex items-center gap-2">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('module_state_' ~ module.slug) }}">
+                                    <input type="hidden" name="action" value="{{ module.enabled ? 'disable' : 'enable' }}">
+                                    <button type="submit" class="btn btn-secondary">
+                                        {{ module.enabled ? 'Disable' : 'Enable' }}
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="table__empty">No modules discovered.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="surface shadow-sm p-6 layout-stack">
+        <h2 class="text-heading text-xl">Discovered themes</h2>
+        <p class="text-text-muted text-sm">Themes registered under <code>/themes</code>. One theme is active at a time.</p>
+        <div class="overflow-x-auto">
+            <table class="table table--compact">
+                <thead>
+                <tr>
+                    <th>Slug</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th class="w-40 text-right">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for theme in themes %}
+                    {% set locked = theme.metadata.locked ?? false %}
+                    <tr>
+                        <td class="font-mono text-xs text-text-muted">{{ theme.slug }}</td>
+                        <td>{{ theme.name }}</td>
+                        <td>
+                            {% if theme.active %}
+                                <span class="badge badge--success">active</span>
+                            {% elseif theme.enabled %}
+                                <span class="badge badge--info">enabled</span>
+                            {% else %}
+                                <span class="badge">disabled</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right space-x-2">
+                            {% if locked %}
+                                <span class="text-text-muted">locked</span>
+                            {% else %}
+                                <form method="post" action="{{ path('admin_assets_theme_toggle', { slug: theme.slug }) }}" class="inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('theme_state_' ~ theme.slug) }}">
+                                    <input type="hidden" name="action" value="{{ theme.enabled ? 'disable' : 'enable' }}">
+                                    <button type="submit" class="btn btn-secondary">{{ theme.enabled ? 'Disable' : 'Enable' }}</button>
+                                </form>
+                                {% if theme.enabled and theme.slug != 'base' %}
+                                    <form method="post" action="{{ path('admin_assets_theme_activate', { slug: theme.slug }) }}" class="inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('theme_activate_' ~ theme.slug) }}">
+                                        <button type="submit" class="btn btn-primary">{{ theme.active ? 'Active' : 'Set active' }}</button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="table__empty">No themes discovered.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="surface shadow-sm p-6 layout-stack">
+        <h2 class="text-heading text-xl">Checksum snapshot</h2>
+        <p class="text-text-muted text-sm">Useful when debugging why a rebuild was triggered.</p>
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <h3 class="text-sm font-medium text-heading">Current filesystem state</h3>
+                <pre class="mt-2 max-h-64 overflow-auto rounded-md bg-surface-muted p-3 text-xs font-mono">{{ current_state|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-heading">Persisted state (last rebuild)</h3>
+                <pre class="mt-2 max-h-64 overflow-auto rounded-md bg-surface-muted p-3 text-xs font-mono">{{ persisted_state|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+            </div>
+        </div>
+    </section>
+{% endblock %}

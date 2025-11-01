@@ -32,7 +32,7 @@
     input:focus,
     textarea:focus,
     select:focus {
-        @apply outline-none border-primary ring-2 ring-[color:var(--ring-primary)];
+        @apply outline-none border-primary ring-2 ring-primary;
     }
 
     input:disabled,
@@ -66,7 +66,7 @@
     .form-field[data-state='error'] input,
     .form-field[data-state='error'] textarea,
     .form-field[data-state='error'] select {
-        @apply border-danger text-danger ring-1 ring-[color:var(--color-danger-muted)];
+        @apply border-danger text-danger ring-1 ring-danger-muted;
     }
 
     .form-field[data-state='success'] .form-label {
@@ -76,6 +76,6 @@
     .form-field[data-state='success'] input,
     .form-field[data-state='success'] textarea,
     .form-field[data-state='success'] select {
-        @apply border-success text-success ring-1 ring-[color:var(--color-success-muted)];
+        @apply border-success text-success ring-1 ring-success-muted;
     }
 }

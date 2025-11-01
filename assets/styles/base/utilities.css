@@ -39,6 +39,26 @@
         background-color: var(--color-surface);
     }
 
+    .text-primary {
+        color: var(--color-primary);
+    }
+
+    .text-primary-darker {
+        color: var(--color-primary-darker);
+    }
+
+    .text-primary-foreground {
+        color: var(--color-primary-foreground);
+    }
+
+    .bg-primary {
+        background-color: var(--color-primary);
+    }
+
+    .bg-primary-darker {
+        background-color: var(--color-primary-darker);
+    }
+
     .bg-surface-muted {
         background-color: var(--color-surface-muted);
     }
@@ -117,6 +137,14 @@
 
     .ring-primary {
         --tw-ring-color: var(--ring-primary);
+    }
+
+    .ring-success-muted {
+        --tw-ring-color: var(--color-success-muted);
+    }
+
+    .ring-danger-muted {
+        --tw-ring-color: var(--color-danger-muted);
     }
 
 }

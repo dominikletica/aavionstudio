@@ -1,0 +1,154 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% block admin_title 'Edit user · Admin · aavion Studio' %}
+
+{% block main %}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert--{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <a class="text-primary hover:text-primary-darker" href="{{ path('admin_users_index') }}">← Back to users</a>
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
+        <section class="surface shadow-sm layout-stack p-6">
+            <header class="layout-stack--tight">
+                <h1 class="text-heading text-2xl">Edit user</h1>
+                <p class="text-text-muted">
+                    Email: <strong class="text-text">{{ user.email }}</strong><br>
+                    Created: {{ user.created_at ? user.created_at|date('Y-m-d H:i') : '—' }}<br>
+                    Last updated: {{ user.updated_at ? user.updated_at|date('Y-m-d H:i') : '—' }}
+                </p>
+            </header>
+
+            {{ form_start(form, { attr: { class: 'layout-stack' } }) }}
+                {{ form_row(form.display_name) }}
+                {{ form_row(form.locale) }}
+                {{ form_row(form.timezone) }}
+                {{ form_row(form.status) }}
+                {{ form_row(form.roles) }}
+                {% include 'partials/forms/buttons/primary.html.twig' with {
+                    label: 'Save changes'
+                } %}
+            {{ form_end(form) }}
+
+            <hr class="divider">
+
+            <form method="post" action="{{ path('admin_users_password_reset', { id: user.id }) }}" class="layout-stack--tight">
+                <input type="hidden" name="_token" value="{{ csrf_token('admin_user_password_reset_' ~ user.id) }}">
+                <p class="text-text-muted">Send a one-time password reset email to this user.</p>
+                <button type="submit" class="btn btn-secondary">Send password reset email</button>
+            </form>
+        </section>
+
+        <section class="surface shadow-sm layout-stack p-6">
+            <h2 class="text-heading text-xl">API keys</h2>
+            <p class="text-text-muted">Generate scoped API keys for integrations. Secrets are shown once—store them securely.</p>
+
+            {{ form_start(apiKeyForm, { attr: { class: 'layout-stack--tight' } }) }}
+                {{ form_row(apiKeyForm.label) }}
+                {{ form_row(apiKeyForm.expires_at) }}
+                {{ form_row(apiKeyForm.scopes) }}
+                {% include 'partials/forms/buttons/primary.html.twig' with {
+                    label: 'Create API key'
+                } %}
+            {{ form_end(apiKeyForm) }}
+
+            {% if apiKeys is not empty %}
+                <table class="table table--compact">
+                    <thead>
+                        <tr>
+                            <th>Label</th>
+                            <th>Created</th>
+                            <th>Status</th>
+                            <th class="w-32 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key in apiKeys %}
+                            <tr>
+                                <td>{{ key.label }}</td>
+                                <td>{{ key.createdAt|date('Y-m-d H:i') }}</td>
+                                <td>
+                                    {% if key.revokedAt %}
+                                        <span class="badge badge--danger">revoked</span>
+                                    {% elseif key.expiresAt and key.expiresAt < date() %}
+                                        <span class="badge badge--warning">expired</span>
+                                    {% elseif key.isActive %}
+                                        <span class="badge badge--success">active</span>
+                                    {% else %}
+                                        <span class="badge">inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right">
+                                    {% if key.revokedAt is null %}
+                                        <form method="post" action="{{ path('admin_users_api_keys_revoke', { userId: user.id, apiKeyId: key.id }) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('revoke_api_key_' ~ key.id) }}">
+                                            <button class="btn btn-secondary" type="submit">Revoke</button>
+                                        </form>
+                                    {% else %}
+                                        <small class="text-text-muted">{{ key.revokedAt|date('Y-m-d H:i') }}</small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-text-muted">No API keys issued yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="surface shadow-sm layout-stack p-6 lg:col-span-2">
+            <h2 class="text-heading text-xl">Project access</h2>
+            <p class="text-text-muted">Override roles or add project-specific capabilities. Leave role empty to inherit global permissions.</p>
+
+            {% if projects is empty %}
+                <p class="text-text-muted">No projects available yet.</p>
+            {% else %}
+                {{ form_start(projectMembershipForm) }}
+                    <table class="table table--compact">
+                        <thead>
+                        <tr>
+                            <th>Project</th>
+                            <th>Role</th>
+                            <th>Extra capabilities</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for assignment in projectMembershipForm.assignments %}
+                            {% set projectId = assignment.project_id.vars.value %}
+                            {% set project = null %}
+                            {% for item in projects %}
+                                {% if item.id == projectId %}
+                                    {% set project = item %}
+                                {% endif %}
+                            {% endfor %}
+                            <tr>
+                                {% set projectName = project is not null ? project.name : 'Unknown project' %}
+                                {% set projectSlug = project is not null ? project.slug : projectId %}
+                                <td>
+                                    <strong>{{ projectName }}</strong><br>
+                                    <span class="text-text-muted text-sm">{{ projectSlug }}</span>
+                                    {{ form_widget(assignment.project_id) }}
+                                </td>
+                                <td>
+                                    {{ form_widget(assignment.role) }}
+                                    {{ form_errors(assignment.role) }}
+                                </td>
+                                <td>
+                                    {{ form_widget(assignment.capabilities) }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="flex justify-end mt-4">
+                        <button class="btn btn-primary" type="submit">Save project access</button>
+                    </div>
+                {{ form_end(projectMembershipForm) }}
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}
