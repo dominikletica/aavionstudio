@@ -27,6 +27,27 @@
         @apply ml-auto flex gap-2;
     }
 
+    .alert__body {
+        @apply flex flex-col gap-2 text-sm leading-relaxed text-text;
+    }
+
+    .alert__description {
+        @apply text-sm leading-relaxed text-text;
+    }
+
+    .alert--has-illustration {
+        @apply items-center gap-6;
+    }
+
+    .alert__illustration {
+        @apply hidden w-24 shrink-0 items-center justify-center sm:flex;
+    }
+
+    .alert__illustration img,
+    .alert__illustration svg {
+        @apply h-full w-full object-contain;
+    }
+
     .badge {
         @apply inline-flex items-center gap-1 rounded-full border border-border bg-surface-muted px-3 py-1 text-xs font-medium text-text uppercase tracking-wide;
     }

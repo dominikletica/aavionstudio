@@ -1,0 +1,21 @@
+{% set description = description|default(null) %}
+
+<label class="form-switch">
+    <input
+        type="checkbox"
+        id="{{ id }}"
+        name="{{ name }}"
+        value="{{ value|default('1') }}"
+        class="form-switch__input {{ classes|default('') }}"
+        {% if checked|default(false) %}checked{% endif %}
+        {% if required|default(false) %}required{% endif %}
+        {% if disabled|default(false) %}disabled{% endif %}
+    >
+    <span class="form-switch__track" aria-hidden="true">
+        <span class="form-switch__thumb"></span>
+    </span>
+    <span class="form-switch__label-group">
+        <span class="form-switch__label">{{ label|default('') }}</span>
+        {% if description %}<span class="form-switch__description">{{ description }}</span>{% endif %}
+    </span>
+</label>

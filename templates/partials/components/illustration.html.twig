@@ -1,0 +1,43 @@
+{% import 'partials/components/_macros.html.twig' as component %}
+
+{#
+    Context:
+    - name: required illustration slug (e.g. "a-day-at-the-park")
+    - alt: accessible text when illustration is decorative image (defaults to empty string)
+    - variant: sm|md|lg (default: md)
+    - as: HTML tag (default: div)
+    - attributes: map of extra HTML attributes
+#}
+
+{% set name = name|default(null) %}
+{% if name is empty %}
+    {% set name = 'placeholder' %}
+{% endif %}
+
+{% set variant = variant|default('md') %}
+{% set as = as|default('div') %}
+{% set attributes = attributes|default({}) %}
+
+{% set classes = ['illustration', 'illustration-' ~ name] %}
+{% if variant != 'md' %}
+    {% set classes = classes|merge(['illustration--' ~ variant]) %}
+{% endif %}
+
+{% set attr_class = attributes.class|default('') %}
+{% set attributes = attributes|merge({
+    class: (classes|join(' ') ~ ' ' ~ attr_class)|trim
+}) %}
+
+{% if alt is defined and alt is not same as('') %}
+    {% set attributes = attributes|merge({
+        role: attributes.role|default('img'),
+        'aria-label': attributes['aria-label']|default(alt)
+    }) %}
+{% else %}
+    {% set attributes = attributes|merge({
+        role: attributes.role|default('presentation'),
+        'aria-hidden': attributes['aria-hidden']|default('true')
+    }) %}
+{% endif %}
+
+<{{ as }}{{ component.attributes(attributes) }}></{{ as }}>

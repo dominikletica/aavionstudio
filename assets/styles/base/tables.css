@@ -1,4 +1,16 @@
 @layer components {
+    .table-container {
+        @apply overflow-hidden rounded-lg border border-border bg-surface shadow-sm;
+    }
+
+    .table-container + .table-container {
+        @apply mt-6;
+    }
+
+    .table-scroll {
+        @apply overflow-x-auto;
+    }
+
     .table {
         width: 100%;
         border-collapse: separate;
@@ -63,6 +75,11 @@
         @apply flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-surface px-4 py-3 shadow-xs;
     }
 
+    .table-toolbar__left,
+    .table-toolbar__right {
+        @apply flex flex-wrap items-center gap-3;
+    }
+
     .table-pagination {
         @apply inline-flex items-center gap-2 text-sm text-text;
     }
@@ -78,5 +95,13 @@
     .table-pagination__button:hover:not(:disabled),
     .table-pagination__button:focus-visible:not(:disabled) {
         @apply border-primary text-primary;
+    }
+
+    .table-pagination__summary {
+        @apply text-sm text-text-muted;
+    }
+
+    .table__footer {
+        @apply flex flex-wrap items-center justify-between gap-3 border-t border-border bg-surface px-4 py-3 text-sm text-text-muted;
     }
 }

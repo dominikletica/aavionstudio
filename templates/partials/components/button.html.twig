@@ -1,0 +1,85 @@
+{% import 'partials/components/_macros.html.twig' as component %}
+
+{#
+    Context options:
+    - label: string label rendered inside the button (fallbacks to `content`)
+    - content: raw HTML content for the button body
+    - icon: Tabler icon name or full CSS class (e.g. "ti-plus" or "ti ti-plus")
+    - icon_position: "start" (default) or "end"
+    - badge: optional small badge value rendered to the right
+    - variant: primary|secondary|ghost (default: primary)
+    - size: sm|md|lg (default: md)
+    - block: true to stretch to full width
+    - tag: button|a|span (default: button)
+    - url: href for anchor buttons (or provide in attributes)
+    - type: button type attribute (defaults to "button")
+    - attributes: map of extra HTML attributes
+#}
+
+{% set variant = variant|default('primary') %}
+{% set size = size|default('md') %}
+{% set tag = tag|default('button') %}
+{% set icon_position = icon_position|default('start') %}
+{% set block = block|default(false) %}
+{% set attributes = attributes|default({}) %}
+
+{% set classes = ['btn'] %}
+{% if variant %}
+    {% set classes = classes|merge(['btn-' ~ variant]) %}
+{% endif %}
+{% if size != 'md' %}
+    {% set classes = classes|merge(['btn--' ~ size]) %}
+{% endif %}
+{% if block %}
+    {% set classes = classes|merge(['btn--full']) %}
+{% endif %}
+
+{% set attr_class = attributes.class|default('') %}
+{% set attributes = attributes|merge({
+    class: (classes|join(' ') ~ ' ' ~ attr_class)|trim
+}) %}
+
+{% if tag == 'a' %}
+    {% set attributes = attributes|merge({ href: url|default(attributes.href|default('#')) }) %}
+{% elseif tag == 'button' %}
+    {% set attributes = attributes|merge({ type: type|default('button') }) %}
+{% endif %}
+
+{% set icon_html = icon_html|default(null) %}
+{% if icon is defined and icon is not empty %}
+    {% if icon matches '/^ti /' %}
+        {% set icon_html = '<i class="' ~ icon ~ '"></i>' %}
+    {% elseif icon matches '/^ti-/' %}
+        {% set icon_html = '<i class="ti ' ~ icon ~ '"></i>' %}
+    {% else %}
+        {% set icon_html = '<i class="ti ti-' ~ icon ~ '"></i>' %}
+    {% endif %}
+{% endif %}
+
+{% set badge = badge|default(null) %}
+{% set button_label = content|default(label|default('Button')) %}
+
+{% if tag == 'a' %}
+<a{{ component.attributes(attributes) }}>
+{% elseif tag == 'button' %}
+<button{{ component.attributes(attributes) }}>
+{% else %}
+<{{ tag }}{{ component.attributes(attributes) }}>
+{% endif %}
+    {% if icon_html and icon_position == 'start' %}
+        <span class="btn__icon">{{ icon_html|raw }}</span>
+    {% endif %}
+    <span class="btn__label">{{ button_label|raw }}</span>
+    {% if badge %}
+        <span class="badge badge--primary">{{ badge }}</span>
+    {% endif %}
+    {% if icon_html and icon_position == 'end' %}
+        <span class="btn__icon">{{ icon_html|raw }}</span>
+    {% endif %}
+{% if tag == 'a' %}
+</a>
+{% elseif tag == 'button' %}
+</button>
+{% else %}
+</{{ tag }}>
+{% endif %}

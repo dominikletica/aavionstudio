@@ -1,0 +1,77 @@
+{% import 'partials/components/_macros.html.twig' as component %}
+
+{#
+    Context options:
+    - variant: surface|muted|emphasis (default: surface)
+    - interactive: bool for hover elevation
+    - eyebrow: small label above the title
+    - title: heading text
+    - subtitle: supporting text below title
+    - media: raw HTML for media block
+    - illustration: src for an illustration image
+    - illustration_alt: alt text for illustration
+    - content/body: HTML content for the card body
+    - actions: array of button definitions rendered in the footer
+    - footer: raw HTML footer content (below actions)
+    - attributes: additional HTML attributes for wrapper
+#}
+
+{% set variant = variant|default('surface') %}
+{% set interactive = interactive|default(false) %}
+{% set attributes = attributes|default({}) %}
+
+{% set classes = ['card'] %}
+{% if variant and variant != 'surface' %}
+    {% set classes = classes|merge(['card--' ~ variant]) %}
+{% endif %}
+{% if interactive %}
+    {% set classes = classes|merge(['card--interactive']) %}
+{% endif %}
+
+{% set attr_class = attributes.class|default('') %}
+{% set attributes = attributes|merge({
+    class: (classes|join(' ') ~ ' ' ~ attr_class)|trim
+}) %}
+
+{% set eyebrow = eyebrow|default(null) %}
+{% set title = title|default(null) %}
+{% set subtitle = subtitle|default(null) %}
+{% set body = body|default(content|default(null)) %}
+
+<article{{ component.attributes(attributes) }}>
+    {% if illustration %}
+        <figure class="card__media">
+            <img src="{{ illustration }}" alt="{{ illustration_alt|default('') }}">
+        </figure>
+    {% elseif media is defined and media %}
+        <div class="card__media">{{ media|raw }}</div>
+    {% endif %}
+
+    <header class="card__header">
+        {% if eyebrow %}
+            <p class="card__eyebrow">{{ eyebrow }}</p>
+        {% endif %}
+        {% if title %}
+            <h3 class="card__title">{{ title }}</h3>
+        {% endif %}
+        {% if subtitle %}
+            <p class="card__subtitle">{{ subtitle }}</p>
+        {% endif %}
+    </header>
+
+    {% if body %}
+        <div class="card__body">{{ body|raw }}</div>
+    {% endif %}
+
+    {% if actions is defined and actions is not empty %}
+        <div class="card__actions">
+            {% for action in actions %}
+                {% include 'partials/components/button.html.twig' with action only %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if footer is defined and footer %}
+        <footer class="card__footer">{{ footer|raw }}</footer>
+    {% endif %}
+</article>

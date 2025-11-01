@@ -33,15 +33,68 @@ Pages extend one of the layouts and render the actual content (`templates/pages/
 Partial templates live under `templates/partials/` and are grouped by feature:
 
 - `partials/alerts/alerts.html.twig` – flash message stack injected by the root shell.
-- `partials/header/header.html.twig` – global header with menu + action hooks.
-- `partials/header/header.html.twig` renders a full-width hero header with optional background image/logo, overlay heading (`header_heading`) and subtitle. Admin/project/entity layouts can pass `header_image`, `header_logo`, `header_heading`, and `header_subtitle` to customise the hero.
+- `partials/header/header.html.twig` – full-width hero header with optional background image/logo, overlay heading (`header_heading`) and subtitle. Admin/project/entity layouts can pass `header_image`, `header_logo`, `header_heading`, and `header_subtitle` to customise the hero.
 - `partials/navigation/*.html.twig` – global/header menus and sidebar sections.
 - `partials/forms/fields/*.html.twig` – form inputs; use `{% include %}` in pages or embed in custom form themes.
 - `partials/forms/buttons/*.html.twig` – button presets (`btn btn-primary`, etc.).
-- `partials/feedback/*.html.twig` (planned) – alerts, toasts, badges (currently exposed via CSS utility classes).
+- `partials/feedback/*.html.twig` – legacy flash/alert snippets (replaced by the component collection below).
+- `partials/components/*.html.twig` – reusable building blocks (buttons, alerts, cards, empty states) with Tailwind-ready styling and illustration slots.
 - `partials/head/importmap.html.twig` – default importmap injection, can be overridden by themes.
 
 When adding new partials, document expected context variables at the top of the file or in this guide.
+
+### 3.1 Component partials
+
+The component collection keeps installer/admin views lean while ensuring consistent styling. Available building blocks:
+
+| Partial | Purpose | Notes |
+|---------|---------|-------|
+| `partials/components/button.html.twig` | Generic button element | Supports `variant`, `size`, `icon`, `badge`, anchor rendering (`tag: 'a'`) and full-width buttons. |
+| `partials/components/alert.html.twig` | Inline alert / callout | Accepts `variant`, optional `illustration`, `title`, `description`, and an `actions` array (rendered via the button component). |
+| `partials/components/card.html.twig` | Content card | Provides `eyebrow`, `title`, `subtitle`, `body`, optional `media`/`illustration`, call-to-action buttons and footer slot. Enable `interactive` for hover elevation. |
+| `partials/components/empty_state.html.twig` | Empty state / onboarding panel | Centres an illustration with supporting copy and action buttons. Use `variant: 'muted'` for softer backgrounds. |
+| `partials/components/illustration.html.twig` | Utility wrapper for CSS-based illustrations | Maps `name` to the generated `.illustration-*` class (e.g. `name: 'a-day-at-the-park'`). Variants (`sm`, `md`, `lg`) adjust the minimum height. |
+| `partials/components/table.html.twig` | Data table shell | Handles toolbar slots, zebra/compact variants, empty states, pagination summary, and optional custom cell templates via `column.template`. |
+| `partials/components/modal.html.twig` | Modal dialog shell | Provides backdrop, header (title/subtitle), body slot, and footer actions. Hooks (`data-action`) can be wired to Stimulus later. |
+| `partials/components/drawer.html.twig` | Drawer/off-canvas panel | Mirrors the modal API for side panels (`side: 'left'|'right'`). |
+| `partials/components/section_heading.html.twig` | Section header | Consistent heading + description + action buttons for dashboard sections. |
+
+Components accept an `attributes` map for custom HTML attributes. Example:
+
+```twig
+{% include 'partials/components/card.html.twig' with {
+    eyebrow: 'Project',
+    title: project.name,
+    subtitle: project.slug,
+    body: render_markdown(project.summary),
+    actions: [
+        {
+            label: 'View details',
+            tag: 'a',
+            url: path('admin_project_show', { id: project.id }),
+            variant: 'secondary'
+        },
+        {
+            label: 'Open',
+            tag: 'a',
+            url: path('project_overview', { slug: project.slug }),
+            icon: 'arrow-right'
+        }
+    ]
+} only %}
+```
+
+### 3.2 Form field partials
+
+Form controls now ship with dedicated Twig snippets:
+
+- `partials/forms/fields/input.html.twig` – text-based inputs (`type` defaults to `text`).
+- `partials/forms/fields/textarea.html.twig` – multi-line input with `rows`, `help`, and state handling.
+- `partials/forms/fields/select.html.twig` – dropdown selector driven by an `options` array.
+- `partials/forms/fields/checkbox.html.twig` – checkbox with optional description copy.
+- `partials/forms/fields/switch.html.twig` – accessible toggle switch matching the Tailwind tokens.
+
+Each field accepts `label`, `help`, `state`, `required`, and additional HTML attributes. Combine them with the component buttons/card partials to assemble full forms and tables quickly.
 
 ## 4. Theme tokens & Tailwind utilities
 

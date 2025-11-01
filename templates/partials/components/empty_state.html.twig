@@ -1,0 +1,46 @@
+{% import 'partials/components/_macros.html.twig' as component %}
+
+{#
+    Context options:
+    - title: heading text
+    - description: supporting body copy
+    - illustration: optional image path
+    - illustration_alt: alt text for the image
+    - actions: array of button definitions
+    - variant: surface|muted (default: surface)
+    - attributes: extra HTML attributes
+#}
+
+{% set variant = variant|default('surface') %}
+{% set attributes = attributes|default({}) %}
+
+{% set classes = ['empty-state'] %}
+{% if variant == 'muted' %}
+    {% set classes = classes|merge(['empty-state--muted']) %}
+{% endif %}
+
+{% set attr_class = attributes.class|default('') %}
+{% set attributes = attributes|merge({
+    class: (classes|join(' ') ~ ' ' ~ attr_class)|trim
+}) %}
+
+<section{{ component.attributes(attributes) }}>
+    {% if illustration %}
+        <figure class="empty-state__illustration">
+            <img src="{{ illustration }}" alt="{{ illustration_alt|default('') }}">
+        </figure>
+    {% endif %}
+    {% if title %}
+        <h2 class="empty-state__title">{{ title }}</h2>
+    {% endif %}
+    {% if description %}
+        <p class="empty-state__description">{{ description|raw }}</p>
+    {% endif %}
+    {% if actions is defined and actions is not empty %}
+        <div class="empty-state__actions">
+            {% for action in actions %}
+                {% include 'partials/components/button.html.twig' with action only %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</section>

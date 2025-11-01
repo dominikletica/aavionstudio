@@ -1,0 +1,63 @@
+{% import 'partials/components/_macros.html.twig' as component %}
+
+{#
+    Context:
+    - id: optional id for the drawer container
+    - side: left|right (default right)
+    - state: visible|hidden (default hidden)
+    - title / subtitle: header text
+    - body / content: main content
+    - footer_actions: array of button definitions
+    - footer: raw HTML appended to footer
+    - attributes: extra attributes for drawer element
+#}
+
+{% set id = id|default(null) %}
+{% set side = side|default('right') %}
+{% set state = state|default('hidden') %}
+{% set attributes = attributes|default({}) %}
+
+{% set attributes = attributes|merge({
+    class: (attributes.class|default('drawer')),
+    'data-side': attributes['data-side']|default(side),
+    'data-state': attributes['data-state']|default(state)
+}) %}
+
+{% if id %}
+    {% set attributes = attributes|merge({ id: id }) %}
+{% endif %}
+
+<div class="backdrop" data-state="{{ state }}"></div>
+<aside{{ component.attributes(attributes) }}>
+    <header class="drawer__header">
+        <div class="drawer__heading">
+            {% if title is defined and title %}
+                <h2 class="modal__title">{{ title }}</h2>
+            {% endif %}
+            {% if subtitle is defined and subtitle %}
+                <p class="modal__subtitle">{{ subtitle }}</p>
+            {% endif %}
+        </div>
+        <button type="button" class="btn btn-ghost" data-action="drawer.close">
+            <span class="sr-only">Close</span>
+            <span class="btn__icon">&times;</span>
+        </button>
+    </header>
+    <div class="drawer__body">
+        {{ body|default(content|default(''))|raw }}
+    </div>
+    {% if footer_actions is defined and footer_actions or footer is defined and footer %}
+        <footer class="drawer__footer">
+            {% if footer_actions is defined %}
+                <div class="drawer__actions">
+                    {% for action in footer_actions %}
+                        {% include 'partials/components/button.html.twig' with action only %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if footer is defined and footer %}
+                {{ footer|raw }}
+            {% endif %}
+        </footer>
+    {% endif %}
+</aside>
