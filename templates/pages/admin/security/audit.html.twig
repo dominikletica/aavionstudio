@@ -1,0 +1,129 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% set admin_title = 'Admin: Security Audit Log'|trans %}
+
+{% block content %}
+    {% include 'partials/components/section_heading.html.twig' with {
+        title: 'Security audit log'|trans,
+        subtitle: 'Track authentication attempts and permission changes.'|trans
+    } only %}
+
+    <div class="layout-stack layout-stack--loose">
+        {% set filter_form %}
+            <form class="layout-stack layout-stack--tight" method="get" action="{{ path('admin_security_audit') }}">
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    {% include 'partials/forms/fields/input.html.twig' with {
+                        id: 'audit-filter-actor',
+                        name: 'actor',
+                        label: 'Actor'|trans,
+                        value: filters.actor,
+                        placeholder: 'User ID or email'|trans
+                    } only %}
+
+                    {% include 'partials/forms/fields/input.html.twig' with {
+                        id: 'audit-filter-subject',
+                        name: 'subject',
+                        label: 'Subject'|trans,
+                        value: filters.subject,
+                        placeholder: 'Subject ID'|trans
+                    } only %}
+
+                    {% set action_options = [{ value: '', label: 'All actions'|trans }] %}
+                    {% for actionKey in actions %}
+                        {% set action_options = action_options|merge([{ value: actionKey, label: actionKey|trans }]) %}
+                    {% endfor %}
+
+                    {% include 'partials/forms/fields/select.html.twig' with {
+                        id: 'audit-filter-action',
+                        name: 'action',
+                        label: 'Action'|trans,
+                        value: filters.action,
+                        options: action_options
+                    } only %}
+
+                    {% include 'partials/forms/fields/input.html.twig' with {
+                        id: 'audit-filter-from',
+                        name: 'from',
+                        label: 'From'|trans,
+                        type: 'datetime-local',
+                        value: filters.from
+                    } only %}
+
+                    {% include 'partials/forms/fields/input.html.twig' with {
+                        id: 'audit-filter-to',
+                        name: 'to',
+                        label: 'To'|trans,
+                        type: 'datetime-local',
+                        value: filters.to
+                    } only %}
+                </div>
+                <div class="flex justify-end gap-3">
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'Clear'|trans,
+                        tag: 'a',
+                        variant: 'ghost',
+                        url: path('admin_security_audit'),
+                        icon: 'eraser'
+                    }, with_context = false) }}
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'Apply filters'|trans,
+                        type: 'submit',
+                        icon: 'filter'
+                    }, with_context = false) }}
+                </div>
+            </form>
+        {% endset %}
+
+        {% include 'partials/components/card.html.twig' with {
+            eyebrow: 'Filters'|trans,
+            title: 'Refine results'|trans,
+            body: filter_form
+        } only %}
+
+        {% if entries is empty %}
+            {% include 'partials/components/card.html.twig' with {
+                variant: 'muted',
+                title: 'Security events'|trans,
+                body: include('partials/components/empty_state.html.twig', {
+                    title: 'No security events'|trans,
+                    description: 'Adjust the filters or check back after more user activity.'|trans
+                }, with_context = false)|raw
+            } only %}
+        {% else %}
+            {% set entry_rows = [] %}
+            {% for entry in entries %}
+                {% set action_badge %}
+                    <span class="badge badge--info">{{ entry.action|trans }}</span>
+                {% endset %}
+                {% set context_markup %}
+                    <code class="text-xs">{{ entry.context|json_encode(constant('JSON_PRETTY_PRINT')) }}</code>
+                {% endset %}
+                {% set entry_rows = entry_rows|merge([{
+                    timestamp: entry.occurred_at|date('Y-m-d H:i:s'),
+                    actor: entry.actor_email ?? entry.actor_name ?? 'system'|trans,
+                    action: action_badge,
+                    subject: entry.subject_id ?? 'n/a'|trans,
+                    ip: entry.context.ip ?? 'n/a'|trans,
+                    context: context_markup
+                }]) %}
+            {% endfor %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Log'|trans,
+                title: 'Security events'|trans,
+                body: include('partials/components/table.html.twig', {
+                    columns: [
+                        { label: 'Timestamp'|trans, key: 'timestamp', class: 'whitespace-nowrap text-sm text-text-muted' },
+                        { label: 'Actor'|trans, key: 'actor' },
+                        { label: 'Type'|trans, key: 'action', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'Subject'|trans, key: 'subject' },
+                        { label: 'IP'|trans, key: 'ip' },
+                        { label: 'Context'|trans, key: 'context', template: 'partials/components/table/value_raw.html.twig' }
+                    ],
+                    rows: entry_rows,
+                    compact: true
+                }, with_context = false)|raw
+            } only %}
+        {% endif %}
+    </div>
+{% endblock %}

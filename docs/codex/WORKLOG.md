@@ -60,6 +60,7 @@
 - [ ] Integrate JSON schema validation into draft workflow
 - [ ] Build admin schema builder + template preview tools
 - [ ] Write unit tests for schema validation + template resolution helpers
+- [ ] Model `error_page` entity schema (markdown body, header injects) and surface per-status mapping in system settings referencing default-project entities.
 
 ### Feat: Draft & Commit Workflow (P0 | L)
 - [ ] Build DraftManager service with autosave + optimistic locking
@@ -151,6 +152,8 @@
 - [ ] Wire API key-based authentication/authorization into the public HTTP API once the write/read endpoints land (reuse `ApiKeyManager` issuance data).
 - [ ] Add smoke checks for `/admin/api/api-keys` in the release workflow to ensure serialization changes remain backwards compatible.
 - [ ] Hook future module-/theme-installers into the asset rebuild scheduler 
+- [ ] Replace STDERR fallback logging in `App\Controller\Error\ErrorController` with PSR logger + context metadata.
+- [ ] Add unit coverage for `App\Error\ErrorPageResolver` once project-specific mappings land.
 
 ## Roadmap To Next Release
 Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
@@ -172,6 +175,7 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - [Feat: Draft & Commit Workflow](./notes/feat-draft-commit.md)
 - [Feat: Resolver Pipeline](./notes/feat-resolver-pipeline.md)
 - [Feat: Snapshot & API Delivery](./notes/feat-snapshot-api.md)
+- [Feat: Theming & Templating](./notes/feat-theming-templating.md)
 - [Feat: Frontend Delivery & Rendering](./notes/feat-frontend-delivery.md)
 - [Feat: User Management & Access Control](./notes/feat-user-access.md)
 - [Feat: Admin Studio UI](./notes/feat-admin-studio.md)
@@ -274,3 +278,28 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Aligned persistence by introducing `app_theme_state`, `ThemeStateSynchronizer`, and `ThemeStateRepository`, seeded the locked `base` theme, wired module/theme enable toggles + rebuild triggers into the admin UI, and documented the new Twig cascade (active theme → modules → base).
 - Cleared the Symfony cache before pipeline sync, purged stale mirrored assets, warmed the cache afterwards, and added regression coverage so rebuilds immediately reflect newly introduced module/theme manifests.
 - Updated `app:assets:sync` to clear the cache internally and respawn with a fresh container so direct console runs mirror newly added module/theme assets on the first pass; documented the command change and added regression coverage for the self-refresh flow.
+
+### 2025-10-31 (Session 3)
+- Consolidated theming/templating strategy into [`feat-theming-templating`](notes/feat-theming-templating.md), covering Twig cascade, CSS token plan without PostCSS, locale-aware template variants, and menu builder expectations.
+- Captured follow-up implementation steps (template restructure, menu builder, localization helper, CSS foundation) to unblock upcoming Roadmap Step 4 work.
+- Implemented CSS foundation: added base tokens/utilities under `assets/styles/base/`, introduced generated `imports.css`, hooked it into `tailwind:build`, and wired `StylesheetImportsBuilder` into asset rebuild/sync flows for theme/module overrides.
+- Extended asset rebuild to clear `public/assets` before generating new bundles, preventing hashed clutter during runtime rebuilds.
+- Migrated Twig structure to layered layouts/partials/pages, updated controllers to supply navigation context, and refreshed installer/admin/security pages to use the new design tokens. Aligned PHPUnut-tests accordingly.
+- Added navigation, tables, overlays, feedback, loaders, and token utility layers under `assets/styles/base/`, ensuring all shared UI patterns rely on the new theme variables.
+- Implemented custom error flow: registered `App\Controller\Error\ErrorController`, added project-aware resolver + Twig layouts (`templates/layouts/project.html.twig`, `templates/pages/error/*.html.twig`), and wired production/debug handling with functional tests.
+- Shifted the fallback markup to the new `layouts/entity.html.twig` shell with optional sidebar capture so future entity-driven error pages can render without manual Twig overrides.
+- Documented the error pipeline in `docs/dev/sections/ui/templates-and-themes.md` and updated the class map for the new controller/service.
+- Follow-ups captured for Roadmap Step 4: menu builder hierarchy, admin-specific navigation swap, project-defined footer content editor, project-configurable error template mappings + PSR logger integration, and entity layout sidebars that render only when populated.
+- Realigned `layouts/project.html.twig` and `layouts/admin.html.twig` to use the shared sidebar hooks (`sidebar_top`, `sidebar_nav`, `sidebar_bottom`) and removed the sidebar block from `layouts/base.html.twig` to keep installer/security pages single-column by default. Admin now extends the entity layout and injects its header via the new `layout_header` block to stay in sync with future entity/page behaviour.
+- Normalised the base/default layout contract: added safe defaults for title variables, centralised sidebar rendering around `sidebar_menu`, restored error-page debug blocks via `error_intro` overrides, wrapped the installer view in `<main>`, and refreshed functional tests to match the unified `content` block strategy.
+- Refined the global hero header with background image support, admin body class, translated hero headings/subtitles, and a contrast navigation variant that doubles as the styling baseline for future admin/project/entity theming.
+- Replaced the deprecated Doctrine `postConnect` listener with a DBAL middleware so SQLite busy-timeouts and the `user_brain` attachment run without deprecation noise and are reused by the installer diagnostics.
+- Seeded a component library (`templates/partials/components/…`) covering buttons, alerts, cards, and empty states with optional illustration slots plus matching CSS tokens for card and empty-state layouts.
+- Hardened the table component macro so generated attributes remain raw HTML (fixes `data-testid` selectors) and brought the installer diagnostics test back in sync with the new markup.
+- Introduced the `_theme_demo` route (`App\Controller\DemoController`) rendering `templates/pages/demo.html.twig` to showcase Tailwind-driven components, plus functional coverage to guard the preview.
+- Updated developer docs (`docs/dev/sections/ui/templates-and-themes.md`) and the class map with the demo route, ensuring theming contributors can discover the showcase page quickly.
+- Added `.codex/render.php` so any route can be rendered from the CLI while honouring the theme → module → default cascade.
+- Extended `_theme_demo` with Stimulus, Turbo, CodeMirror, and Alpine samples (including the `_theme_demo_tip` fragment) and refreshed tests/documentation accordingly.
+- Filled installer environment, storage, admin, and summary pages with actionable guidance so the new layouts are exercised with realistic copy.
+- Mapped the Codemirror `twig` option to the built-in HTML highlighter so the showcase editor renders without missing-module errors.
+- Refreshed admin user, invitation, security, and asset pipeline templates to reuse the new cards, tables, and form components for consistent styling ahead of Roadmap #4.

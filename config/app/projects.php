@@ -12,6 +12,7 @@ return [
             'navigation' => [
                 'auto_include' => true,
             ],
+            'errors' => [],
         ],
     ],
 ];

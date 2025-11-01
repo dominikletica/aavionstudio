@@ -1,0 +1,54 @@
+{% import 'partials/components/_macros.html.twig' as component %}
+
+{#
+    Context options:
+    - variant: info|success|warning|danger|none (default: info)
+    - title: heading text
+    - description/content: HTML description
+    - illustration: optional asset path for an illustration image (string)
+    - illustration_alt: alt text for the illustration
+    - actions: array of button definitions (label, url, variant, attributes, icon, size, etc.)
+    - attributes: additional HTML attributes for the wrapper
+#}
+
+{% set variant = variant|default('info') %}
+{% set attributes = attributes|default({}) %}
+{% set classes = ['alert'] %}
+
+{% if variant and variant != 'none' %}
+    {% set classes = classes|merge(['alert--' ~ variant]) %}
+{% endif %}
+{% if illustration is defined and illustration %}
+    {% set classes = classes|merge(['alert--has-illustration']) %}
+{% endif %}
+
+{% set attr_class = attributes.class|default('') %}
+{% set attributes = attributes|merge({
+    class: (classes|join(' ') ~ ' ' ~ attr_class)|trim
+}) %}
+
+{% set title = title|default(null) %}
+{% set description = description|default(content|default(null)) %}
+
+<div{{ component.attributes(attributes) }}>
+{% if illustration is defined and illustration %}
+        <figure class="alert__illustration">
+            <img src="{{ illustration }}" alt="{{ illustration_alt|default('') }}">
+        </figure>
+    {% endif %}
+    <div class="alert__body">
+        {% if title %}
+            <div class="alert__title">{{ title }}</div>
+        {% endif %}
+        {% if description %}
+            <div class="alert__description">{{ description|raw }}</div>
+        {% endif %}
+    </div>
+    {% if actions is defined and actions is not empty %}
+        <div class="alert__actions">
+            {% for action in actions %}
+                {% include 'partials/components/button.html.twig' with action only %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

@@ -1,0 +1,22 @@
+{% set options = options|default([]) %}
+
+<div class="form-field" data-state="{{ state|default('default') }}">
+    {% if label is defined %}<label class="form-label" for="{{ id }}">{{ label }}</label>{% endif %}
+    <select
+        id="{{ id }}"
+        name="{{ name }}"
+        class="{{ classes|default('') }}"
+        {% if required|default(false) %}required{% endif %}
+        {% if disabled|default(false) %}disabled{% endif %}
+    >
+        {% if placeholder is defined %}
+            <option value="" disabled{% if value is not defined or value is same as('') %} selected{% endif %}>{{ placeholder }}</option>
+        {% endif %}
+        {% for option in options %}
+            {% set option_value = option.value is defined ? option.value : option %}
+            {% set option_label = option.label is defined ? option.label : option %}
+            <option value="{{ option_value }}"{% if value is defined and value == option_value %} selected{% endif %}>{{ option_label }}</option>
+        {% endfor %}
+    </select>
+    {% if help is defined %}<p class="form-help">{{ help }}</p>{% endif %}
+</div>

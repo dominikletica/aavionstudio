@@ -1,0 +1,21 @@
+{% extends 'layouts/security.html.twig' %}
+
+{% set security_title = 'Password Reset'|trans %}
+
+{% block content %}
+    <header class="layout-stack--tight">
+        <h1 class="text-heading text-2xl">{{ 'Reset your password'|trans }}</h1>
+        <p class="text-text-muted">{{ 'Enter the email address linked to your account. If it exists, you will receive a reset link.'|trans }}</p>
+    </header>
+
+    {{ form_start(requestForm, { attr: { class: 'layout-stack' } }) }}
+        {{ form_row(requestForm.email) }}
+        {% include 'partials/forms/buttons/primary.html.twig' with {
+            label: 'Send reset link'|trans
+        } %}
+    {{ form_end(requestForm) }}
+
+    <p class="text-sm text-text-muted">
+        <a class="text-primary hover:text-primary-darker" href="{{ path('app_login') }}">{{ 'Back to sign in'|trans }}</a>
+    </p>
+{% endblock %}

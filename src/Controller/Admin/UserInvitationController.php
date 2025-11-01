@@ -23,6 +23,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 final class UserInvitationController extends AbstractController
 {
+    use AdminNavigationTrait;
+
     public function __construct(
         private readonly UserInvitationManager $invitationManager,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
@@ -66,10 +68,10 @@ final class UserInvitationController extends AbstractController
 
         $invitations = $this->invitationManager->list();
 
-        return $this->render('admin/users/invitations/index.html.twig', [
+        return $this->render('pages/admin/users/invitations/index.html.twig', array_merge([
             'createForm' => $form->createView(),
             'invitations' => $invitations,
-        ]);
+        ], $this->adminNavigation('users', 'invitations')));
     }
 
     #[Route('/admin/users/invitations/{id}/cancel', name: 'admin_user_invitations_cancel', methods: ['POST'])]

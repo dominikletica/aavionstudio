@@ -19,6 +19,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 final class SystemAssetsController extends AbstractController
 {
+    use AdminNavigationTrait;
+
     public function __construct(
         private readonly AssetRebuildScheduler $scheduler,
         private readonly AssetStateTracker $stateTracker,
@@ -32,12 +34,15 @@ final class SystemAssetsController extends AbstractController
     #[Route('/admin/system/assets', name: 'admin_assets_overview', methods: ['GET'])]
     public function overview(): Response
     {
-        return $this->render('admin/system/assets.html.twig', [
+        $currentState = $this->stateTracker->currentState();
+        $persistedState = $this->stateTracker->readPersistedState();
+
+        return $this->render('pages/admin/system/assets.html.twig', array_merge([
             'modules' => $this->moduleRegistry->all(),
             'themes' => $this->themeRegistry->all(),
-            'current_state' => $this->stateTracker->currentState(),
-            'persisted_state' => $this->stateTracker->readPersistedState(),
-        ]);
+            'current_state' => $currentState,
+            'persisted_state' => $persistedState,
+        ], $this->adminNavigation('system', 'assets')));
     }
 
     #[Route('/admin/system/assets/rebuild', name: 'admin_assets_rebuild', methods: ['POST'])]

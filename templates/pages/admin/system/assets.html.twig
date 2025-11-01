@@ -1,0 +1,211 @@
+{% extends 'layouts/admin.html.twig' %}
+
+{% set admin_title = 'Admin: Asset Pipeline'|trans %}
+
+{% block content %}
+    {% include 'partials/components/section_heading.html.twig' with {
+        title: 'Asset pipeline'|trans,
+        subtitle: 'Synchronise mirrored assets and trigger Tailwind/importmap rebuilds without CLI access.'|trans
+    } only %}
+
+    <div class="layout-stack layout-stack--loose">
+        <div class="grid gap-4 md:grid-cols-2">
+            {% set queue_form %}
+                <form method="post" action="{{ path('admin_assets_rebuild') }}" class="layout-stack layout-stack--tight">
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin_assets_rebuild') }}">
+                    <input type="hidden" name="mode" value="queue">
+                    <label class="form-choice">
+                        <input type="checkbox" name="force" value="1" class="form-choice__input">
+                        <span class="form-choice__label">{{ 'Force rebuild even if state hashes match'|trans }}</span>
+                    </label>
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'Queue background job'|trans,
+                        type: 'submit',
+                        variant: 'secondary',
+                        icon: 'clock'
+                    }, with_context = false) }}
+                </form>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Async'|trans,
+                title: 'Queue rebuild'|trans,
+                subtitle: 'Dispatches a Messenger job. The rebuild runs in the background.'|trans,
+                body: queue_form
+            } only %}
+
+            {% set run_form %}
+                <form method="post" action="{{ path('admin_assets_rebuild') }}" class="layout-stack layout-stack--tight">
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin_assets_rebuild') }}">
+                    <input type="hidden" name="mode" value="sync">
+                    <label class="form-choice">
+                        <input type="checkbox" name="force" value="1" class="form-choice__input">
+                        <span class="form-choice__label">{{ 'Force rebuild even if state hashes match'|trans }}</span>
+                    </label>
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'Rebuild immediately'|trans,
+                        type: 'submit',
+                        icon: 'bolt'
+                    }, with_context = false) }}
+                </form>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Sync'|trans,
+                title: 'Run now'|trans,
+                subtitle: 'Executes the pipeline in this request. Use sparingly to avoid long wait times.'|trans,
+                body: run_form
+            } only %}
+        </div>
+
+        {% set module_rows = [] %}
+        {% for module in modules %}
+            {% set locked = module.metadata.locked ?? false %}
+            {% set status_badge %}
+                {% if module.enabled %}
+                    <span class="badge badge--success">{{ 'enabled'|trans }}</span>
+                {% else %}
+                    <span class="badge">{{ 'disabled'|trans }}</span>
+                {% endif %}
+            {% endset %}
+            {% if locked %}
+                {% set module_actions %}
+                    <span class="text-xs uppercase tracking-wide text-text-muted">{{ 'locked'|trans }}</span>
+                {% endset %}
+            {% else %}
+                {% set module_actions %}
+                    <form method="post" action="{{ path('admin_assets_module_toggle', { slug: module.slug }) }}" class="inline-flex">
+                        <input type="hidden" name="_token" value="{{ csrf_token('module_state_' ~ module.slug) }}">
+                        <input type="hidden" name="action" value="{{ module.enabled ? 'disable' : 'enable' }}">
+                        <button type="submit" class="btn btn-secondary btn--sm">
+                            {{ module.enabled ? 'Disable'|trans : 'Enable'|trans }}
+                        </button>
+                    </form>
+                {% endset %}
+            {% endif %}
+            {% set module_rows = module_rows|merge([{
+                slug: '<code class="text-xs text-text-muted">' ~ module.slug ~ '</code>',
+                name: module.name,
+                description: module.description ?: '—',
+                status: status_badge,
+                actions: module_actions
+            }]) %}
+        {% endfor %}
+
+        {% include 'partials/components/card.html.twig' with {
+            eyebrow: 'Modules'|trans,
+            title: 'Discovered modules'|trans,
+            subtitle: 'Manifests registered under <code>/modules</code>. Locked modules cannot be toggled.'|trans|raw,
+            body: module_rows is empty
+                ? include('partials/components/empty_state.html.twig', {
+                    title: 'No modules discovered'|trans,
+                    description: 'Drop module manifests into the /modules directory to extend the system.'|trans
+                }, with_context = false)
+                : include('partials/components/table.html.twig', {
+                    columns: [
+                        { label: 'Slug'|trans, key: 'slug', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'Name'|trans, key: 'name', class: 'font-medium' },
+                        { label: 'Description'|trans, key: 'description' },
+                        { label: 'Status'|trans, key: 'status', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'Actions'|trans, key: 'actions', template: 'partials/components/table/value_raw.html.twig', class: 'text-right whitespace-nowrap' }
+                    ],
+                    rows: module_rows,
+                    compact: true
+                }, with_context = false)
+        } only %}
+
+        {% set theme_rows = [] %}
+        {% for theme in themes %}
+            {% set locked = theme.metadata.locked ?? false %}
+            {% set status_badge %}
+                {% if theme.active %}
+                    <span class="badge badge--success">{{ 'active'|trans }}</span>
+                {% elseif theme.enabled %}
+                    <span class="badge badge--info">{{ 'enabled'|trans }}</span>
+                {% else %}
+                    <span class="badge">{{ 'disabled'|trans }}</span>
+                {% endif %}
+            {% endset %}
+            {% if locked %}
+                {% set theme_actions %}
+                    <span class="text-xs uppercase tracking-wide text-text-muted">{{ 'locked'|trans }}</span>
+                {% endset %}
+            {% else %}
+                {% set toggle_button %}
+                    <form method="post" action="{{ path('admin_assets_theme_toggle', { slug: theme.slug }) }}" class="inline-flex">
+                        <input type="hidden" name="_token" value="{{ csrf_token('theme_state_' ~ theme.slug) }}">
+                        <input type="hidden" name="action" value="{{ theme.enabled ? 'disable' : 'enable' }}">
+                        <button type="submit" class="btn btn-secondary btn--sm">{{ theme.enabled ? 'Disable'|trans : 'Enable'|trans }}</button>
+                    </form>
+                {% endset %}
+                {% if theme.enabled and theme.slug != 'base' %}
+                    {% set activate_button %}
+                        <form method="post" action="{{ path('admin_assets_theme_activate', { slug: theme.slug }) }}" class="inline-flex">
+                            <input type="hidden" name="_token" value="{{ csrf_token('theme_activate_' ~ theme.slug) }}">
+                            <button type="submit" class="btn btn-primary btn--sm">{{ theme.active ? 'Active'|trans : 'Set active'|trans }}</button>
+                        </form>
+                    {% endset %}
+                    {% set theme_actions %}
+                        <div class="flex flex-wrap justify-end gap-2">
+                            {{ toggle_button|raw }}
+                            {{ activate_button|raw }}
+                        </div>
+                    {% endset %}
+                {% else %}
+                    {% set theme_actions %}
+                        <div class="flex justify-end">
+                            {{ toggle_button|raw }}
+                        </div>
+                    {% endset %}
+                {% endif %}
+            {% endif %}
+            {% set theme_rows = theme_rows|merge([{
+                slug: '<code class="text-xs text-text-muted">' ~ theme.slug ~ '</code>',
+                name: theme.name,
+                status: status_badge,
+                actions: theme_actions
+            }]) %}
+        {% endfor %}
+
+        {% include 'partials/components/card.html.twig' with {
+            eyebrow: 'Themes'|trans,
+            title: 'Discovered themes'|trans,
+            subtitle: 'Themes registered under <code>/themes</code>. One theme is active at a time.'|trans|raw,
+            body: theme_rows is empty
+                ? include('partials/components/empty_state.html.twig', {
+                    title: 'No themes discovered'|trans,
+                    description: 'Add theme manifests to the /themes directory or enable them via modules.'|trans
+                }, with_context = false)
+                : include('partials/components/table.html.twig', {
+                    columns: [
+                        { label: 'Slug'|trans, key: 'slug', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'Name'|trans, key: 'name', class: 'font-medium' },
+                        { label: 'Status'|trans, key: 'status', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'Actions'|trans, key: 'actions', template: 'partials/components/table/value_raw.html.twig', class: 'text-right whitespace-nowrap' }
+                    ],
+                    rows: theme_rows,
+                    compact: true
+                }, with_context = false)
+        } only %}
+
+        {% set checksum_body %}
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="layout-stack layout-stack--tight">
+                    <h3 class="text-sm font-medium text-heading">{{ 'Current filesystem state'|trans }}</h3>
+                    <pre class="max-h-64 overflow-auto rounded-md bg-surface-muted p-3 text-xs font-mono">{{ current_state|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                </div>
+                <div class="layout-stack layout-stack--tight">
+                    <h3 class="text-sm font-medium text-heading">{{ 'Persisted state (last rebuild)'|trans }}</h3>
+                    <pre class="max-h-64 overflow-auto rounded-md bg-surface-muted p-3 text-xs font-mono">{{ persisted_state|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                </div>
+            </div>
+        {% endset %}
+
+        {% include 'partials/components/card.html.twig' with {
+            eyebrow: 'Diagnostics'|trans,
+            title: 'Checksum snapshot'|trans,
+            subtitle: 'Useful when debugging why a rebuild was triggered.'|trans,
+            body: checksum_body
+        } only %}
+    </div>
+{% endblock %}

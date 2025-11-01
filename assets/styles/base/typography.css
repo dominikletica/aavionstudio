@@ -1,0 +1,59 @@
+@layer base {
+    :root {
+        color-scheme: light;
+    }
+
+    html {
+        text-rendering: optimizeLegibility;
+        @apply font-sans text-base;
+    }
+
+    body {
+        color: var(--color-text);
+        @apply bg-surface antialiased;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        color: var(--color-heading);
+        @apply font-heading font-semibold tracking-tight;
+    }
+
+    h1 {
+        @apply text-3xl md:text-4xl;
+    }
+
+    h2 {
+        @apply text-2xl md:text-3xl;
+    }
+
+    h3 {
+        @apply text-xl md:text-2xl;
+    }
+
+    a {
+        @apply text-primary transition-colors;
+    }
+
+    a:hover,
+    a:focus {
+        @apply text-primary-darker;
+    }
+
+    strong {
+        color: var(--color-text-strong);
+        @apply font-semibold;
+    }
+
+    code {
+        @apply font-mono text-sm bg-surface-muted px-1 py-0.5 rounded-xs;
+    }
+
+    pre {
+        @apply font-mono bg-surface-muted p-6 rounded-md overflow-auto;
+    }
+}

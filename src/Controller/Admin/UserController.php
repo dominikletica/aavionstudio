@@ -27,6 +27,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[IsGranted('ROLE_ADMIN')]
 final class UserController extends AbstractController
 {
+    use AdminNavigationTrait;
+
     public function __construct(
         private readonly UserAdminManager $userAdminManager,
         private readonly ApiKeyManager $apiKeyManager,
@@ -50,11 +52,11 @@ final class UserController extends AbstractController
             $status !== '' ? $status : null
         );
 
-        return $this->render('admin/users/index.html.twig', [
+        return $this->render('pages/admin/users/index.html.twig', array_merge([
             'users' => $users,
             'query' => $query,
             'status' => $status,
-        ]);
+        ], $this->adminNavigation('users', 'index')));
     }
 
     #[Route('/admin/users/{id}', name: 'admin_users_edit', requirements: ['id' => '[0-9A-Z]{26}'], methods: ['GET', 'POST'])]
@@ -122,7 +124,7 @@ final class UserController extends AbstractController
                     } catch (\Exception $exception) {
                         $apiKeyForm->get('expires_at')->addError(new FormError('Invalid date/time format.'));
 
-                        return $this->render('admin/users/edit.html.twig', [
+                        return $this->render('pages/admin/users/edit.html.twig', [
                             'form' => $profileForm->createView(),
                             'user' => $user,
                             'apiKeyForm' => $apiKeyForm->createView(),
@@ -207,14 +209,18 @@ final class UserController extends AbstractController
 
         $apiKeys = $this->apiKeyManager->listForUser($id);
 
-        return $this->render('admin/users/edit.html.twig', [
+        render:
+
+        $apiKeys ??= $this->apiKeyManager->listForUser($id);
+
+        return $this->render('pages/admin/users/edit.html.twig', array_merge([
             'form' => $profileForm->createView(),
             'user' => $user,
             'apiKeyForm' => $apiKeyForm->createView(),
             'apiKeys' => $apiKeys,
             'projectMembershipForm' => $projectMembershipForm->createView(),
             'projects' => $projects,
-        ]);
+        ], $this->adminNavigation('users', 'index')));
     }
 
     #[Route('/admin/users/{userId}/api-keys/{apiKeyId}/revoke', name: 'admin_users_api_keys_revoke', requirements: ['userId' => '[0-9A-Z]{26}', 'apiKeyId' => '[0-9A-Z]{26}'], methods: ['POST'])]

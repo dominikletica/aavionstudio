@@ -6,9 +6,9 @@ namespace App\Tests\Doctrine;
 
 use App\Doctrine\Health\SqliteHealthChecker;
 use App\Doctrine\Health\SqliteHealthReport;
-use App\Doctrine\Listener\AttachUserDatabaseListener;
+use App\Doctrine\Middleware\AttachUserDatabaseMiddleware;
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Event\ConnectionEventArgs;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -36,14 +36,15 @@ final class SqliteHealthCheckerTest extends TestCase
         $primaryPath = $this->workspace.'/system.brain';
         $secondaryPath = $this->workspace.'/user.brain';
 
+        $config = new Configuration();
+        $config->setMiddlewares([
+            new AttachUserDatabaseMiddleware($secondaryPath, new Filesystem(), null, 3000),
+        ]);
+
         $connection = DriverManager::getConnection([
             'driver' => 'pdo_sqlite',
             'path' => $primaryPath,
-        ]);
-
-        // Ensure listener ran so that user database exists/attaches.
-        $listener = new AttachUserDatabaseListener($secondaryPath, new Filesystem(), null, 3000);
-        $listener->postConnect(new ConnectionEventArgs($connection));
+        ], $config);
 
         $healthChecker = new SqliteHealthChecker($connection, $secondaryPath);
         $report = $healthChecker->check();

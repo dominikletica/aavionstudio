@@ -1,15 +1,6 @@
 @import "tailwindcss";
 @import "./fonts.css";
+@import "./imports.css";
 @import "./icons.css";
 @import "./illustrations.css";
 @import "./codemirror.css";
-
-@layer components {
-    .cm-wrapper {
-        @apply border border-slate-300 rounded-md bg-white;
-    }
-
-    .cm-editor {
-        @apply text-sm;
-    }
-}

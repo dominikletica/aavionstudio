@@ -98,6 +98,6 @@ final class LoginControllerTest extends WebTestCase
         self::assertResponseRedirects('/login');
         $crawler = $client->followRedirect();
 
-        self::assertGreaterThan(0, $crawler->filter('.error')->count());
+        self::assertGreaterThan(0, $crawler->filter('.alert.alert--danger')->count());
     }
 }

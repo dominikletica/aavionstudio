@@ -1,0 +1,17 @@
+{% extends 'layouts/default.html.twig' %}
+
+{% block title %}
+    {{ security_title is defined and security_title ? security_title ~ ' · ' : 'Sign In · '|trans }}{{ site_title is defined and site_title ? site_title : 'aavion Studio'|trans }}
+{% endblock %}
+
+{% block main %}
+<div class="min-h-screen bg-surface flex flex-col items-center">
+    <main class="container mx-auto max-w-6xl px-6 py-12">
+        <div class="grid gap-8 {{ has_sidebar ? 'lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]' : '' }}">
+            <section class="layout-stack layout-stack--loose">
+                {% block content %}{% endblock %}
+            </section>
+        </div>
+    </main>
+</div>
+{% endblock %}

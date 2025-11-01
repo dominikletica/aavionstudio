@@ -86,6 +86,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 - **Developer Sections:** `docs/dev/sections/` (add guides per subsystem)
 - **Class Map:** [`docs/dev/classmap.md`](classmap.md)
 - **Security Guides:** [`docs/dev/sections/security/`](sections/security/) – invitation onboarding, user management UI, upcoming capability registry deep dives.
+- **UI & Theming:** [`docs/dev/sections/ui/templates-and-themes.md`](sections/ui/templates-and-themes.md) – template cascade, partial contracts, theme overrides.
 
 ---
 

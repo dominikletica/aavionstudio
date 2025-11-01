@@ -1,0 +1,32 @@
+{% import 'partials/components/_macros.html.twig' as component %}
+
+{#
+    Context:
+    - title: main heading (required)
+    - subtitle: supporting text (optional)
+    - actions: array of button definitions (optional)
+    - attributes: extra wrapper attributes
+#}
+
+{% set attributes = attributes|default({}) %}
+{% set classes = ['section-heading'] %}
+{% set attr_class = attributes.class|default('') %}
+{% set attributes = attributes|merge({
+    class: (classes|join(' ') ~ ' ' ~ attr_class)|trim
+}) %}
+
+<div{{ component.attributes(attributes) }}>
+    <div class="section-heading__meta">
+        <h2 class="section-heading__title">{{ title }}</h2>
+        {% if subtitle is defined and subtitle %}
+            <p class="section-heading__subtitle">{{ subtitle }}</p>
+        {% endif %}
+    </div>
+    {% if actions is defined and actions %}
+        <div class="section-heading__actions">
+            {% for action in actions %}
+                {% include 'partials/components/button.html.twig' with action only %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

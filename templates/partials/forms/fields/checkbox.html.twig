@@ -1,0 +1,18 @@
+{% set description = description|default(null) %}
+
+<div class="form-choice" data-state="{{ state|default('default') }}">
+    <input
+        type="checkbox"
+        id="{{ id }}"
+        name="{{ name }}"
+        value="{{ value|default('1') }}"
+        class="form-choice__input {{ classes|default('') }}"
+        {% if checked|default(false) %}checked{% endif %}
+        {% if required|default(false) %}required{% endif %}
+        {% if disabled|default(false) %}disabled{% endif %}
+    >
+    <label class="flex flex-col gap-1" for="{{ id }}">
+        <span class="form-choice__label">{{ label|default('') }}</span>
+        {% if description %}<span class="form-choice__description">{{ description }}</span>{% endif %}
+    </label>
+</div>

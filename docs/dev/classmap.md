@@ -9,11 +9,12 @@
 | Service ID | Class | Responsibility | Notes |
 |------------|-------|----------------|-------|
 | `App\Kernel` | `src/Kernel.php` | Application kernel | Uses MicroKernelTrait |
-| `App\Doctrine\Listener\AttachUserDatabaseListener` | `src/Doctrine/Listener/AttachUserDatabaseListener.php` | Attaches `user.brain` to primary SQLite connection, configures pragmas | Sets `PRAGMA busy_timeout`/`foreign_keys` and ensures secondary DB file exists |
+| `App\Doctrine\Middleware\AttachUserDatabaseMiddleware` | `src/Doctrine/Middleware/AttachUserDatabaseMiddleware.php` | Attaches `user.brain` to primary SQLite connection via DBAL middleware and configures pragmas | Sets `PRAGMA busy_timeout`/`foreign_keys` and ensures secondary DB file exists |
 | `App\Doctrine\Health\SqliteHealthChecker` | `src/Doctrine/Health/SqliteHealthChecker.php` | Reports connection status for system + user SQLite stores | Used in tests/diagnostics to confirm attachment and busy timeout |
 | `App\Installer\DefaultSystemSettings` | `src/Installer/DefaultSystemSettings.php` | Loads shared default settings from `config/app/system_settings.php` | Consumed by migrations/installer to seed baseline values |
 | `App\Installer\DefaultProjects` | `src/Installer/DefaultProjects.php` | Provides default project seeds from `config/app/projects.php` | Initial migration inserts `default` project via this helper |
 | `App\Bootstrap\RootEntryPoint` | `src/Bootstrap/RootEntryPoint.php` | Normalises requests that hit the root fallback (`index.php`) and forwards them to `public/index.php` | Sets compatibility flags for installer rewrite diagnostics |
+| `App\Error\ErrorPageResolver` | `src/Error/ErrorPageResolver.php` | Resolves project/error-code specific Twig templates with fallback chain | Used by `App\Controller\Error\ErrorController`; behaviour covered by `tests/Controller/Error/ErrorControllerTest.php` |
 | `App\Module\ModuleDiscovery` | `src/Module/ModuleDiscovery.php` | Discovers module manifests under `/modules/*/module.php` | Supports drop-in modules without Composer autoload |
 | `App\Module\ModuleRegistry` | `src/Module/ModuleRegistry.php` | Provides module manifest lookup/capability aggregation | Hydrated from `app.modules` parameter during boot |
 | `App\Module\ModuleStateRepository` | `src/Module/ModuleStateRepository.php` | Reads persisted module enable/metadata flags from database | Optional helper for future enable/disable UI |
@@ -25,6 +26,7 @@
 | `App\Twig\TemplatePathConfigurator` | `src/Twig/TemplatePathConfigurator.php` | Rebuilds Twig search paths (active theme → modules → base templates) each boot | Injected into kernel during boot |
 | `App\Asset\AssetStateTracker` | `src/Asset/AssetStateTracker.php` | Hashes module/theme asset trees and stores checksum cache in `var/cache/assets-state.json` | Depends on `ModuleRegistry`/`ThemeRegistry` plus kernel dir parameters |
 | `App\Asset\AssetPipelineRefresher` | `src/Asset/AssetPipelineRefresher.php` | Clears cache, purges mirrored asset targets, then runs sync → importmap → Tailwind → asset-map before warming cache and persisting state hashes | Depends on `AssetStateTracker`, logger, kernel parameters |
+| `App\Asset\StylesheetImportsBuilder` | `src/Asset/StylesheetImportsBuilder.php` | Regenerates `assets/styles/imports.css` combining base tokens, active theme styles, and enabled module styles | Used by asset sync/rebuild pipeline |
 | `App\Service\AssetRebuildScheduler` | `src/Service/AssetRebuildScheduler.php` | Orchestrates synchronous/asynchronous rebuilds; dispatches `AssetRebuildMessage` when changes detected | Uses tracker, Messenger bus, pipeline refresher |
 | `App\MessageHandler\AssetRebuildMessageHandler` | `src/MessageHandler/AssetRebuildMessageHandler.php` | Messenger handler executing queued asset rebuild jobs | Handles `App\Message\AssetRebuildMessage` |
 | `App\Security\User\AppUserProvider` | `src/Security/User/AppUserProvider.php` | Doctrine-backed user provider for authentication | Handles status checks, password upgrades, role loading |
@@ -57,6 +59,9 @@ For each service added to `config/services.yaml` or module manifests, document:
 
 | Route Name | Class | Description | Module |
 |------------|-------|-------------|--------|
+| `framework.error_controller` | `src/Controller/Error/ErrorController.php` | Project-aware HTML error pages with debug-aware diagnostics and Symfony fallback | Core; covered by `tests/Controller/Error/ErrorControllerTest.php` |
+| `_theme_demo` | `src/Controller/DemoController.php` | Renders the UI component showcase/demo route for theming work | Covered by `tests/Controller/DemoControllerTest.php` |
+| `_theme_demo_tip` | `src/Controller/DemoController.php` | Turbo-frame fragment serving rotating theming tips | Covered by `tests/Controller/DemoControllerTest.php` |
 | `app_login` | `src/Controller/Security/LoginController.php` | Handles sign-in form | Core |
 | `app_password_forgot` | `src/Controller/Security/PasswordResetController.php` | Password reset request | Core |
 | `app_password_reset` | `src/Controller/Security/PasswordResetController.php` | Password reset confirmation | Core |
@@ -128,7 +133,7 @@ Record module manifest classes/files and their contributions:
 
 ## Maintenance Tips
 - Whenever adding a new service/controller/command, update this map.
-- Cross-link to relevant drafts in `docs/codex/notes/`.
+- Reference canonical developer or user docs when available instead of transient notes.
 - Include test class references to ease traceability (`tests/...`).
 - Mark deprecated entries clearly when refactoring.
 

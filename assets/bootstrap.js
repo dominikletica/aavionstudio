@@ -1,3 +1,4 @@
+import '@hotwired/turbo';
 import { startStimulusApp } from '@symfony/stimulus-bundle';
 import AlpineModule from 'alpinejs';
 import ApexChartsModule from 'apexcharts';

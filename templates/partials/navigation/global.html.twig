@@ -1,0 +1,27 @@
+{% set contrast = contrast|default(false) %}
+{% set variant = variant|default(null) %}
+{% set nav_classes = ['nav-bar'] %}
+{% if contrast %}
+    {% set nav_classes = nav_classes|merge(['nav-bar--contrast']) %}
+{% endif %}
+{% if variant %}
+    {% set nav_classes = nav_classes|merge(['nav-bar--' ~ variant]) %}
+{% endif %}
+
+<nav class="{{ nav_classes|join(' ') }}" aria-label="Main navigation">
+    {% for item in menu.items %}
+        {% set item_classes = ['nav-bar__item'] %}
+        {% if contrast %}
+            {% set item_classes = item_classes|merge(['nav-bar__item--contrast']) %}
+        {% endif %}
+        {% if variant %}
+            {% set item_classes = item_classes|merge(['nav-bar__item--' ~ variant]) %}
+        {% endif %}
+        <a class="{{ item_classes|join(' ') }}" href="{{ item.url }}" aria-current="{{ item.active ? 'page' : 'false' }}">
+            {% if item.icon %}
+                <i class="ti ti-{{ item.icon }}"></i>
+            {% endif %}
+            <span>{{ item.label }}</span>
+        </a>
+    {% endfor %}
+</nav>

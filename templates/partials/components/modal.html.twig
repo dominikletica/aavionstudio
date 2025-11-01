@@ -1,0 +1,75 @@
+{% import 'partials/components/_macros.html.twig' as component %}
+
+{#
+    Context:
+    - id: identifier for panel (optional)
+    - state: visible|hidden (default hidden)
+    - title / subtitle: header text
+    - eyebrow: small label above title
+    - body / content: modal body HTML
+    - footer_actions: array of button definitions rendered in footer
+    - footer: raw HTML appended to footer (after actions)
+    - close_button: bool to render a basic close button (default true)
+    - attributes: wrapper attrs for modal container
+    - panel_attributes: attrs for modal panel
+#}
+
+{% set state = state|default('hidden') %}
+{% set attributes = attributes|default({}) %}
+{% set panel_attributes = panel_attributes|default({}) %}
+{% set id = id|default(null) %}
+
+{% set attributes = attributes|merge({
+    class: (attributes.class|default('modal')),
+    'data-state': attributes['data-state']|default(state)
+}) %}
+
+{% set panel_classes = ['modal__panel'] %}
+{% set panel_attr_class = panel_attributes.class|default('') %}
+{% set panel_attributes = panel_attributes|merge({
+    class: (panel_classes|join(' ') ~ ' ' ~ panel_attr_class)|trim
+}) %}
+
+{% if id %}
+    {% set attributes = attributes|merge({ id: id }) %}
+{% endif %}
+
+<div class="backdrop" data-state="{{ state }}"></div>
+<div{{ component.attributes(attributes) }} role="dialog" aria-modal="true"{% if title is defined and title %} aria-labelledby="{{ id }}-title"{% endif %}>
+    <div{{ component.attributes(panel_attributes) }}>
+        <header class="modal__header">
+            <div class="modal__heading">
+                {% if eyebrow is defined and eyebrow %}
+                    <p class="card__eyebrow">{{ eyebrow }}</p>
+                {% endif %}
+                {% if title is defined and title %}
+                    <h2 class="modal__title"{% if id %} id="{{ id }}-title"{% endif %}>{{ title }}</h2>
+                {% endif %}
+                {% if subtitle is defined and subtitle %}
+                    <p class="modal__subtitle">{{ subtitle }}</p>
+                {% endif %}
+            </div>
+            {% if close_button|default(true) %}
+                <button type="button" class="btn btn-ghost" data-action="modal.close">
+                    <span class="sr-only">Close</span>
+                    <span class="btn__icon">&times;</span>
+                </button>
+            {% endif %}
+        </header>
+        <div class="modal__body">
+            {{ body|default(content|default(''))|raw }}
+        </div>
+        {% if footer_actions is defined and footer_actions or footer is defined and footer %}
+            <footer class="modal__footer">
+                {% if footer_actions is defined %}
+                    {% for action in footer_actions %}
+                        {% include 'partials/components/button.html.twig' with action only %}
+                    {% endfor %}
+                {% endif %}
+                {% if footer is defined and footer %}
+                    {{ footer|raw }}
+                {% endif %}
+            </footer>
+        {% endif %}
+    </div>
+</div>

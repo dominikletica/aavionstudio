@@ -73,7 +73,7 @@ final class PasswordResetController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        return $this->render('security/password/request.html.twig', [
+        return $this->render('pages/security/password/request.html.twig', [
             'requestForm' => $form->createView(),
         ]);
     }
@@ -129,7 +129,7 @@ final class PasswordResetController extends AbstractController
             $form->addError(new FormError('Please correct the highlighted errors.'));
         }
 
-        return $this->render('security/password/reset.html.twig', [
+        return $this->render('pages/security/password/reset.html.twig', [
             'resetForm' => $form->createView(),
         ]);
     }

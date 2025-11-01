@@ -1,0 +1,131 @@
+@layer components {
+    .alert {
+        @apply flex items-start gap-3 rounded-md border border-border px-4 py-3 text-sm bg-surface shadow-xs text-text;
+    }
+
+    .alert--info {
+        @apply border-info bg-info-muted text-info-foreground;
+    }
+
+    .alert--success {
+        @apply border-success bg-success-muted text-success-foreground;
+    }
+
+    .alert--warning {
+        @apply border-warning bg-warning-muted text-warning-foreground;
+    }
+
+    .alert--danger {
+        @apply border-danger bg-danger-muted text-danger-foreground;
+    }
+
+    .alert__title {
+        @apply font-semibold text-text-strong;
+    }
+
+    .alert__actions {
+        @apply ml-auto flex gap-2;
+    }
+
+    .alert__body {
+        @apply flex flex-col gap-2 text-sm leading-relaxed text-text;
+    }
+
+    .alert__description {
+        @apply text-sm leading-relaxed text-text;
+    }
+
+    .alert--has-illustration {
+        @apply items-center gap-6;
+    }
+
+    .alert__illustration {
+        @apply hidden w-24 shrink-0 items-center justify-center sm:flex;
+    }
+
+    .alert__illustration img,
+    .alert__illustration svg {
+        @apply h-full w-full object-contain;
+    }
+
+    .badge {
+        @apply inline-flex items-center gap-1 rounded-full border border-border bg-surface-muted px-3 py-1 text-xs font-medium text-text uppercase tracking-wide;
+    }
+
+    .badge--primary {
+        border-color: var(--color-primary);
+        background-color: color-mix(in oklch, var(--color-primary) 15%, var(--color-surface) 85%);
+        color: var(--color-primary-darker);
+    }
+
+    .badge--info {
+        @apply border-info bg-info-muted text-info-foreground;
+    }
+
+    .badge--success {
+        @apply border-success bg-success-muted text-success-foreground;
+    }
+
+    .badge--warning {
+        @apply border-warning bg-warning-muted text-warning-foreground;
+    }
+
+    .badge--danger {
+        @apply border-danger bg-danger-muted text-danger-foreground;
+    }
+
+    .tooltip {
+        @apply relative inline-flex cursor-help text-inherit;
+    }
+
+    .tooltip::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        inset-inline-start: 50%;
+        bottom: calc(100% + 0.5rem);
+        translate: -50% 0.25rem;
+        max-width: 18rem;
+        background-color: var(--color-tooltip-surface);
+        color: var(--color-tooltip-foreground);
+        @apply pointer-events-none rounded-sm px-3 py-2 text-xs font-medium opacity-0 shadow-sm transition duration-150;
+    }
+
+    .tooltip::before {
+        content: "";
+        position: absolute;
+        inset-inline-start: 50%;
+        bottom: calc(100% - 0.125rem);
+        translate: -50% 0.25rem;
+        border-width: 6px;
+        border-style: solid;
+        border-color: var(--color-tooltip-surface) transparent transparent transparent;
+        opacity: 0;
+        transition: opacity var(--transition-fast), translate var(--transition-fast);
+    }
+
+    .tooltip:is(:hover, :focus-visible)::after,
+    .tooltip:is(:hover, :focus-visible)::before {
+        opacity: 1;
+        translate: -50% 0;
+    }
+
+    .toast {
+        @apply flex items-start gap-3 rounded-md border border-border bg-surface px-4 py-3 shadow-sm text-sm text-text;
+    }
+
+    .toast--success {
+        @apply border-success bg-success-muted text-success-foreground;
+    }
+
+    .toast--danger {
+        @apply border-danger bg-danger-muted text-danger-foreground;
+    }
+
+    .toast--info {
+        @apply border-info bg-info-muted text-info-foreground;
+    }
+
+    .toast__close {
+        @apply ml-auto text-text-muted hover:text-text transition;
+    }
+}

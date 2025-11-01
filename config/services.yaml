@@ -7,6 +7,7 @@ parameters:
     app.user_database_path: '%kernel.project_dir%/var/user.brain'
     app.sqlite_busy_timeout_default: 5000
     app.sqlite_busy_timeout_ms: '%env(int:default:app.sqlite_busy_timeout_default:SQLITE_BUSY_TIMEOUT_MS)%'
+    app.default_project_slug: 'default'
 
 services:
     # default configuration for services in *this* file
@@ -28,12 +29,12 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    App\Doctrine\Listener\AttachUserDatabaseListener:
+    App\Doctrine\Middleware\AttachUserDatabaseMiddleware:
         arguments:
             $userDatabasePath: '%app.user_database_path%'
             $busyTimeoutMs: '%app.sqlite_busy_timeout_ms%'
         tags:
-            - { name: doctrine.event_listener, event: postConnect }
+            - { name: doctrine.middleware, connection: default }
 
     App\Module\ModuleRegistry:
         arguments:

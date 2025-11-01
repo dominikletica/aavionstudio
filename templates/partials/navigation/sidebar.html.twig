@@ -1,0 +1,15 @@
+<nav class="sidebar-nav" aria-label="Section navigation">
+    {% for section in menu.sections %}
+        <div class="sidebar-nav__group">
+            {% if section.label %}
+                <div class="sidebar-nav__label">{{ section.label }}</div>
+            {% endif %}
+            {% for item in section.items %}
+                <a class="sidebar-nav__item" href="{{ item.url }}" aria-current="{{ item.active ? 'page' : 'false' }}">
+                    {% if item.icon %}<i class="ti ti-{{ item.icon }}"></i>{% endif %}
+                    <span>{{ item.label }}</span>
+                </a>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</nav>

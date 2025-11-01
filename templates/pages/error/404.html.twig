@@ -1,0 +1,9 @@
+{% extends 'pages/error/default.html.twig' %}
+
+{% block error_intro %}
+    <div class="layout-stack--tight">
+        <h1 class="text-heading text-3xl">{{ 'Page not found'|trans }}</h1>
+        <p class="text-text-muted text-lg">{{ 'The resource you requested could not be located.'|trans }}</p>
+    </div>
+    <p class="text-text">{{ 'Check the address, go back, or reach out to your administrator if you need assistance.'|trans }}</p>
+{% endblock %}

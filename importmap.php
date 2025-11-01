@@ -113,9 +113,9 @@ return [
         'version' => '0.19.6',
     ],
     'alpinejs' => [
-        'path' => './assets/js/alpinejs.min.js',
+        'path' => './assets/js/alpinejs.esm.js',
     ],
     'apexcharts' => [
-        'path' => './assets/js/apexcharts.min.js',
+        'path' => './assets/js/apexcharts.esm.js',
     ],
 ];

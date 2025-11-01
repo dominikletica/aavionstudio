@@ -1,0 +1,153 @@
+{% import 'partials/components/_macros.html.twig' as component %}
+
+{#
+    Context:
+    - columns: list of { label: string, key?: string, template?: string, class?: string, align?: left|center|right }
+    - rows: list of row data (array/object)
+    - toolbar_left / toolbar_right: optional HTML content for table toolbar areas
+    - compact: bool for condensed spacing
+    - zebra: bool for zebra striping
+    - empty_state: dict forwarded to empty_state component when rows empty
+    - pagination: { previous?, next?, pages?: [{ label, url, current?, disabled? }], summary? }
+    - footer: raw HTML content rendered below table (inside wrapper)
+    - table_attributes: attributes for <table>
+    - wrapper_attributes: attributes for outer container
+#}
+
+{% set columns = columns|default([]) %}
+{% set rows = rows|default([]) %}
+{% set compact = compact|default(false) %}
+{% set zebra = zebra|default(false) %}
+{% set wrapper_attributes = wrapper_attributes|default({}) %}
+{% set table_attributes = table_attributes|default({}) %}
+
+{% set wrapper_classes = ['table-container'] %}
+{% set wrapper_attr_class = wrapper_attributes.class|default('') %}
+{% set wrapper_attributes = wrapper_attributes|merge({
+    class: (wrapper_classes|join(' ') ~ ' ' ~ wrapper_attr_class)|trim
+}) %}
+
+{% set table_classes = ['table'] %}
+{% if compact %}
+    {% set table_classes = table_classes|merge(['table--compact']) %}
+{% endif %}
+{% if zebra %}
+    {% set table_classes = table_classes|merge(['table--zebra']) %}
+{% endif %}
+{% set table_attr_class = table_attributes.class|default('') %}
+{% set cleaned_attributes = {} %}
+{% for attr_name, attr_value in table_attributes %}
+    {% set current = attr_value %}
+    {% if current is same as(false) or current is same as(true) or current is same as(null) %}
+        {% set cleaned_attributes = cleaned_attributes|merge({ (attr_name): current }) %}
+    {% elseif current is iterable %}
+        {% set cleaned_attributes = cleaned_attributes|merge({ (attr_name): current }) %}
+    {% else %}
+        {% set current = current ~ '' %}
+        {% if current starts with '"' and current ends with '"' %}
+            {% set current = current|slice(1, current|length - 2) %}
+        {% endif %}
+        {% set cleaned_attributes = cleaned_attributes|merge({ (attr_name): current }) %}
+    {% endif %}
+{% endfor %}
+
+{% set table_attributes = cleaned_attributes|merge({
+    class: (table_classes|join(' ') ~ ' ' ~ table_attr_class)|trim
+}) %}
+
+<div{{ component.attributes(wrapper_attributes) }}>
+    {% if toolbar_left is defined or toolbar_right is defined %}
+        <div class="table-toolbar">
+            <div class="table-toolbar__left">{{ toolbar_left|default('')|raw }}</div>
+            <div class="table-toolbar__right">{{ toolbar_right|default('')|raw }}</div>
+        </div>
+    {% endif %}
+
+    <div class="table-scroll">
+        <table{{ component.attributes(table_attributes) }}>
+            {% if columns is not empty %}
+            <thead>
+                <tr>
+                    {% for column in columns %}
+                        {% set th_classes = column.class|default('') %}
+                        {% if column.align is defined %}
+                            {% set th_classes = th_classes ~ ' text-' ~ column.align %}
+                        {% endif %}
+                        <th class="{{ th_classes|trim }}" scope="col">{{ column.label|default('') }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            {% endif %}
+            <tbody>
+                {% if rows is empty %}
+                    <tr>
+                        <td class="table__empty" colspan="{{ columns|length > 0 ? columns|length : 1 }}">
+                            {% if empty_state is defined and empty_state %}
+                                {% include 'partials/components/empty_state.html.twig' with empty_state only %}
+                            {% else %}
+                                <p>{{ empty_message|default('No entries found.') }}</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    {% for row in rows %}
+                        <tr>
+                            {% if columns is empty %}
+                                <td>{{ row|raw }}</td>
+                            {% else %}
+                                {% for column in columns %}
+                                    {% set td_classes = column.class|default('') %}
+                                    {% if column.align is defined %}
+                                        {% set td_classes = td_classes ~ ' text-' ~ column.align %}
+                                    {% endif %}
+                                    <td class="{{ td_classes|trim }}">
+                                        {% set value = column.key is defined ? attribute(row, column.key) : null %}
+                                        {% if column.template is defined %}
+                                            {% include column.template with { row: row, column: column, value: value } only %}
+                                        {% else %}
+                                            {{ value is not null ? value : '' }}
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if pagination is defined and pagination %}
+        {% set previous = pagination.previous|default(null) %}
+        {% set next = pagination.next|default(null) %}
+        {% set pages = pagination.pages|default([]) %}
+        {% set summary = pagination.summary|default(null) %}
+        <div class="table__footer">
+            {% if summary %}
+                <div class="table-pagination__summary">{{ summary|raw }}</div>
+            {% else %}
+                <div></div>
+            {% endif %}
+            <nav class="table-pagination" aria-label="Table pagination">
+                <button class="table-pagination__button" type="button" {% if previous %}data-url="{{ previous }}"{% else %}disabled{% endif %}>
+                    <span class="sr-only">Previous page</span>
+                    &larr;
+                </button>
+                {% for page in pages %}
+                    {% set page_label = page.label|default(loop.index) %}
+                    {% if page.current %}
+                        <span class="table-pagination__button" aria-current="page">{{ page_label }}</span>
+                    {% else %}
+                        <button class="table-pagination__button" type="button" {% if page.url is defined %}data-url="{{ page.url }}"{% endif %} {% if page.disabled %}disabled{% endif %}>{{ page_label }}</button>
+                    {% endif %}
+                {% endfor %}
+                <button class="table-pagination__button" type="button" {% if next %}data-url="{{ next }}"{% else %}disabled{% endif %}>
+                    <span class="sr-only">Next page</span>
+                    &rarr;
+                </button>
+            </nav>
+        </div>
+    {% elseif footer is defined and footer %}
+        <div class="table__footer">{{ footer|raw }}</div>
+    {% endif %}
+</div>
