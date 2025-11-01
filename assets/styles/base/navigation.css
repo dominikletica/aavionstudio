@@ -3,8 +3,43 @@
         @apply flex items-center gap-4 text-sm text-text;
     }
 
+    .nav-bar--contrast {
+        @apply text-white;
+    }
+
+    .nav-bar--contrast .nav-bar__item {
+        @apply text-white/70;
+    }
+
+    .nav-bar--contrast .nav-bar__item:hover,
+    .nav-bar--contrast .nav-bar__item:focus-visible,
+    .nav-bar--contrast .nav-bar__item[aria-current='page'] {
+        @apply text-white;
+    }
+
+    .nav-bar--contrast .nav-bar__item[aria-current='page']::after {
+        background-color: rgba(255, 255, 255, 0.85);
+    }
+
+    .nav-bar--hero {
+        @apply gap-3 lg:gap-4;
+    }
+
     .nav-bar__item {
         @apply relative inline-flex items-center gap-2 rounded-sm px-3 py-2 text-text-muted transition duration-150 ease-in-out;
+    }
+
+    .nav-bar__item--contrast {
+        @apply text-white/70;
+    }
+
+    .nav-bar__item--hero {
+        @apply rounded-xl bg-white/10 px-4 py-3 text-base font-medium uppercase tracking-wide text-white/80 shadow-sm transition duration-200 ease-out;
+    }
+
+    .nav-bar__item--hero:hover,
+    .nav-bar__item--hero:focus-visible {
+        @apply bg-white/20 text-white;
     }
 
     .nav-bar__item:hover,
@@ -15,6 +50,14 @@
     .nav-bar__item[aria-current='page'] {
         color: var(--color-text);
         @apply font-medium;
+    }
+
+    .nav-bar__item--hero[aria-current='page'] {
+        @apply bg-white text-neutral-900 shadow-md;
+    }
+
+    .nav-bar__item--hero[aria-current='page']::after {
+        content: none;
     }
 
     .nav-bar__item[aria-current='page']::after {

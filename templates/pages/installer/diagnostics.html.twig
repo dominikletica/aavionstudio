@@ -1,107 +1,113 @@
 {% extends 'layouts/installer.html.twig' %}
 
-{% block installer_content %}
-    <article class="layout-stack">
-        <section>
-            <h2 class="text-heading text-xl">Environment diagnostics</h2>
-            <p>PHP version: <strong>{{ diagnostics.php_version }}</strong></p>
-        </section>
+{% block content %}
+    <section>
+        <h2 class="text-heading text-xl">{{ 'Environment diagnostics'|trans }}</h2>
+        <p>{{ 'PHP version:'|trans }} <strong>{{ diagnostics.php_version }}</strong></p>
+    </section>
 
-        <section class="layout-stack">
-            <h3 class="text-heading text-lg">Docroot &amp; rewrite status</h3>
-            <p>
-                Rewrite engine: <strong>{{ diagnostics.rewrite.enabled ? 'enabled' : 'compatibility mode' }}</strong>
-                {% if diagnostics.rewrite.mode == 'forced' %}
-                    (forced via <code>APP_FORCE_ROOT_ENTRY</code>)
-                {% elseif not diagnostics.rewrite.enabled %}
-                    – request served by compatibility fallback
-                {% endif %}
-            </p>
-            {% if not diagnostics.rewrite.enabled and not diagnostics.rewrite.forced %}
-                <p role="alert" class="alert alert--warning">Configure the web server to use the <code>public/</code> directory as document root and enable URL rewrites to avoid exposing sensitive files.</p>
-            {% elseif diagnostics.rewrite.mode == 'forced' %}
-                <p class="alert">Compatibility mode is intentionally forced; disable <code>APP_FORCE_ROOT_ENTRY</code> after testing the fallback.</p>
+    <section class="layout-stack">
+        <h3 class="text-heading text-lg">{{ 'Docroot & rewrite status'|trans }}</h3>
+        <p>
+            {{ 'Rewrite engine:'|trans }} <strong>{{ diagnostics.rewrite.enabled ? 'enabled'|trans : 'compatibility mode'|trans }}</strong>
+            {% if diagnostics.rewrite.mode == 'forced' %}
+                ({{ 'forced via %env%'|trans({ '%env%': '<code>APP_FORCE_ROOT_ENTRY</code>' })|raw }})
+            {% elseif not diagnostics.rewrite.enabled %}
+                – {{ 'request served by compatibility fallback'|trans }}
             {% endif %}
-            <dl class="grid gap-1 text-sm">
-                <dt>Effective route</dt>
-                <dd><code>{{ diagnostics.rewrite.route }}</code></dd>
-                <dt>Original request URI</dt>
-                <dd><code>{{ diagnostics.rewrite.original_uri }}</code></dd>
-                <dt>Effective request URI</dt>
-                <dd><code>{{ diagnostics.rewrite.request_uri }}</code></dd>
-            </dl>
-        </section>
+        </p>
+        {% if not diagnostics.rewrite.enabled and not diagnostics.rewrite.forced %}
+            <p role="alert" class="alert alert--warning">
+                {{ 'Configure the web server to use the <code>public/</code> directory as document root and enable URL rewrites to avoid exposing sensitive files.'|trans|raw }}
+            </p>
+        {% elseif diagnostics.rewrite.mode == 'forced' %}
+            <p class="alert">
+                {{ 'Compatibility mode is intentionally forced; disable <code>APP_FORCE_ROOT_ENTRY</code> after testing the fallback.'|trans|raw }}
+            </p>
+        {% endif %}
+        <dl class="grid gap-1 text-sm">
+            <dt>{{ 'Effective route'|trans }}</dt>
+            <dd><code>{{ diagnostics.rewrite.route }}</code></dd>
+            <dt>{{ 'Original request URI'|trans }}</dt>
+            <dd><code>{{ diagnostics.rewrite.original_uri }}</code></dd>
+            <dt>{{ 'Effective request URI'|trans }}</dt>
+            <dd><code>{{ diagnostics.rewrite.request_uri }}</code></dd>
+        </dl>
+    </section>
 
-        <section class="layout-stack">
-            <h3 class="text-heading text-lg">Required extensions</h3>
-            <table class="table table--compact" data-testid="diagnostics-extensions">
-                <thead>
+    <section class="layout-stack">
+        <h3 class="text-heading text-lg">{{ 'Required extensions'|trans }}</h3>
+        <table class="table table--compact" data-testid="diagnostics-extensions">
+            <thead>
+            <tr>
+                <th>{{ 'Extension'|trans }}</th>
+                <th>{{ 'Status'|trans }}</th>
+                <th>{{ 'Hint'|trans }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for extension in diagnostics.extensions %}
                 <tr>
-                    <th>Extension</th>
-                    <th>Status</th>
-                    <th>Hint</th>
+                    <td>{{ extension.label }}</td>
+                    <td>{{ extension.available ? 'available'|trans : 'missing'|trans }}</td>
+                    <td>
+                        {% if not extension.available %}
+                            {{ extension.hint }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
                 </tr>
-                </thead>
-                <tbody>
-                {% for extension in diagnostics.extensions %}
-                    <tr>
-                        <td>{{ extension.label }}</td>
-                        <td>{{ extension.available ? 'available' : 'missing' }}</td>
-                        <td>
-                            {% if not extension.available %}
-                                {{ extension.hint }}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </section>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
 
-        <section class="layout-stack">
-            <h3 class="text-heading text-lg">SQLite health</h3>
-            <dl class="grid gap-1 text-sm">
-                <dt>Primary path</dt><dd>{{ diagnostics.sqlite.primary_path ?: 'n/a' }}</dd>
-                <dt>Secondary path</dt><dd>{{ diagnostics.sqlite.secondary_path ?: 'n/a' }}</dd>
-                <dt>Primary exists</dt><dd>{{ diagnostics.sqlite.primary_exists ? 'yes' : 'no' }}</dd>
-                <dt>Secondary exists</dt><dd>{{ diagnostics.sqlite.secondary_exists ? 'yes' : 'no' }}</dd>
-                <dt>Secondary attached</dt><dd>{{ diagnostics.sqlite.secondary_attached ? 'yes' : 'no' }}</dd>
-                <dt>busy_timeout (ms)</dt><dd>{{ diagnostics.sqlite.busy_timeout_ms }}</dd>
-            </dl>
-        </section>
+    <section class="layout-stack">
+        <h3 class="text-heading text-lg">{{ 'SQLite health'|trans }}</h3>
+        <dl class="grid gap-1 text-sm">
+            <dt>{{ 'Primary path'|trans }}</dt><dd>{{ diagnostics.sqlite.primary_path ?: 'n/a'|trans }}</dd>
+            <dt>{{ 'Secondary path'|trans }}</dt><dd>{{ diagnostics.sqlite.secondary_path ?: 'n/a'|trans }}</dd>
+            <dt>{{ 'Primary exists'|trans }}</dt><dd>{{ diagnostics.sqlite.primary_exists ? 'yes'|trans : 'no'|trans }}</dd>
+            <dt>{{ 'Secondary exists'|trans }}</dt><dd>{{ diagnostics.sqlite.secondary_exists ? 'yes'|trans : 'no'|trans }}</dd>
+            <dt>{{ 'Secondary attached'|trans }}</dt><dd>{{ diagnostics.sqlite.secondary_attached ? 'yes'|trans : 'no'|trans }}</dd>
+            <dt>{{ 'busy_timeout (ms)'|trans }}</dt><dd>{{ diagnostics.sqlite.busy_timeout_ms }}</dd>
+        </dl>
+    </section>
 
-        <section class="layout-stack">
-            <h3 class="text-heading text-lg">Filesystem checks</h3>
-            <table class="table table--compact" data-testid="diagnostics-filesystem">
-                <thead>
+    <section class="layout-stack">
+        <h3 class="text-heading text-lg">{{ 'Filesystem checks'|trans }}</h3>
+        <table class="table table--compact" data-testid="diagnostics-filesystem">
+            <thead>
+            <tr>
+                <th>{{ 'Directory'|trans }}</th>
+                <th>{{ 'Exists'|trans }}</th>
+                <th>{{ 'Writable'|trans }}</th>
+                <th>{{ 'Hint'|trans }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for directory in diagnostics.filesystem %}
                 <tr>
-                    <th>Directory</th>
-                    <th>Exists</th>
-                    <th>Writable</th>
-                    <th>Hint</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for directory in diagnostics.filesystem %}
-                    <tr>
-                        <td><code>{{ directory.path }}</code></td>
-                        <td>{{ directory.exists ? 'yes' : 'no' }}</td>
-                        <td>
-                            {% if directory.writable %}
-                                yes
-                            {% elseif directory.exists %}
-                                no
+                    <td><code>{{ directory.path }}</code></td>
+                    <td>{{ directory.exists ? 'yes'|trans : 'no'|trans }}</td>
+                    <td>
+                        {% if directory.writable %}
+                            {{ 'yes'|trans }}
+                        {% elseif directory.exists %}
+                            {{ 'no'|trans }}
+                        {% else %}
+                            {% if directory.parent_writable %}
+                                {{ 'parent writable'|trans }}
                             {% else %}
-                                {% if directory.parent_writable %}parent writable{% else %}no{% endif %}
+                                {{ 'no'|trans }}
                             {% endif %}
-                        </td>
-                        <td>{% if directory.writable %}—{% else %}{{ directory.hint }}{% endif %}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </section>
-    </article>
+                        {% endif %}
+                    </td>
+                    <td>{% if directory.writable %}—{% else %}{{ directory.hint }}{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
 {% endblock %}

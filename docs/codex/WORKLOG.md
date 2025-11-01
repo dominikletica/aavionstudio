@@ -60,6 +60,7 @@
 - [ ] Integrate JSON schema validation into draft workflow
 - [ ] Build admin schema builder + template preview tools
 - [ ] Write unit tests for schema validation + template resolution helpers
+- [ ] Model `error_page` entity schema (markdown body, header injects) and surface per-status mapping in system settings referencing default-project entities.
 
 ### Feat: Draft & Commit Workflow (P0 | L)
 - [ ] Build DraftManager service with autosave + optimistic locking
@@ -151,6 +152,8 @@
 - [ ] Wire API key-based authentication/authorization into the public HTTP API once the write/read endpoints land (reuse `ApiKeyManager` issuance data).
 - [ ] Add smoke checks for `/admin/api/api-keys` in the release workflow to ensure serialization changes remain backwards compatible.
 - [ ] Hook future module-/theme-installers into the asset rebuild scheduler 
+- [ ] Replace STDERR fallback logging in `App\Controller\Error\ErrorController` with PSR logger + context metadata.
+- [ ] Add unit coverage for `App\Error\ErrorPageResolver` once project-specific mappings land.
 
 ## Roadmap To Next Release
 Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
@@ -283,3 +286,10 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Extended asset rebuild to clear `public/assets` before generating new bundles, preventing hashed clutter during runtime rebuilds.
 - Migrated Twig structure to layered layouts/partials/pages, updated controllers to supply navigation context, and refreshed installer/admin/security pages to use the new design tokens. Aligned PHPUnut-tests accordingly.
 - Added navigation, tables, overlays, feedback, loaders, and token utility layers under `assets/styles/base/`, ensuring all shared UI patterns rely on the new theme variables.
+- Implemented custom error flow: registered `App\Controller\Error\ErrorController`, added project-aware resolver + Twig layouts (`templates/layouts/project.html.twig`, `templates/pages/error/*.html.twig`), and wired production/debug handling with functional tests.
+- Shifted the fallback markup to the new `layouts/entity.html.twig` shell with optional sidebar capture so future entity-driven error pages can render without manual Twig overrides.
+- Documented the error pipeline in `docs/dev/sections/ui/templates-and-themes.md` and updated the class map for the new controller/service.
+- Follow-ups captured for Roadmap Step 4: menu builder hierarchy, admin-specific navigation swap, project-defined footer content editor, project-configurable error template mappings + PSR logger integration, and entity layout sidebars that render only when populated.
+- Realigned `layouts/project.html.twig` and `layouts/admin.html.twig` to use the shared sidebar hooks (`sidebar_top`, `sidebar_nav`, `sidebar_bottom`) and removed the sidebar block from `layouts/base.html.twig` to keep installer/security pages single-column by default. Admin now extends the entity layout and injects its header via the new `layout_header` block to stay in sync with future entity/page behaviour.
+- Normalised the base/default layout contract: added safe defaults for title variables, centralised sidebar rendering around `sidebar_menu`, restored error-page debug blocks via `error_intro` overrides, wrapped the installer view in `<main>`, and refreshed functional tests to match the unified `content` block strategy.
+- Refined the global hero header with background image support, admin body class, translated hero headings/subtitles, and a contrast navigation variant that doubles as the styling baseline for future admin/project/entity theming.

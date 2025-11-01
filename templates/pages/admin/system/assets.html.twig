@@ -1,59 +1,53 @@
 {% extends 'layouts/admin.html.twig' %}
 
-{% block admin_title 'Asset Pipeline · Admin · aavion Studio' %}
+{% set admin_title = 'Admin: Asset Pipeline'|trans %}
 
-{% block main %}
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert--{{ label }}">{{ message }}</div>
-        {% endfor %}
-    {% endfor %}
-
+{% block content %}
     <section class="surface shadow-sm layout-stack p-6">
         <header class="layout-stack--tight">
-            <h1 class="text-heading text-2xl">Asset pipeline</h1>
-            <p class="text-text-muted">Synchronise mirrored assets and trigger Tailwind/importmap rebuilds without CLI access.</p>
+            <h1 class="text-heading text-2xl">{{ 'Asset pipeline'|trans }}</h1>
+            <p class="text-text-muted">{{ 'Synchronise mirrored assets and trigger Tailwind/importmap rebuilds without CLI access.'|trans }}</p>
         </header>
 
         <div class="grid gap-4 md:grid-cols-2">
             <form method="post" action="{{ path('admin_assets_rebuild') }}" class="surface-muted rounded-md p-4 layout-stack--tight">
                 <input type="hidden" name="_token" value="{{ csrf_token('admin_assets_rebuild') }}">
                 <input type="hidden" name="mode" value="queue">
-                <h2 class="text-heading text-lg">Queue rebuild</h2>
-                <p class="text-sm text-text-muted">Dispatches a Messenger job. The rebuild runs in the background.</p>
+                <h2 class="text-heading text-lg">{{ 'Queue rebuild'|trans }}</h2>
+                <p class="text-sm text-text-muted">{{ 'Dispatches a Messenger job. The rebuild runs in the background.'|trans }}</p>
                 <label class="inline-flex items-center gap-2 text-sm text-text">
                     <input type="checkbox" name="force" value="1" class="h-4 w-4">
-                    Force rebuild even if state hashes match
+                    {{ 'Force rebuild even if state hashes match'|trans }}
                 </label>
-                <button class="btn btn-secondary" type="submit">Queue background job</button>
+                <button class="btn btn-secondary" type="submit">{{ 'Queue background job'|trans }}</button>
             </form>
 
             <form method="post" action="{{ path('admin_assets_rebuild') }}" class="surface-muted rounded-md p-4 layout-stack--tight">
                 <input type="hidden" name="_token" value="{{ csrf_token('admin_assets_rebuild') }}">
                 <input type="hidden" name="mode" value="sync">
-                <h2 class="text-heading text-lg">Run now</h2>
-                <p class="text-sm text-text-muted">Executes the pipeline in this request. Use sparingly to avoid long wait times.</p>
+                <h2 class="text-heading text-lg">{{ 'Run now'|trans }}</h2>
+                <p class="text-sm text-text-muted">{{ 'Executes the pipeline in this request. Use sparingly to avoid long wait times.'|trans }}</p>
                 <label class="inline-flex items-center gap-2 text-sm text-text">
                     <input type="checkbox" name="force" value="1" class="h-4 w-4">
-                    Force rebuild even if state hashes match
+                    {{ 'Force rebuild even if state hashes match'|trans }}
                 </label>
-                <button class="btn btn-primary" type="submit">Rebuild immediately</button>
+                <button class="btn btn-primary" type="submit">{{ 'Rebuild immediately'|trans }}</button>
             </form>
         </div>
     </section>
 
     <section class="surface shadow-sm p-6 layout-stack">
-        <h2 class="text-heading text-xl">Discovered modules</h2>
-        <p class="text-text-muted text-sm">Manifests registered under <code>/modules</code>. Locked modules cannot be toggled.</p>
+        <h2 class="text-heading text-xl">{{ 'Discovered modules'|trans }}</h2>
+        <p class="text-text-muted text-sm">{{ 'Manifests registered under <code>/modules</code>. Locked modules cannot be toggled.'|trans|raw }}</p>
         <div class="overflow-x-auto">
             <table class="table table--compact">
                 <thead>
                 <tr>
-                    <th>Slug</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th class="w-32 text-right">Actions</th>
+                    <th>{{ 'Slug'|trans }}</th>
+                    <th>{{ 'Name'|trans }}</th>
+                    <th>{{ 'Description'|trans }}</th>
+                    <th>{{ 'Status'|trans }}</th>
+                    <th class="w-32 text-right">{{ 'Actions'|trans }}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -65,20 +59,20 @@
                         <td>{{ module.description ?: '—' }}</td>
                         <td>
                             {% if module.enabled %}
-                                <span class="badge badge--success">enabled</span>
+                                <span class="badge badge--success">{{ 'enabled'|trans }}</span>
                             {% else %}
-                                <span class="badge">disabled</span>
+                                <span class="badge">{{ 'disabled'|trans }}</span>
                             {% endif %}
                         </td>
                         <td class="text-right text-sm">
                             {% if locked %}
-                                <span class="text-text-muted">locked</span>
+                                <span class="text-text-muted">{{ 'locked'|trans }}</span>
                             {% else %}
                                 <form method="post" action="{{ path('admin_assets_module_toggle', { slug: module.slug }) }}" class="inline-flex items-center gap-2">
                                     <input type="hidden" name="_token" value="{{ csrf_token('module_state_' ~ module.slug) }}">
                                     <input type="hidden" name="action" value="{{ module.enabled ? 'disable' : 'enable' }}">
                                     <button type="submit" class="btn btn-secondary">
-                                        {{ module.enabled ? 'Disable' : 'Enable' }}
+                                        {{ module.enabled ? 'Disable'|trans : 'Enable'|trans }}
                                     </button>
                                 </form>
                             {% endif %}
@@ -86,7 +80,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5" class="table__empty">No modules discovered.</td>
+                        <td colspan="5" class="table__empty">{{ 'No modules discovered.'|trans }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -95,16 +89,16 @@
     </section>
 
     <section class="surface shadow-sm p-6 layout-stack">
-        <h2 class="text-heading text-xl">Discovered themes</h2>
-        <p class="text-text-muted text-sm">Themes registered under <code>/themes</code>. One theme is active at a time.</p>
+        <h2 class="text-heading text-xl">{{ 'Discovered themes'|trans }}</h2>
+        <p class="text-text-muted text-sm">{{ 'Themes registered under <code>/themes</code>. One theme is active at a time.'|trans|raw }}</p>
         <div class="overflow-x-auto">
             <table class="table table--compact">
                 <thead>
                 <tr>
-                    <th>Slug</th>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th class="w-40 text-right">Actions</th>
+                    <th>{{ 'Slug'|trans }}</th>
+                    <th>{{ 'Name'|trans }}</th>
+                    <th>{{ 'Status'|trans }}</th>
+                    <th class="w-40 text-right">{{ 'Actions'|trans }}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -115,26 +109,26 @@
                         <td>{{ theme.name }}</td>
                         <td>
                             {% if theme.active %}
-                                <span class="badge badge--success">active</span>
+                                <span class="badge badge--success">{{ 'active'|trans }}</span>
                             {% elseif theme.enabled %}
-                                <span class="badge badge--info">enabled</span>
+                                <span class="badge badge--info">{{ 'enabled'|trans }}</span>
                             {% else %}
-                                <span class="badge">disabled</span>
+                                <span class="badge">{{ 'disabled'|trans }}</span>
                             {% endif %}
                         </td>
                         <td class="text-right space-x-2">
                             {% if locked %}
-                                <span class="text-text-muted">locked</span>
+                                <span class="text-text-muted">{{ 'locked'|trans }}</span>
                             {% else %}
                                 <form method="post" action="{{ path('admin_assets_theme_toggle', { slug: theme.slug }) }}" class="inline">
                                     <input type="hidden" name="_token" value="{{ csrf_token('theme_state_' ~ theme.slug) }}">
                                     <input type="hidden" name="action" value="{{ theme.enabled ? 'disable' : 'enable' }}">
-                                    <button type="submit" class="btn btn-secondary">{{ theme.enabled ? 'Disable' : 'Enable' }}</button>
+                                    <button type="submit" class="btn btn-secondary">{{ theme.enabled ? 'Disable'|trans : 'Enable'|trans }}</button>
                                 </form>
                                 {% if theme.enabled and theme.slug != 'base' %}
                                     <form method="post" action="{{ path('admin_assets_theme_activate', { slug: theme.slug }) }}" class="inline">
                                         <input type="hidden" name="_token" value="{{ csrf_token('theme_activate_' ~ theme.slug) }}">
-                                        <button type="submit" class="btn btn-primary">{{ theme.active ? 'Active' : 'Set active' }}</button>
+                                        <button type="submit" class="btn btn-primary">{{ theme.active ? 'Active'|trans : 'Set active'|trans }}</button>
                                     </form>
                                 {% endif %}
                             {% endif %}
@@ -142,7 +136,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="4" class="table__empty">No themes discovered.</td>
+                        <td colspan="4" class="table__empty">{{ 'No themes discovered.'|trans }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -151,15 +145,15 @@
     </section>
 
     <section class="surface shadow-sm p-6 layout-stack">
-        <h2 class="text-heading text-xl">Checksum snapshot</h2>
-        <p class="text-text-muted text-sm">Useful when debugging why a rebuild was triggered.</p>
+        <h2 class="text-heading text-xl">{{ 'Checksum snapshot'|trans }}</h2>
+        <p class="text-text-muted text-sm">{{ 'Useful when debugging why a rebuild was triggered.'|trans }}</p>
         <div class="grid gap-4 md:grid-cols-2">
             <div>
-                <h3 class="text-sm font-medium text-heading">Current filesystem state</h3>
+                <h3 class="text-sm font-medium text-heading">{{ 'Current filesystem state'|trans }}</h3>
                 <pre class="mt-2 max-h-64 overflow-auto rounded-md bg-surface-muted p-3 text-xs font-mono">{{ current_state|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
             </div>
             <div>
-                <h3 class="text-sm font-medium text-heading">Persisted state (last rebuild)</h3>
+                <h3 class="text-sm font-medium text-heading">{{ 'Persisted state (last rebuild)'|trans }}</h3>
                 <pre class="mt-2 max-h-64 overflow-auto rounded-md bg-surface-muted p-3 text-xs font-mono">{{ persisted_state|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
             </div>
         </div>

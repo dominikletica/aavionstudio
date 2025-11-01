@@ -1,24 +1,22 @@
 {% extends 'layouts/security.html.twig' %}
 
-{% block security_title 'Set a new password' %}
+{% set security_title = 'Set a new password'|trans %}
 
-{% block security_main %}
-    <div class="layout-stack">
-        <header class="layout-stack--tight">
-            <h1 class="text-heading text-2xl">Choose a new password</h1>
-            <p class="text-text-muted">Enter and confirm your new password to secure your account.</p>
-        </header>
+{% block content %}
+    <header class="layout-stack--tight">
+        <h1 class="text-heading text-2xl">{{ 'Choose a new password'|trans }}</h1>
+        <p class="text-text-muted">{{ 'Enter and confirm your new password to secure your account.'|trans }}</p>
+    </header>
 
-        {{ form_start(resetForm, { attr: { class: 'layout-stack' } }) }}
-            {{ form_row(resetForm.plainPassword.first) }}
-            {{ form_row(resetForm.plainPassword.second) }}
-            {% include 'partials/forms/buttons/primary.html.twig' with {
-                label: 'Update password'
-            } %}
-        {{ form_end(resetForm) }}
+    {{ form_start(resetForm, { attr: { class: 'layout-stack' } }) }}
+        {{ form_row(resetForm.plainPassword.first) }}
+        {{ form_row(resetForm.plainPassword.second) }}
+        {% include 'partials/forms/buttons/primary.html.twig' with {
+            label: 'Update password'|trans
+        } %}
+    {{ form_end(resetForm) }}
 
-        <p class="text-sm text-text-muted">
-            <a class="text-primary hover:text-primary-darker" href="{{ path('app_login') }}">Back to sign in</a>
-        </p>
-    </div>
+    <p class="text-sm text-text-muted">
+        <a class="text-primary hover:text-primary-darker" href="{{ path('app_login') }}">{{ 'Back to sign in'|trans }}</a>
+    </p>
 {% endblock %}

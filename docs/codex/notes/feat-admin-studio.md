@@ -3,6 +3,14 @@
 **Status:** Draft – subject to iteration with UX feedback.  
 **Purpose:** Deliver a cohesive admin experience with modular navigation, themable layout, and extensibility hooks for feature modules.
 
+
+### Upcoming UI groundwork
+- Add shared flash/toast partial and register it in admin layout.
+- Provide breadcrumb/tab/card partials for nested navigation.
+- Implement modal/drawer markup + JS hooks for quick actions.
+- Define responsive sidebar/table behaviour (mobile collapse).
+- Consider dark-mode token strategy and document overrides.
+- Capture plan for visual regression/storybook style previews.
 ## Core Experiences
 - Responsive layout with sidebar navigation, top bar status indicators, and workspace canvas.
 - Module-driven navigation: manifests contribute menu items, icons, and feature flags.

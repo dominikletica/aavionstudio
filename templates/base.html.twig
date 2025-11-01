@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="{{ app.request and app.request.locale ? app.request.locale : "en" }}" data-theme="{{ theme.slug|default('base') }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ site_title is defined and site_title ? site_title : 'aavion Studio'|trans }}{% endblock %}</title>
+
+    {% block head_meta %}{% endblock %}
+
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+    {% endblock %}
+
+    {% block head %}
+        {% include 'partials/head/importmap.html.twig' %}
+    {% endblock %}
+</head>
+{% set body_class_attribute = body_class is defined and body_class ? ' ' ~ body_class : '' %}
+<body class="min-h-screen bg-surface text-text{{ body_class_attribute }}">
+{% block body %}
+    {% block header %}{% include 'partials/header/header.html.twig' %}{% endblock %}
+    {% block alerts %}{% include 'partials/alerts/alerts.html.twig' %}{% endblock %} 
+    {% block main %}{% include 'partials/main/main.html.twig' %}{% endblock %}
+    {% block footer %}{% include 'partials/footer/footer.html.twig' %}{% endblock %}
+{% endblock %}
+{% block footer_scripts %}{% endblock %}
+</body>
+</html>

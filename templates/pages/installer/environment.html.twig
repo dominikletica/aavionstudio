@@ -1,24 +1,22 @@
 {% extends 'layouts/installer.html.twig' %}
 
-{% block installer_content %}
-    <section class="layout-stack">
-        <h2 class="text-heading text-xl">Environment defaults</h2>
-        <p>The installer will generate <code>.env.local.php</code> using these defaults. Adjust values before proceeding.</p>
-        <table class="table table--compact">
-            <thead>
+{% block content %}
+    <h2 class="text-heading text-xl">{{ 'Environment defaults'|trans }}</h2>
+    <p>{{ 'The installer will generate <code>.env.local.php</code> using these defaults. Adjust values before proceeding.'|trans|raw }}</p>
+    <table class="table table--compact">
+        <thead>
+        <tr>
+            <th>{{ 'Key'|trans }}</th>
+            <th>{{ 'Value'|trans }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for key, value in default_settings %}
             <tr>
-                <th>Key</th>
-                <th>Value</th>
+                <td>{{ key }}</td>
+                <td>{{ value is iterable ? value|json_encode(constant('JSON_PRETTY_PRINT')) : value }}</td>
             </tr>
-            </thead>
-            <tbody>
-            {% for key, value in default_settings %}
-                <tr>
-                    <td>{{ key }}</td>
-                    <td>{{ value is iterable ? value|json_encode(constant('JSON_PRETTY_PRINT')) : value }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </section>
+        {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

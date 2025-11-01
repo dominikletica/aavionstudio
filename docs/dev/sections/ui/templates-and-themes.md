@@ -1,7 +1,7 @@
 # Templates & Themes
 
 Status: Draft  
-Updated: 2025-10-31
+Updated: 2025-11-01
 
 This guide explains how the templating stack is organised and how to extend or replace layouts when building custom themes or modules.
 
@@ -18,11 +18,13 @@ Theme and module overrides should mirror this structure (e.g. `themes/<slug>/tem
 
 ## 2. Layout cascade
 
-- `layouts/base.html.twig` provides the HTML skeleton with importmap, body/main slots, and the `data-theme` attribute.
-- `layouts/admin.html.twig` extends the base layout and expects `primary_menu` / `sidebar_menu` arrays (constructed via `AdminNavigationTrait`).
-- `layouts/security.html.twig` wraps authentication flows in a centered panel.
-- `layouts/installer.html.twig` renders the setup wizard shell with the step navigation.
-- Additional layouts (project/entity) can be introduced following the same pattern.
+- `templates/base.html.twig` is the root shell; it wires the HTML head, global header/alerts/footer partials, and exposes the `main` block.
+- `layouts/default.html.twig` extends the root shell and provides the shared page scaffold (`content` block) plus optional sidebar hooks (`sidebar_top`, `sidebar_nav`, `sidebar_bottom`). The sidebar automatically renders when `sidebar_menu` (or `menu`) is provided.
+- `layouts/entity.html.twig` builds on the default layout, adding the `entity_title` helper. Use this for entity-driven pages, error fallbacks, or any view that should inherit the standard sidebar/header cascade.
+- `layouts/project.html.twig` currently just aliases the entity layout; future project-specific overrides can specialise `sidebar_*` blocks or headers.
+- `layouts/admin.html.twig` also extends the default layout, injecting the admin header and relying on the same sidebar hooks (controllers pass `sidebar_menu` via `AdminNavigationTrait`).
+- `layouts/security.html.twig` overrides the `main` wrapper to centre authentication flows while still benefiting from the shared title + sidebar contract.
+- `layouts/installer.html.twig` renders the setup wizard shell, wrapping its content in a `<main>` element that contains the step navigation and page blocks.
 
 Pages extend one of the layouts and render the actual content (`templates/pages/admin/users/index.html.twig`, `templates/pages/security/login.html.twig`, etc.).
 
@@ -30,6 +32,9 @@ Pages extend one of the layouts and render the actual content (`templates/pages/
 
 Partial templates live under `templates/partials/` and are grouped by feature:
 
+- `partials/alerts/alerts.html.twig` – flash message stack injected by the root shell.
+- `partials/header/header.html.twig` – global header with menu + action hooks.
+- `partials/header/header.html.twig` renders a full-width hero header with optional background image/logo, overlay heading (`header_heading`) and subtitle. Admin/project/entity layouts can pass `header_image`, `header_logo`, `header_heading`, and `header_subtitle` to customise the hero.
 - `partials/navigation/*.html.twig` – global/header menus and sidebar sections.
 - `partials/forms/fields/*.html.twig` – form inputs; use `{% include %}` in pages or embed in custom form themes.
 - `partials/forms/buttons/*.html.twig` – button presets (`btn btn-primary`, etc.).
@@ -64,6 +69,13 @@ When adding new partials, document expected context variables at the top of the 
 
 ## 8. Next steps
 
-- Add documentation for dedicated error pages once implemented.
 - Expand partial coverage (breadcrumbs, tabs, cards) as modules/pages start using them.
+- Document navigation builder conventions once the menu service ships.
 - Keep this file updated whenever the structure or available components change.
+
+## 9. Error pages
+
+- Application errors now render through `pages/error/...` templates using `layouts/entity.html.twig`.
+- Add overrides by placing a template with the status code under `templates/pages/error/<code>.html.twig` or by mapping a custom template path via project settings (`config/app/projects.php` &rarr; `settings.errors`).
+- Debug mode automatically exposes exception details and a trimmed stack trace; production renders a generic message.
+- If rendering fails, Symfony's built-in error controller is used as a fallback.

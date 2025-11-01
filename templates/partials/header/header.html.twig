@@ -1,0 +1,66 @@
+{% set header_title = header_title is defined and header_title ? header_title : (site_title is defined and site_title ? site_title : 'aavion Studio'|trans) %}
+{% set header_logo = header_logo is defined and header_logo ? header_logo : (site_logo is defined and site_logo ? site_logo : null) %}
+{% set header_image = header_image is defined and header_image ? header_image : null %}
+{% set header_heading = header_heading is defined and header_heading ? header_heading : (
+    page_title is defined and page_title ? page_title :
+    admin_title is defined and admin_title ? admin_title :
+    project_title is defined and project_title ? project_title :
+    entity_title is defined and entity_title ? entity_title :
+    security_title is defined and security_title ? security_title :
+    header_title
+) %}
+{% set header_subtitle = header_subtitle is defined and header_subtitle ? header_subtitle : (
+    page_subtitle is defined and page_subtitle ? page_subtitle :
+    admin_subtitle is defined and admin_subtitle ? admin_subtitle :
+    project_subtitle is defined and project_subtitle ? project_subtitle :
+    entity_subtitle is defined and entity_subtitle ? entity_subtitle :
+    null
+) %}
+
+{% set background_class = header_image ? 'bg-cover bg-center bg-no-repeat' : 'bg-surface' %}
+{% set background_style = header_image ? 'background-image: url(' ~ header_image|e('html_attr') ~ ');' : '' %}
+
+<header class="relative w-full overflow-hidden">
+    <div class="absolute inset-0 {{ background_class }} transition-all duration-500 ease-out" style="{{ background_style }}"></div>
+    <div class="relative isolate">
+        <div class="absolute inset-0 bg-black/65 backdrop-blur-sm"></div>
+        <div class="relative mx-auto flex min-h-[18rem] w-full max-w-7xl flex-col justify-center gap-8 px-6 py-10 text-white lg:flex-row lg:items-end lg:justify-between">
+            <div class="flex flex-col gap-4">
+                {% if header_logo %}
+                    <img src="{{ header_logo }}" alt="{{ header_title }}" class="h-16 w-auto max-w-xs object-contain drop-shadow-lg">
+                {% else %}
+                    <span class="text-sm font-semibold uppercase tracking-[0.35em] text-white/70">
+                        {{ header_title }}
+                    </span>
+                {% endif %}
+
+                {% if header_heading %}
+                    <p role="heading" aria-level="1" class="text-4xl font-semibold leading-tight text-white md:text-5xl">
+                        {{ header_heading }}
+                    </p>
+                {% endif %}
+
+                {% if header_subtitle %}
+                    <p class="max-w-3xl text-base text-white/75 md:text-lg">
+                        {{ header_subtitle }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-col items-end gap-4">
+                {% if primary_menu is defined and primary_menu %}
+                    <div class="flex justify-end">
+                        {% include 'partials/navigation/global.html.twig' with {
+                            menu: primary_menu,
+                            contrast: true,
+                            variant: 'hero'
+                        } only %}
+                    </div>
+                {% endif %}
+                <div class="flex items-center gap-3 text-sm text-white/85">
+                    {% include 'partials/header/header_actions.html.twig' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

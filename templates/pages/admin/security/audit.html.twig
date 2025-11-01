@@ -1,71 +1,71 @@
 {% extends 'layouts/admin.html.twig' %}
 
-{% block admin_title 'Security Audit Log · Admin · aavion Studio' %}
+{% set admin_title = 'Admin: Security Audit Log'|trans %}
 
-{% block main %}
+{% block content %}
     <section class="surface shadow-sm layout-stack p-6">
         <div class="layout-stack--tight">
-            <h1 class="text-heading text-2xl">Security audit log</h1>
-            <p class="text-text-muted">Track authentication attempts and permission changes.</p>
+            <h1 class="text-heading text-2xl">{{ 'Security audit log'|trans }}</h1>
+            <p class="text-text-muted">{{ 'Track authentication attempts and permission changes.'|trans }}</p>
         </div>
         <form class="layout-stack" method="get" action="{{ path('admin_security_audit') }}">
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <div>
-                    <label class="form-label" for="actor">Actor</label>
-                    <input class="w-full rounded-sm border border-border px-4 py-3" type="text" id="actor" name="actor" value="{{ filters.actor }}" placeholder="User ID or email">
+                    <label class="form-label" for="actor">{{ 'Actor'|trans }}</label>
+                    <input class="w-full rounded-sm border border-border px-4 py-3" type="text" id="actor" name="actor" value="{{ filters.actor }}" placeholder="{{ 'User ID or email'|trans }}">
                 </div>
                 <div>
-                    <label class="form-label" for="subject">Subject</label>
-                    <input class="w-full rounded-sm border border-border px-4 py-3" type="text" id="subject" name="subject" value="{{ filters.subject }}" placeholder="Subject ID">
+                    <label class="form-label" for="subject">{{ 'Subject'|trans }}</label>
+                    <input class="w-full rounded-sm border border-border px-4 py-3" type="text" id="subject" name="subject" value="{{ filters.subject }}" placeholder="{{ 'Subject ID'|trans }}">
                 </div>
                 <div>
-                    <label class="form-label" for="action">Action</label>
+                    <label class="form-label" for="action">{{ 'Action'|trans }}</label>
                     <select class="w-full rounded-sm border border-border px-4 py-3" id="action" name="action">
-                        <option value="">All actions</option>
+                        <option value="">{{ 'All actions'|trans }}</option>
                         {% for actionKey in actions %}
-                            <option value="{{ actionKey }}" {% if filters.action == actionKey %}selected{% endif %}>{{ actionKey }}</option>
+                            <option value="{{ actionKey }}" {% if filters.action == actionKey %}selected{% endif %}>{{ actionKey|trans }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label class="form-label" for="from">From</label>
+                    <label class="form-label" for="from">{{ 'From'|trans }}</label>
                     <input class="w-full rounded-sm border border-border px-4 py-3" type="datetime-local" id="from" name="from" value="{{ filters.from }}">
                 </div>
                 <div>
-                    <label class="form-label" for="to">To</label>
+                    <label class="form-label" for="to">{{ 'To'|trans }}</label>
                     <input class="w-full rounded-sm border border-border px-4 py-3" type="datetime-local" id="to" name="to" value="{{ filters.to }}">
                 </div>
             </div>
             <div class="flex justify-end gap-2">
-                <a class="btn btn-secondary" href="{{ path('admin_security_audit') }}">Clear</a>
-                <button class="btn btn-primary" type="submit">Apply filters</button>
+                <a class="btn btn-secondary" href="{{ path('admin_security_audit') }}">{{ 'Clear'|trans }}</a>
+                <button class="btn btn-primary" type="submit">{{ 'Apply filters'|trans }}</button>
             </div>
         </form>
     </section>
 
     <section class="surface shadow-sm p-6">
         {% if entries is empty %}
-            <div class="table__empty">No security events recorded for the selected filters.</div>
+            <div class="table__empty">{{ 'No security events recorded for the selected filters.'|trans }}</div>
         {% else %}
             <table class="table table--compact">
                 <thead>
                 <tr>
-                    <th>Timestamp</th>
-                    <th>Actor</th>
-                    <th>Type</th>
-                    <th>Subject</th>
-                    <th>IP</th>
-                    <th>Context</th>
+                    <th>{{ 'Timestamp'|trans }}</th>
+                    <th>{{ 'Actor'|trans }}</th>
+                    <th>{{ 'Type'|trans }}</th>
+                    <th>{{ 'Subject'|trans }}</th>
+                    <th>{{ 'IP'|trans }}</th>
+                    <th>{{ 'Context'|trans }}</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for entry in entries %}
                     <tr>
                         <td>{{ entry.occurred_at|date('Y-m-d H:i:s') }}</td>
-                        <td>{{ entry.actor_email ?? entry.actor_name ?? 'system' }}</td>
-                        <td><span class="badge badge--info">{{ entry.action }}</span></td>
-                        <td>{{ entry.subject_id ?? 'n/a' }}</td>
-                        <td>{{ entry.context.ip ?? 'n/a' }}</td>
+                        <td>{{ entry.actor_email ?? entry.actor_name ?? 'system'|trans }}</td>
+                        <td><span class="badge badge--info">{{ entry.action|trans }}</span></td>
+                        <td>{{ entry.subject_id ?? 'n/a'|trans }}</td>
+                        <td>{{ entry.context.ip ?? 'n/a'|trans }}</td>
                         <td><code class="text-xs">{{ entry.context|json_encode(constant('JSON_PRETTY_PRINT')) }}</code></td>
                     </tr>
                 {% endfor %}

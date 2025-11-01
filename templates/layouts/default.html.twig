@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ page_title is defined and page_title ? page_title : (site_title is defined and site_title ? site_title : 'aavion Studio'|trans) }}
+{% endblock %}
+
+{% set sidebar_capture %}
+    {% block sidebar %}
+        {% block sidebar_top %}{% endblock %}
+        {% block sidebar_nav %}
+            {% set resolved_sidebar_menu = sidebar_menu is defined and sidebar_menu ? sidebar_menu : (menu is defined and menu ? menu : null) %}
+            {% if resolved_sidebar_menu %}
+                {% include 'partials/navigation/sidebar.html.twig' with { menu: resolved_sidebar_menu } only %}
+            {% endif %}
+        {% endblock %}
+        {% block sidebar_bottom %}{% endblock %}
+    {% endblock %}
+{% endset %}
+{% set sidebar_capture = sidebar_capture|trim %}
+{% set has_sidebar = sidebar_capture is not empty %}
+
+{% block main %}
+<div class="min-h-screen bg-surface">
+    <main class="container mx-auto max-w-6xl px-6 py-12">
+        <div class="grid gap-8 {{ has_sidebar ? 'lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]' : '' }}">
+            <section class="layout-stack layout-stack--loose">
+                {% block content %}{% endblock %}
+            </section>
+            {% if has_sidebar %}
+                <aside class="layout-stack layout-stack--tight">
+                    {{ sidebar_capture|raw }}
+                </aside>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

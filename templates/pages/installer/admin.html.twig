@@ -1,8 +1,6 @@
 {% extends 'layouts/installer.html.twig' %}
 
-{% block installer_content %}
-    <section class="layout-stack">
-        <h2 class="text-heading text-xl">Administrator account</h2>
-        <p class="text-text-muted">Admin account setup UI will be implemented in a later iteration.</p>
-    </section>
+{% block content %}
+    <h2 class="text-heading text-xl">{{ 'Administrator account'|trans }}</h2>
+    <p class="text-text-muted">{{ 'Admin account setup UI will be implemented in a later iteration.'|trans }}</p>
 {% endblock %}

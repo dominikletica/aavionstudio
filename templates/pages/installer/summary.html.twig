@@ -1,8 +1,6 @@
 {% extends 'layouts/installer.html.twig' %}
 
-{% block installer_content %}
-    <section class="layout-stack">
-        <h2 class="text-heading text-xl">Summary</h2>
-        <p class="text-text-muted">Installation summary placeholder. Display configuration details here.</p>
-    </section>
+{% block content %}
+    <h2 class="text-heading text-xl">{{ 'Summary'|trans }}</h2>
+    <p class="text-text-muted">{{ 'Installation summary placeholder. Display configuration details here.'|trans }}</p>
 {% endblock %}

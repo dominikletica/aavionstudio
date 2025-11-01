@@ -1,25 +1,23 @@
 {% extends 'layouts/security.html.twig' %}
 
-{% block security_title 'Complete your invitation' %}
+{% set security_title = 'Complete your invitation'|trans %}
 
-{% block security_main %}
-    <div class="layout-stack">
-        <header class="layout-stack--tight">
-            <h1 class="text-heading text-2xl">Welcome to aavion Studio</h1>
-            <p class="text-text-muted">You're joining as <strong class="text-text">{{ email }}</strong>. Choose a display name and password to activate your account.</p>
-        </header>
+{% block content %}
+    <header class="layout-stack--tight">
+        <h1 class="text-heading text-2xl">{{ 'Welcome to %site%'|trans({ '%site%': header_title is defined and header_title ? header_title : (site_title is defined and site_title ? site_title : 'aavion Studio') }) }}</h1>
+        <p class="text-text-muted">{{ "You're joining as <strong class=\"text-text\">%email%</strong>. Choose a display name and password to activate your account."|trans({ '%email%': email })|raw }}</p>
+    </header>
 
-        {{ form_start(acceptForm, { attr: { class: 'layout-stack' } }) }}
-            {{ form_row(acceptForm.display_name) }}
-            {{ form_row(acceptForm.plainPassword.first) }}
-            {{ form_row(acceptForm.plainPassword.second) }}
-            {% include 'partials/forms/buttons/primary.html.twig' with {
-                label: 'Activate account'
-            } %}
-        {{ form_end(acceptForm) }}
+    {{ form_start(acceptForm, { attr: { class: 'layout-stack' } }) }}
+        {{ form_row(acceptForm.display_name) }}
+        {{ form_row(acceptForm.plainPassword.first) }}
+        {{ form_row(acceptForm.plainPassword.second) }}
+        {% include 'partials/forms/buttons/primary.html.twig' with {
+            label: 'Activate account'|trans
+        } %}
+    {{ form_end(acceptForm) }}
 
-        <p class="text-sm text-text-muted">
-            <a class="text-primary hover:text-primary-darker" href="{{ path('app_login') }}">Back to sign in</a>
-        </p>
-    </div>
+    <p class="text-sm text-text-muted">
+        <a class="text-primary hover:text-primary-darker" href="{{ path('app_login') }}">{{ 'Back to sign in'|trans }}</a>
+    </p>
 {% endblock %}

@@ -14,6 +14,7 @@
 | `App\Installer\DefaultSystemSettings` | `src/Installer/DefaultSystemSettings.php` | Loads shared default settings from `config/app/system_settings.php` | Consumed by migrations/installer to seed baseline values |
 | `App\Installer\DefaultProjects` | `src/Installer/DefaultProjects.php` | Provides default project seeds from `config/app/projects.php` | Initial migration inserts `default` project via this helper |
 | `App\Bootstrap\RootEntryPoint` | `src/Bootstrap/RootEntryPoint.php` | Normalises requests that hit the root fallback (`index.php`) and forwards them to `public/index.php` | Sets compatibility flags for installer rewrite diagnostics |
+| `App\Error\ErrorPageResolver` | `src/Error/ErrorPageResolver.php` | Resolves project/error-code specific Twig templates with fallback chain | Used by `App\Controller\Error\ErrorController`; behaviour covered by `tests/Controller/Error/ErrorControllerTest.php` |
 | `App\Module\ModuleDiscovery` | `src/Module/ModuleDiscovery.php` | Discovers module manifests under `/modules/*/module.php` | Supports drop-in modules without Composer autoload |
 | `App\Module\ModuleRegistry` | `src/Module/ModuleRegistry.php` | Provides module manifest lookup/capability aggregation | Hydrated from `app.modules` parameter during boot |
 | `App\Module\ModuleStateRepository` | `src/Module/ModuleStateRepository.php` | Reads persisted module enable/metadata flags from database | Optional helper for future enable/disable UI |
@@ -58,6 +59,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 
 | Route Name | Class | Description | Module |
 |------------|-------|-------------|--------|
+| `framework.error_controller` | `src/Controller/Error/ErrorController.php` | Project-aware HTML error pages with debug-aware diagnostics and Symfony fallback | Core; covered by `tests/Controller/Error/ErrorControllerTest.php` |
 | `app_login` | `src/Controller/Security/LoginController.php` | Handles sign-in form | Core |
 | `app_password_forgot` | `src/Controller/Security/PasswordResetController.php` | Password reset request | Core |
 | `app_password_reset` | `src/Controller/Security/PasswordResetController.php` | Password reset confirmation | Core |
@@ -129,7 +131,7 @@ Record module manifest classes/files and their contributions:
 
 ## Maintenance Tips
 - Whenever adding a new service/controller/command, update this map.
-- Cross-link to relevant drafts in `docs/codex/notes/`.
+- Reference canonical developer or user docs when available instead of transient notes.
 - Include test class references to ease traceability (`tests/...`).
 - Mark deprecated entries clearly when refactoring.
 

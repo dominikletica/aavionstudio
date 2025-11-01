@@ -1,31 +1,18 @@
-{% extends 'layouts/base.html.twig' %}
+{% extends 'layouts/default.html.twig' %}
 
-{% block title %}{% block admin_title %}Admin · aavion Studio{% endblock %}{% endblock %}
+{% block title %}
+    {{ admin_title is defined and admin_title ? admin_title ~ ' · ' : '' }}{{ site_title is defined and site_title ? site_title : 'aavion Studio'|trans }}
+{% endblock %}
+
+{% block header %}
+    {% set header_title = admin_header_title|default('Admin'|trans) %}
+    {% set header_image = admin_header_image|default(header_image|default(null)) %}
+    {{ parent() }}
+{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-surface">
-    <header class="border-b border-border bg-surface">
-        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-            <div class="flex items-center gap-3">
-                <span class="text-lg font-semibold text-heading">aavion Studio</span>
-                {% if primary_menu is defined %}
-                    {% include 'partials/navigation/global.html.twig' with { menu: primary_menu } only %}
-                {% endif %}
-            </div>
-            <div class="flex items-center gap-3 text-sm text-text-muted">
-                {% block admin_header_actions %}{% endblock %}
-            </div>
-        </div>
-    </header>
-    <div class="mx-auto flex max-w-7xl gap-6 px-6 py-8">
-        <aside class="w-64 shrink-0">
-            {% if sidebar_menu is defined %}
-                {% include 'partials/navigation/sidebar.html.twig' with { menu: sidebar_menu } only %}
-            {% endif %}
-        </aside>
-        <main class="flex-1 layout-stack">
-            {% block main %}{% endblock %}
-        </main>
-    </div>
-</div>
+    {% set body_class = (body_class is defined and body_class ? body_class ~ ' ' : '') ~ 'admin' %}
+    {{ parent() }}
 {% endblock %}
+
+{% block content %}{% endblock %}
