@@ -298,3 +298,7 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Hardened the table component macro so generated attributes remain raw HTML (fixes `data-testid` selectors) and brought the installer diagnostics test back in sync with the new markup.
 - Introduced the `_theme_demo` route (`App\Controller\DemoController`) rendering `templates/pages/demo.html.twig` to showcase Tailwind-driven components, plus functional coverage to guard the preview.
 - Updated developer docs (`docs/dev/sections/ui/templates-and-themes.md`) and the class map with the demo route, ensuring theming contributors can discover the showcase page quickly.
+- Added `.codex/render.php` so any route can be rendered from the CLI while honouring the theme → module → default cascade.
+- Extended `_theme_demo` with Stimulus, Turbo, CodeMirror, and Alpine samples (including the `_theme_demo_tip` fragment) and refreshed tests/documentation accordingly.
+- Filled installer environment, storage, admin, and summary pages with actionable guidance so the new layouts are exercised with realistic copy.
+- Mapped the Codemirror `twig` option to the built-in HTML highlighter so the showcase editor renders without missing-module errors.

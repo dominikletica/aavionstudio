@@ -98,12 +98,12 @@ export default class extends Controller {
                     return html();
                 }
                 case 'twig': {
-                    const [{ StreamLanguage }, { twig }] = await Promise.all([
-                        import('@codemirror/stream-parser'),
-                        import('@codemirror/legacy-modes/mode/twig'),
-                    ]);
+                    const { html } = await import('@codemirror/lang-html');
 
-                    return StreamLanguage.define(twig);
+                    return html({
+                        matchClosingTags: true,
+                        selfClosingTags: true,
+                    });
                 }
                 default:
                     console.warn(`codemirror controller: unsupported language "${language}", falling back to plain text.`);

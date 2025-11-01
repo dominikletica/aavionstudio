@@ -61,6 +61,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 |------------|-------|-------------|--------|
 | `framework.error_controller` | `src/Controller/Error/ErrorController.php` | Project-aware HTML error pages with debug-aware diagnostics and Symfony fallback | Core; covered by `tests/Controller/Error/ErrorControllerTest.php` |
 | `_theme_demo` | `src/Controller/DemoController.php` | Renders the UI component showcase/demo route for theming work | Covered by `tests/Controller/DemoControllerTest.php` |
+| `_theme_demo_tip` | `src/Controller/DemoController.php` | Turbo-frame fragment serving rotating theming tips | Covered by `tests/Controller/DemoControllerTest.php` |
 | `app_login` | `src/Controller/Security/LoginController.php` | Handles sign-in form | Core |
 | `app_password_forgot` | `src/Controller/Security/PasswordResetController.php` | Password reset request | Core |
 | `app_password_reset` | `src/Controller/Security/PasswordResetController.php` | Password reset confirmation | Core |

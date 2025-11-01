@@ -16,7 +16,7 @@
     {% endfor %}
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div>
+        <div class="layout-stack layout-stack--loose">
             {% include 'partials/components/table.html.twig' with {
                 columns: [
                     { label: 'Key'|trans, key: 'key', class: 'font-mono text-xs' },
@@ -24,6 +24,37 @@
                 ],
                 rows: settings_rows,
                 compact: true
+            } only %}
+
+            {% set overrides_body %}
+                <ul class="list-disc space-y-2 pl-5 text-sm leading-relaxed text-text-muted">
+                    <li><strong>APP_ENV</strong> – {{ 'Set <code>prod</code> for production installs; keep <code>dev</code> on staging boxes.'|trans|raw }}</li>
+                    <li><strong>APP_DEBUG</strong> – {{ 'Disable debug outside of trusted environments to prevent verbose error output.'|trans }}</li>
+                    <li><strong>APP_SECRET</strong> – {{ 'Generate a unique random value; never reuse secrets across instances.'|trans }}</li>
+                    <li><strong>DEFAULT_URI</strong> – {{ 'Match the canonical base URL (including HTTPS) so CLI URL generators behave.'|trans }}</li>
+                    <li><strong>MAILER_DSN</strong> – {{ 'Point to your SMTP or transactional provider before onboarding users.'|trans }}</li>
+                </ul>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Configuration',
+                title: 'Recommended overrides',
+                body: overrides_body
+            } only %}
+
+            {% set deployment_body %}
+                <ol class="list-decimal space-y-3 pl-5 text-sm leading-relaxed text-text-muted">
+                    <li>{{ 'Copy the generated <code>.env.local.php</code> to your deployment target or secrets manager.'|trans|raw }}</li>
+                    <li>{{ 'Enable opcache, configure PHP-FPM, and point the web server at <code>public/</code>.'|trans|raw }}</li>
+                    <li>{{ 'Schedule the asset rebuild command (`php bin/console app:assets:rebuild --force`) for theme/module updates.'|trans|raw }}</li>
+                    <li>{{ 'Back up <code>var/system.brain</code> and <code>var/user.brain</code> regularly; the storage step will add remote targets soon.'|trans|raw }}</li>
+                </ol>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Readiness checklist',
+                title: 'Before pushing to production',
+                body: deployment_body
             } only %}
         </div>
         <div class="layout-stack layout-stack--tight">
@@ -37,6 +68,10 @@
                 variant: 'muted',
                 title: 'Tip'|trans,
                 body: '<p class="text-sm text-text-muted">' ~ 'Values can be fine-tuned later in the admin UI; keep secrets out of version control.'|trans ~ '</p>'
+            } only %}
+            {% include 'partials/components/card.html.twig' with {
+                title: 'Secrets policy'|trans,
+                body: '<p class="text-sm text-text-muted">' ~ 'Store credentials in Symfony secrets or your orchestration platform. The generated file is convenient for local use but should not be committed.'|trans ~ '</p>'
             } only %}
         </div>
     </div>

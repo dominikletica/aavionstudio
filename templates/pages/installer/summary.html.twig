@@ -6,23 +6,56 @@
         subtitle: 'A consolidated overview of environment, storage, and admin choices will appear here.'|trans
     } only %}
 
-    {% set card_body %}
-        <p class="text-sm text-text-muted">{{ 'Installation summary placeholder. Display configuration details here.'|trans }}</p>
-    {% endset %}
-
     <div class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        {% include 'partials/components/card.html.twig' with {
-            title: 'Configuration recap'|trans,
-            subtitle: 'We will surface all collected answers once the wizard is complete.'|trans,
-            body: card_body,
-            eyebrow: 'Overview'|trans
-        } only %}
+        <div class="layout-stack layout-stack--loose">
+            {% set overview_body %}
+                <div class="layout-stack layout-stack--tight text-sm leading-relaxed text-text-muted">
+                    <p>{{ 'This recap confirms the data collected in previous steps. The final implementation will show live values for quick verification.'|trans }}</p>
+                    <ul class="list-disc space-y-2 pl-5">
+                        <li><strong>{{ 'Diagnostics'|trans }}</strong> – {{ 'Rewrite rules, PHP extensions, and filesystem permissions must all be green before launch.'|trans }}</li>
+                        <li><strong>{{ 'Environment'|trans }}</strong> – {{ 'Environment variables map to the generated <code>.env.local.php</code>; overrides flow into Symfony secrets where available.'|trans|raw }}</li>
+                        <li><strong>{{ 'Storage'|trans }}</strong> – {{ 'Media roots, backup targets, and retention policies will surface here once configured.'|trans }}</li>
+                        <li><strong>{{ 'Administrator'|trans }}</strong> – {{ 'Invited users, MFA requirements, and audit notification settings appear for a final review.'|trans }}</li>
+                    </ul>
+                </div>
+            {% endset %}
 
-        {% include 'partials/components/illustration.html.twig' with {
-            name: 'about-us-page',
-            variant: 'lg',
-            attributes: { class: 'w-full' },
-            alt: 'Summary illustration'|trans
-        } only %}
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Overview',
+                title: 'Configuration recap',
+                subtitle: 'Live summaries arrive with the next wizard iteration.',
+                body: overview_body
+            } only %}
+
+            {% set next_steps_body %}
+                <ol class="list-decimal space-y-3 pl-5 text-sm leading-relaxed text-text-muted">
+                    <li>{{ 'Download or copy the generated environment file and secrets for safekeeping.'|trans }}</li>
+                    <li>{{ 'Queue the asset pipeline rebuild to compile Tailwind, importmaps, and theme overrides.'|trans }}</li>
+                    <li>{{ 'Trigger the snapshot job once storage backends are connected (CLI helpers will be exposed here).'|trans }}</li>
+                    <li>{{ 'Invite additional collaborators so they can finish module or schema configuration.'|trans }}</li>
+                </ol>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Launch checklist',
+                title: 'Next actions after review',
+                body: next_steps_body
+            } only %}
+        </div>
+
+        <div class="layout-stack layout-stack--tight">
+            {% include 'partials/components/illustration.html.twig' with {
+                name: 'about-us-page',
+                variant: 'lg',
+                attributes: { class: 'w-full' },
+                alt: 'Summary illustration'|trans
+            } only %}
+
+            {% include 'partials/components/card.html.twig' with {
+                variant: 'muted',
+                title: 'Need help?'|trans,
+                body: '<p class="text-sm text-text-muted">' ~ 'Open the diagnostics sidebar or the upcoming command palette to jump directly to troubleshooting guides.'|trans ~ '</p>'
+            } only %}
+        </div>
     </div>
 {% endblock %}

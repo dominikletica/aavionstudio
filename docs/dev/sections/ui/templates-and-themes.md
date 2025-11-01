@@ -98,7 +98,14 @@ Each field accepts `label`, `help`, `state`, `required`, and additional HTML att
 
 ### 3.3 Component showcase route
 
-Developers can preview the base component library at `/_themedemo` (handled by `App\Controller\DemoController`). The page renders the buttons, alerts, cards, tables, form fields, empty states, typography, and illustration helpers included with the default theme. Use it when building new themes or verifying Tailwind overrides—clone the template under `templates/pages/demo.html.twig` into your theme to ship custom showcases.
+Developers can preview the base component library at `/_themedemo` (handled by `App\Controller\DemoController`). The page renders buttons, alerts, cards, tables, form fields, empty states, typography, and illustration helpers, plus interactive samples:
+
+- Stimulus controller (`data-controller="themedemo"`) drives a live counter to show how to wire JS actions to Tailwind UI.
+- A Turbo frame (`turbo-frame#themedemo_tip`) lazy-loads rotating guidance from `_theme_demo_tip`.
+- The `codemirror` Stimulus controller upgrades textareas into language-aware editors.
+- Alpine.js powers lightweight tab toggles to demonstrate micro-interactions without custom controllers.
+
+Use it when building new themes or verifying Tailwind overrides—clone the template under `templates/pages/demo.html.twig` into your theme (or override the controller) to ship custom showcases.
 
 ## 4. Theme tokens & Tailwind utilities
 

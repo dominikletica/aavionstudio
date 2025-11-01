@@ -102,9 +102,93 @@
                 title: 'Form field collection',
                 body: form_body
             } only %}
+
+            {% set stimulus_body %}
+                <div class="layout-stack layout-stack--tight">
+                    <div data-controller="themedemo" data-themedemo-count-value="2" class="rounded-xl border border-dashed border-border/60 bg-surface p-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="text-sm font-medium text-text">{{ 'Active modules'|trans }}</p>
+                            <span class="badge badge--info">{{ 'Stimulus'|trans }}</span>
+                        </div>
+                        <p class="text-3xl font-semibold tracking-tight text-primary"><span data-themedemo-target="output">2</span></p>
+                        <div class="flex flex-wrap gap-3 pt-3">
+                            {{ include('partials/components/button.html.twig', {
+                                label: 'Add module'|trans,
+                                icon: 'plus',
+                                attributes: { 'data-action': 'click->themedemo#increment' }
+                            }, with_context = false) }}
+                            {{ include('partials/components/button.html.twig', {
+                                label: 'Reset'|trans,
+                                variant: 'ghost',
+                                icon: 'refresh',
+                                attributes: { 'data-action': 'click->themedemo#reset' }
+                            }, with_context = false) }}
+                        </div>
+                    </div>
+                    <p class="text-xs text-text-muted">{{ 'Stimulus keeps the counter in sync without reloading the page. Attach the controller to any dashboard metric for live previews.'|trans }}</p>
+                </div>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Interactions',
+                title: 'Stimulus counter demo',
+                body: stimulus_body
+            } only %}
+
+            {% set codemirror_body %}
+                <div class="layout-stack layout-stack--tight">
+                    <p class="text-sm text-text-muted">{{ 'The Codemirror Stimulus controller transforms any textarea into an editor with language-aware highlighting.'|trans }}</p>
+                    <textarea
+                        id="themedemo-editor"
+                        name="themedemo_editor"
+                        rows="8"
+                        data-controller="codemirror"
+                        data-codemirror-language-value="twig"
+                        data-codemirror-placeholder-value="{{ 'Paste Twig here…'|trans }}"
+                    >{% verbatim %}{% extends 'layouts/project.html.twig' %}
+{% block content %}
+    <h1>{{ page.title }}</h1>
+{% endblock %}{% endverbatim %}</textarea>
+                </div>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Code editor',
+                title: 'CodeMirror integration',
+                body: codemirror_body
+            } only %}
         </div>
 
         <aside class="layout-stack layout-stack--loose">
+            {% set turbo_body %}
+                <turbo-frame id="themedemo_tip" src="{{ path('_theme_demo_tip') }}" loading="lazy" class="layout-stack layout-stack--tight rounded-xl border border-dashed border-border/60 bg-surface p-4">
+                    <p class="text-sm text-text-muted">{{ 'Loading tip…'|trans }}</p>
+                </turbo-frame>
+                <div class="flex flex-wrap gap-2">
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'Refresh tip'|trans,
+                        icon: 'arrows-rotate',
+                        tag: 'a',
+                        url: path('_theme_demo_tip', { refresh: random(10000) }),
+                        attributes: { 'data-turbo-frame': 'themedemo_tip' }
+                    }, with_context = false) }}
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'Show docs reminder'|trans,
+                        variant: 'ghost',
+                        tag: 'a',
+                        url: path('_theme_demo_tip', { i: 3 }),
+                        attributes: { 'data-turbo-frame': 'themedemo_tip' }
+                    }, with_context = false) }}
+                </div>
+                <p class="text-xs text-text-muted">{{ 'Turbo frames lazy-load snippets and refresh inline without manual JavaScript.'|trans }}</p>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                title: 'Turbo frame tips',
+                subtitle: 'Inline refreshable help blocks.',
+                body: turbo_body
+            } only %}
+
             {% include 'partials/components/card.html.twig' with {
                 variant: 'emphasis',
                 title: 'Illustrations',
@@ -120,10 +204,34 @@
                 }, with_context = false)
             } only %}
 
+            {% set alpine_body %}
+                <div x-data="{ tab: 'preview' }" x-cloak class="layout-stack layout-stack--tight rounded-xl border border-border/60 bg-surface p-4">
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-secondary" :class="{ 'btn--ghost': tab !== 'preview' }" @click="tab = 'preview'">{{ 'Preview'|trans }}</button>
+                        <button type="button" class="btn btn-secondary" :class="{ 'btn--ghost': tab !== 'code' }" @click="tab = 'code'">{{ 'Code'|trans }}</button>
+                    </div>
+                    <div class="rounded-lg bg-muted/40 p-4 text-sm leading-relaxed text-text-muted" x-show="tab === 'preview'" x-transition>
+                        {{ 'Alpine.js is available globally for lightweight UI helpers—ideal for toggles, tabs, or progressive disclosure without adding bespoke controllers.'|trans }}
+                    </div>
+                    <pre class="overflow-x-auto rounded-lg bg-muted/70 p-4 text-xs leading-relaxed text-text-muted" x-show="tab === 'code'" x-transition>
+<code>&lt;div x-data="{ open: true }"&gt;
+    &lt;button @click="open = !open"&gt;Toggle&lt;/button&gt;
+    &lt;div x-show="open"&gt;Content&lt;/div&gt;
+&lt;/div&gt;</code>
+                    </pre>
+                </div>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                title: 'Alpine snippet',
+                subtitle: 'Micro-interactions without custom JS.',
+                body: alpine_body
+            } only %}
+
             {% include 'partials/components/card.html.twig' with {
                 title: 'Overlay components',
                 subtitle: 'Modals and drawers share the same token set.',
-                body: '<p class=\"text-sm text-text-muted\">Trigger overlays by including <code>partials/components/modal.html.twig</code> or <code>partials/components/drawer.html.twig</code> from your controller templates. Toggle visibility by switching <code>data-state</code> between <code>hidden</code> and <code>visible</code>.</p>'
+                body: '<p class="text-sm text-text-muted">Trigger overlays by including <code>partials/components/modal.html.twig</code> or <code>partials/components/drawer.html.twig</code> from your controller templates. Toggle visibility by switching <code>data-state</code> between <code>hidden</code> and <code>visible</code>.</p>'
             } only %}
         </aside>
     </section>
