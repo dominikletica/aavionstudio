@@ -63,6 +63,7 @@
 - Environment recap: `docs/codex/ENVIRONMENT.md`
 - README entry point: `README.md`
 - Helper scripts & snippets: store under `.codex/`
+- Tool registry: `docs/codex/TOOLBOX.md`
 - Style guide: `docs/STYLEGUIDE.md`
 - Templates: `docs/templates/`
 
