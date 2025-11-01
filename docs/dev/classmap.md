@@ -9,7 +9,7 @@
 | Service ID | Class | Responsibility | Notes |
 |------------|-------|----------------|-------|
 | `App\Kernel` | `src/Kernel.php` | Application kernel | Uses MicroKernelTrait |
-| `App\Doctrine\Listener\AttachUserDatabaseListener` | `src/Doctrine/Listener/AttachUserDatabaseListener.php` | Attaches `user.brain` to primary SQLite connection, configures pragmas | Sets `PRAGMA busy_timeout`/`foreign_keys` and ensures secondary DB file exists |
+| `App\Doctrine\Middleware\AttachUserDatabaseMiddleware` | `src/Doctrine/Middleware/AttachUserDatabaseMiddleware.php` | Attaches `user.brain` to primary SQLite connection via DBAL middleware and configures pragmas | Sets `PRAGMA busy_timeout`/`foreign_keys` and ensures secondary DB file exists |
 | `App\Doctrine\Health\SqliteHealthChecker` | `src/Doctrine/Health/SqliteHealthChecker.php` | Reports connection status for system + user SQLite stores | Used in tests/diagnostics to confirm attachment and busy timeout |
 | `App\Installer\DefaultSystemSettings` | `src/Installer/DefaultSystemSettings.php` | Loads shared default settings from `config/app/system_settings.php` | Consumed by migrations/installer to seed baseline values |
 | `App\Installer\DefaultProjects` | `src/Installer/DefaultProjects.php` | Provides default project seeds from `config/app/projects.php` | Initial migration inserts `default` project via this helper |

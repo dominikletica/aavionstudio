@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Doctrine;
 
 use App\Doctrine\Health\SqliteHealthChecker;
-use App\Doctrine\Listener\AttachUserDatabaseListener;
+use App\Doctrine\Middleware\AttachUserDatabaseMiddleware;
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Event\ConnectionEventArgs;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
-final class AttachUserDatabaseListenerTest extends TestCase
+final class AttachUserDatabaseMiddlewareTest extends TestCase
 {
     private string $workspace;
 
@@ -38,16 +38,17 @@ final class AttachUserDatabaseListenerTest extends TestCase
         $primaryPath = $this->workspace.'/system.brain';
         $secondaryPath = $this->workspace.'/user.brain';
 
-        $connection = $this->createSqliteConnection($primaryPath);
+        $config = new Configuration();
+        $config->setMiddlewares([
+            new AttachUserDatabaseMiddleware(
+                userDatabasePath: $secondaryPath,
+                filesystem: $filesystem,
+                logger: null,
+                busyTimeoutMs: 7000,
+            ),
+        ]);
 
-        $listener = new AttachUserDatabaseListener(
-            userDatabasePath: $secondaryPath,
-            filesystem: $filesystem,
-            logger: null,
-            busyTimeoutMs: 7000,
-        );
-
-        $listener->postConnect(new ConnectionEventArgs($connection));
+        $connection = $this->createSqliteConnection($primaryPath, $config);
 
         $databases = $connection->fetchAllAssociative('PRAGMA database_list');
         self::assertContains('user_brain', array_column($databases, 'name'));
@@ -67,11 +68,11 @@ final class AttachUserDatabaseListenerTest extends TestCase
         $connection->close();
     }
 
-    private function createSqliteConnection(string $path): Connection
+    private function createSqliteConnection(string $path, ?Configuration $configuration = null): Connection
     {
         return DriverManager::getConnection([
             'driver' => 'pdo_sqlite',
             'path' => $path,
-        ]);
+        ], $configuration);
     }
 }

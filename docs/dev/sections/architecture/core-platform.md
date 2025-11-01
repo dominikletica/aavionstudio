@@ -30,7 +30,7 @@ This guide summarises the core Symfony platform put in place during Roadmap Step
 
 ## Database & Doctrine
 
-- Doctrine connects to the primary `var/system.brain` SQLite database. `AttachUserDatabaseListener` attaches `var/user.brain` on connect, enables `PRAGMA busy_timeout` (configurable via `SQLITE_BUSY_TIMEOUT_MS` env or the container parameter fallback), and ensures `PRAGMA foreign_keys` is set.
+- Doctrine connects to the primary `var/system.brain` SQLite database. `AttachUserDatabaseMiddleware` attaches `var/user.brain` on connect, enables `PRAGMA busy_timeout` (configurable via `SQLITE_BUSY_TIMEOUT_MS` env or the container parameter fallback), and ensures `PRAGMA foreign_keys` is set.
 - Initial migration `Version20251030000100` provisions system tables (`app_project`, `app_schema`, `app_template`, `app_user`, `app_api_key`, `app_log`, `app_module_state`, `app_theme_state`, `app_system_setting`) plus content tables in the attached database namespace (`user_brain.app_entity`, `app_entity_version`, `app_draft`, `app_relation`).
 - Seeds insert default projects and system settings while respecting existing records (using `INSERT OR IGNORE`).
 - Health checks and unit tests (`tests/Doctrine/*`) verify listener behaviour and sqlite attachment.

@@ -8,8 +8,9 @@ use App\Doctrine\Health\SqliteHealthChecker;
 use App\Installer\DefaultProjects;
 use App\Installer\DefaultSystemSettings;
 use App\Bootstrap\RootEntryPoint;
-use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -19,6 +20,13 @@ use Symfony\Component\Routing\Annotation\Route;
 final class InstallerController extends AbstractController
 {
     private const STEPS = ['diagnostics', 'environment', 'storage', 'admin', 'summary'];
+
+    public function __construct(
+        private readonly Connection $connection,
+        #[Autowire('%app.user_database_path%')] private readonly string $userDatabasePath,
+        #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
+    ) {
+    }
 
     #[Route('/setup', name: 'app_installer')]
     public function __invoke(Request $request): Response
@@ -48,20 +56,21 @@ final class InstallerController extends AbstractController
     {
         $extensions = $this->gatherExtensionDiagnostics();
 
-        $projectDir = \dirname(__DIR__, 3);
-        $databaseUrl = $_ENV['DATABASE_URL'] ?? $_SERVER['DATABASE_URL'] ?? sprintf('sqlite:///%s/var/system.brain', $projectDir);
-        $userDatabasePath = $_ENV['APP_USER_DATABASE_PATH'] ?? $projectDir.'/var/user.brain';
-
-        $defaultPrimaryPath = $projectDir.'/var/system.brain';
+        $connectionParams = $this->connection->getParams();
+        $primaryPath = (string) ($connectionParams['path'] ?? $connectionParams['dbname'] ?? '');
+        if ($primaryPath === '' && isset($connectionParams['url'])) {
+            $primaryPath = $this->extractPathFromUrl((string) $connectionParams['url']);
+        }
+        if ($primaryPath === '') {
+            $primaryPath = $this->projectDir.'/var/system.brain';
+        }
 
         try {
-            $connection = DriverManager::getConnection(['url' => $databaseUrl]);
-            $sqliteReport = (new SqliteHealthChecker($connection, $userDatabasePath))->check()->toArray();
-            $connection->close();
+            $sqliteReport = (new SqliteHealthChecker($this->connection, $this->userDatabasePath))->check()->toArray();
         } catch (\Throwable $exception) {
             $sqliteReport = [
-                'primary_path' => $defaultPrimaryPath,
-                'secondary_path' => $userDatabasePath,
+                'primary_path' => $primaryPath,
+                'secondary_path' => $this->userDatabasePath,
                 'primary_exists' => false,
                 'secondary_exists' => false,
                 'secondary_attached' => false,
@@ -75,8 +84,26 @@ final class InstallerController extends AbstractController
             'extensions' => $extensions,
             'sqlite' => $sqliteReport,
             'rewrite' => $this->gatherRewriteDiagnostics(),
-            'filesystem' => $this->gatherFilesystemDiagnostics($projectDir),
+            'filesystem' => $this->gatherFilesystemDiagnostics($this->projectDir),
         ];
+    }
+
+    private function extractPathFromUrl(string $url): string
+    {
+        if ($url === '') {
+            return '';
+        }
+
+        $components = parse_url($url);
+        if (!\is_array($components)) {
+            return '';
+        }
+
+        if (isset($components['path']) && $components['path'] !== '') {
+            return $components['path'];
+        }
+
+        return '';
     }
 
     /**
