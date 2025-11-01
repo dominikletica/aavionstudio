@@ -32,7 +32,7 @@ Unit coverage: `tests/Security/Api/ApiKeyManagerTest.php`.
 - Routes handled by `src/Controller/Admin/UserController.php`:
   - `/admin/users/{id}` (GET/POST) – lists keys per user, allows creation via `ApiKeyCreateType`.
   - `/admin/users/{userId}/api-keys/{apiKeyId}/revoke` (POST) – CSRF-protected revoke action.
-- Template: `templates/admin/users/edit.html.twig` renders the user form + API key table.
+- Template: `templates/pages/admin/users/edit.html.twig` renders the user form + API key table.
 - Functional coverage: `tests/Controller/Admin/UserControllerTest.php::testCreateAndRevokeApiKey`.
 
 ## CLI issuance

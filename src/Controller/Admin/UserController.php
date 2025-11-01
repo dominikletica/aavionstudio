@@ -124,7 +124,7 @@ final class UserController extends AbstractController
                     } catch (\Exception $exception) {
                         $apiKeyForm->get('expires_at')->addError(new FormError('Invalid date/time format.'));
 
-                        return $this->render('admin/users/edit.html.twig', [
+                        return $this->render('pages/admin/users/edit.html.twig', [
                             'form' => $profileForm->createView(),
                             'user' => $user,
                             'apiKeyForm' => $apiKeyForm->createView(),
