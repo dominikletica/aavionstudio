@@ -42,10 +42,7 @@ final class ErrorController extends AbstractController
                 $project = null;
             }
 
-            $template = $this->errorPageResolver->resolve($projectSettings, $statusCode);
-            if ($template === null || !$this->twig->getLoader()->exists($template)) {
-                $template = 'pages/error/default.html.twig';
-            }
+            $template = $this->errorPageResolver->resolve($project, $statusCode);
 
             $context = [
                 'status_code' => $statusCode,

@@ -131,6 +131,7 @@ final class InstallerControllerTest extends WebTestCase
             'token' => $token,
             'steps' => json_encode([
                 ['type' => 'log', 'message' => 'noop'],
+                ['type' => 'configure'],
             ], JSON_THROW_ON_ERROR),
         ]);
 
@@ -165,6 +166,7 @@ final class InstallerControllerTest extends WebTestCase
             'token' => $token,
             'steps' => json_encode([
                 ['type' => 'log', 'message' => 'Testrun'],
+                ['type' => 'configure'],
                 ['type' => 'lock'],
             ], JSON_THROW_ON_ERROR),
         ]);

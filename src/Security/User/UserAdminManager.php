@@ -120,13 +120,14 @@ final class UserAdminManager
      *     updated_at: ?\DateTimeImmutable,
      *     last_login_at: ?\DateTimeImmutable,
      *     roles: list<string>
+     *     flags: array<string, mixed>
      * }|null
      */
     public function getUser(string $id): ?array
     {
         $row = $this->connection->fetchAssociative(
             <<<'SQL'
-                SELECT id, email, display_name, locale, timezone, status, created_at, updated_at, last_login_at
+                SELECT id, email, display_name, locale, timezone, status, created_at, updated_at, last_login_at, flags
                 FROM app_user
                 WHERE id = :id
             SQL,
@@ -148,6 +149,7 @@ final class UserAdminManager
             'updated_at' => $this->parseDateTime($row['updated_at'] ?? null),
             'last_login_at' => $this->parseDateTime($row['last_login_at'] ?? null),
             'roles' => $this->fetchRolesForUser($id),
+            'flags' => $this->decodeFlags($row['flags'] ?? '{}'),
         ];
     }
 
@@ -178,7 +180,7 @@ final class UserAdminManager
     }
 
     /**
-     * @param array{display_name: string, locale: string, timezone: string, status: string} $profile
+     * @param array{display_name: string, locale: string, timezone: string, status: string, flags?: array<string, mixed>} $profile
      * @param list<string> $roles
      */
     public function updateUser(string $id, array $profile, array $roles, ?string $actorId = null): void
@@ -199,11 +201,14 @@ final class UserAdminManager
 
             $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
+            $flags = \is_array($profile['flags'] ?? null) ? $profile['flags'] : $existing['flags'] ?? [];
+
             $connection->update('app_user', [
                 'display_name' => $profile['display_name'],
                 'locale' => $profile['locale'],
                 'timezone' => $profile['timezone'],
                 'status' => $profile['status'],
+                'flags' => json_encode($flags, JSON_THROW_ON_ERROR),
                 'updated_at' => $now,
             ], [
                 'id' => $id,
@@ -244,6 +249,13 @@ final class UserAdminManager
                         'new' => $value,
                     ];
                 }
+            }
+
+            if (($existing['flags'] ?? []) !== $flags) {
+                $changes['flags'] = [
+                    'old' => $existing['flags'] ?? [],
+                    'new' => $flags,
+                ];
             }
 
             if ($changes !== []) {
@@ -312,5 +324,23 @@ final class UserAdminManager
         } catch (\Exception) {
             return null;
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function decodeFlags(?string $json): array
+    {
+        if ($json === null || $json === '') {
+            return [];
+        }
+
+        try {
+            $flags = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return [];
+        }
+
+        return \is_array($flags) ? $flags : [];
     }
 }

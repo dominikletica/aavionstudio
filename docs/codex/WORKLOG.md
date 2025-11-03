@@ -311,3 +311,12 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Updated the overlay UI with a transparent log surface, inline spinner, and new status buttons (`btn-success|warning|danger`) powered by the expanded theme tokens.
 - Documentation refreshed where needed (developer theming guide, class map) to reflect the new component contracts and CLI behaviour.
 - Added session-scoped installer action tokens so `/setup/action` only executes requests issued by the active wizard session and blocked traversal attempts in uploaded archives to keep extractions inside the project directory.
+
+### 2025-11-03 (Session 2)
+- Reviewed current installer groundwork (new setup configurator, expanded defaults, action pipeline tweaks) to align roadmap step 4 prerequisites.
+- Drafted the comprehensive installer implementation outline (`docs/codex/notes/feat-installer.md`) covering UX flow, persistence services, action steps, tests, and documentation touchpoints.
+- Captured open questions around database options, advanced environment overrides, and support log handling to unblock stakeholder feedback before coding.
+- Re-read `AGENTS.md`, `docs/codex/notes/OUTLINE.md`, and related outlines to confirm installer expectations ahead of revisions.
+- Incorporated maintainer feedback, rebuilt `feat-installer.md` from scratch (no `.env.local.php`, reuse `bin/init`, single storage root, inline admin password creation, JSON help catalogue) and removed inline annotations.
+- Documented the session→`bin/init` hand-off (env writer, JSON payload, `--setup/--payload` flags, post-run seeding command) and outlined validation & cleanup requirements.
+- Logged design decisions resolving earlier open questions (SQLite-only driver, no log downloads, lock/session handling) and updated next steps for implementation/test phases.

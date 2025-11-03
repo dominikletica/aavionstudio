@@ -38,6 +38,13 @@
                     {{ form_row(form.display_name) }}
                     {{ form_row(form.locale) }}
                     {{ form_row(form.timezone) }}
+
+                    {% for child in form %}
+                        {% if child.vars.name not in ['display_name', 'locale', 'timezone', 'status', 'roles'] %}
+                            {{ form_row(child) }}
+                        {% endif %}
+                    {% endfor %}
+
                     {{ form_row(form.status) }}
                     {{ form_row(form.roles) }}
                     {{ include('partials/components/button.html.twig', {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Installer\Action;
 
+use App\Setup\SetupConfigurator;
 use App\Setup\SetupState;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -18,6 +19,7 @@ final class ActionExecutor
         #[Autowire('%kernel.project_dir%')]
         private readonly string $projectDir,
         private readonly SetupState $setupState,
+        private readonly SetupConfigurator $setupConfigurator,
         private readonly Filesystem $filesystem,
     ) {
     }
@@ -42,6 +44,7 @@ final class ActionExecutor
                 'console' => $this->runConsoleCommand($rawStep, $emit),
                 'shell' => $this->runShellCommand($rawStep, $emit),
                 'init' => $this->runInit($rawStep, $emit),
+                'configure' => $this->applyConfiguration($emit),
                 'lock' => $this->createLock(),
                 default => throw new \InvalidArgumentException(sprintf('Unsupported action type "%s".', $type)),
             };
@@ -56,6 +59,7 @@ final class ActionExecutor
             'console' => sprintf('Run bin/console %s', $this->stringifyCommand($step['command'] ?? [])),
             'shell' => sprintf('Run %s', $this->stringifyCommand($step['command'] ?? [])),
             'init' => sprintf('Run bin/init (%s)', $step['environment'] ?? 'auto'),
+            'configure' => 'Persist system configuration',
             'lock' => 'Write setup.lock',
             default => 'Unknown step',
         };
@@ -73,8 +77,17 @@ final class ActionExecutor
     {
         $message = (string) ($step['message'] ?? '');
         if ($message !== '') {
-            // $emit('log', $message);
+            // message already emitted by the surrounding step header
         }
+    }
+
+    /**
+     * @param callable(string,string=):void $emit
+     */
+    private function applyConfiguration(callable $emit): void
+    {
+        $emit('log', 'Applying configuration defaults...');
+        $this->setupConfigurator->apply();
     }
 
     private function extractUploadedPackage(?UploadedFile $package, array $step): void
@@ -250,6 +263,7 @@ final class ActionExecutor
     {
         $this->filesystem->mkdir(\dirname($this->setupState->lockFilePath()));
         $this->setupState->markCompleted();
+        $this->setupConfigurator->markCompleted();
     }
 
     /**
