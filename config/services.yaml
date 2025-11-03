@@ -81,5 +81,11 @@ services:
             - '@doctrine.dbal.default_connection'
             - 'app_remember_me_token'
 
+    doctrine.orm.messenger.doctrine_schema_listener:
+        class: Symfony\Bridge\Doctrine\SchemaListener\MessengerTransportDoctrineSchemaListener
+        arguments:
+            - []
+        tags: []
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

@@ -14,6 +14,7 @@ use App\Security\Capability\CapabilitySynchronizer;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Tools\DsnParser;
+use Doctrine\Deprecations\Deprecation;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -33,6 +34,8 @@ class Kernel extends BaseKernel
      * @var list<ThemeManifest>|null
      */
     private ?array $discoveredThemes = null;
+
+    private static bool $doctrineDeprecationsSilenced = false;
 
     protected function configureContainer(ContainerConfigurator $container, LoaderInterface $loader): void
     {
@@ -222,6 +225,14 @@ class Kernel extends BaseKernel
 
     public function boot(): void
     {
+        if (!self::$doctrineDeprecationsSilenced && class_exists(Deprecation::class)) {
+            Deprecation::ignoreDeprecations(
+                'https://github.com/doctrine/dbal/issues/4963',
+                'https://github.com/doctrine/dbal/issues/5812',
+            );
+            self::$doctrineDeprecationsSilenced = true;
+        }
+
         parent::boot();
 
         if ($this->container->has(ModuleStateSynchronizer::class)) {

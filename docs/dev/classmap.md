@@ -13,6 +13,7 @@
 | `App\Doctrine\Health\SqliteHealthChecker` | `src/Doctrine/Health/SqliteHealthChecker.php` | Reports connection status for system + user SQLite stores | Used in tests/diagnostics to confirm attachment and busy timeout |
 | `App\Installer\DefaultSystemSettings` | `src/Installer/DefaultSystemSettings.php` | Loads shared default settings from `config/app/system_settings.php` | Consumed by migrations/installer to seed baseline values |
 | `App\Installer\DefaultProjects` | `src/Installer/DefaultProjects.php` | Provides default project seeds from `config/app/projects.php` | Initial migration inserts `default` project via this helper |
+| `App\Installer\Action\ActionExecutor` | `src/Installer/Action/ActionExecutor.php` | Executes installer/updater action chains (zip extraction, console/init calls, lock creation) with streamed output | Used by `/setup/action` controller |
 | `App\Bootstrap\RootEntryPoint` | `src/Bootstrap/RootEntryPoint.php` | Normalises requests that hit the root fallback (`index.php`) and forwards them to `public/index.php` | Sets compatibility flags for installer rewrite diagnostics |
 | `App\Error\ErrorPageResolver` | `src/Error/ErrorPageResolver.php` | Resolves project/error-code specific Twig templates with fallback chain | Used by `App\Controller\Error\ErrorController`; behaviour covered by `tests/Controller/Error/ErrorControllerTest.php` |
 | `App\Module\ModuleDiscovery` | `src/Module/ModuleDiscovery.php` | Discovers module manifests under `/modules/*/module.php` | Supports drop-in modules without Composer autoload |

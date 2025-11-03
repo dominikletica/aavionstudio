@@ -27,6 +27,7 @@ mkdir -p "$BUILD_DIR"
 
 cat > "$RELEASE_METADATA_PATH" <<JSON
 {
+  "product": "aavion Studio",
   "version": "$VERSION",
   "channel": "$CHANNEL",
   "environment": "$APP_ENV",

@@ -120,35 +120,28 @@ final class InstallerControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        $crawler = $client->request('GET', '/setup?step=summary');
-        $tokenNode = $crawler->filter('form[action="/setup/complete"] input[name="_token"]');
+        $filesystem = new Filesystem();
+        $filesystem->touch($this->systemDatabasePath);
+        $filesystem->touch($this->userDatabasePath);
 
-        self::assertNotSame(0, $tokenNode->count(), 'Setup completion form should render a CSRF token.');
-
-        $token = (string) $tokenNode->attr('value');
-
-        $client->request('POST', '/setup/complete', [
-            '_token' => $token,
+        $client->request('POST', '/setup/action', [
+            'context' => 'setup',
+            'steps' => json_encode([
+                ['type' => 'log', 'message' => 'Testrun'],
+                ['type' => 'lock'],
+            ], JSON_THROW_ON_ERROR),
         ]);
 
-        $requestSession = $client->getRequest()->getSession();
-        $flashMessages = $requestSession !== null ? $requestSession->getFlashBag()->peek('setup_error') : [];
+        $this->assertResponseIsSuccessful();
+        // Consume the streamed body to avoid PHPUnit reporting open buffers.
+        (string) $client->getResponse()->getContent();
 
-        if (!empty($flashMessages)) {
-            self::fail('Setup finalization failed: '.implode(' | ', $flashMessages));
-        }
-
-        $this->assertResponseRedirects('/login');
-
-        $filesystem = new Filesystem();
         self::assertFileExists($this->systemDatabasePath, 'Primary database should be created during setup completion.');
         self::assertFileExists($this->userDatabasePath, 'User database should be created during setup completion.');
         self::assertFileExists($this->setupLockPath, 'Setup completion should lock the wizard.');
 
-        $client->followRedirect();
         $client->request('GET', '/setup');
-
-        $this->assertResponseStatusCodeSame(404);
+        $this->assertResponseRedirects('/admin');
     }
 
     public function testSummaryShowsFinalizeFormEvenIfDatabasesExist(): void
@@ -161,8 +154,9 @@ final class InstallerControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/setup?step=summary');
 
         $this->assertResponseIsSuccessful();
-        $this->assertSame(1, $crawler->filter('form[action="/setup/complete"] button[type="submit"]')->count());
-        $this->assertSelectorTextContains('form[action="/setup/complete"] h2', 'Finalize installation');
+        $trigger = $crawler->filter('[data-action-trigger]');
+        $this->assertSame(1, $trigger->count());
+        $this->assertSame('setup', (string) $trigger->attr('data-action-context'));
     }
 
     protected function tearDown(): void

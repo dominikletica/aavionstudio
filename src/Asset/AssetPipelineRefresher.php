@@ -140,6 +140,17 @@ final class AssetPipelineRefresher
 
     private function resolvePhpBinary(): string
     {
+        $binary = PHP_BINARY;
+
+        if ($binary !== '' && !str_contains(basename($binary), 'php-fpm')) {
+            return $binary;
+        }
+
+        $candidate = PHP_BINDIR.'/php';
+        if (is_file($candidate) && is_executable($candidate)) {
+            return $candidate;
+        }
+
         return 'php';
     }
 }

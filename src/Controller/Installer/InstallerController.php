@@ -7,35 +7,26 @@ namespace App\Controller\Installer;
 use App\Doctrine\Health\SqliteHealthChecker;
 use App\Installer\DefaultProjects;
 use App\Installer\DefaultSystemSettings;
-use App\Setup\SetupFinalizer;
 use App\Setup\SetupState;
 use App\Bootstrap\RootEntryPoint;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 #[AsController]
 final class InstallerController extends AbstractController
 {
     private const STEPS = ['diagnostics', 'environment', 'storage', 'admin', 'summary'];
-    private const COMPLETE_TOKEN_ID = 'app.setup.complete';
 
     public function __construct(
         private readonly Connection $connection,
         #[Autowire('%app.user_database_path%')] private readonly string $userDatabasePath,
         #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
         private readonly SetupState $setupState,
-        private readonly SetupFinalizer $setupFinalizer,
-        private readonly CsrfTokenManagerInterface $csrfTokenManager,
     ) {
     }
 
@@ -43,7 +34,7 @@ final class InstallerController extends AbstractController
     public function __invoke(Request $request): Response
     {
         if ($this->setupState->isCompleted()) {
-            throw new NotFoundHttpException('The setup wizard is locked.');
+            return $this->redirect('/admin');
         }
 
         $requestedStep = (string) $request->query->get('step', self::STEPS[0]);
@@ -62,37 +53,10 @@ final class InstallerController extends AbstractController
             'default_settings' => DefaultSystemSettings::all(),
             'default_projects' => DefaultProjects::all(),
             'setup' => [
-                'completed' => $this->setupState->isCompleted(),
                 'databases_exist' => $this->setupState->databasesExist(),
-                'completion_token' => $this->csrfTokenManager->getToken(self::COMPLETE_TOKEN_ID)->getValue(),
+                'action_steps' => $this->buildSetupActionSteps(),
             ],
         ]);
-    }
-
-    #[Route('/setup/complete', name: 'app_installer_complete', methods: ['POST'])]
-    public function complete(Request $request): RedirectResponse
-    {
-        if ($this->setupState->isCompleted()) {
-            return $this->redirectToRoute('app_login');
-        }
-
-        $submittedToken = (string) $request->request->get('_token', '');
-
-        if (! $this->csrfTokenManager->isTokenValid(new CsrfToken(self::COMPLETE_TOKEN_ID, $submittedToken))) {
-            throw new AccessDeniedHttpException('Invalid setup confirmation token.');
-        }
-
-        try {
-            $this->setupFinalizer->finalize();
-        } catch (\Throwable $exception) {
-            $this->addFlash('setup_error', $exception->getMessage());
-
-            return $this->redirectToRoute('app_installer', ['step' => 'summary']);
-        }
-
-        $this->addFlash('success', 'Setup completed. You can now sign in.');
-
-        return $this->redirectToRoute('app_login');
     }
 
     /**
@@ -333,5 +297,44 @@ final class InstallerController extends AbstractController
         }
 
         return $reports;
+    }
+
+    /**
+     * @return list<array<string,mixed>>
+     */
+    private function buildSetupActionSteps(): array
+    {
+        $environment = $this->resolveTargetEnvironment();
+
+        return [
+            [
+                'type' => 'log',
+                'message' => 'Start setup routine...',
+            ],
+            [
+                'type' => 'init',
+                'environment' => $environment,
+            ],
+            [
+                'type' => 'lock',
+            ],
+        ];
+    }
+
+    private function resolveTargetEnvironment(): string
+    {
+        $manifest = $this->projectDir.'/manifest.json';
+
+        if (is_file($manifest)) {
+            $contents = file_get_contents($manifest);
+            if (\is_string($contents)) {
+                $decoded = json_decode($contents, true);
+                if (\is_array($decoded) && isset($decoded['environment']) && \is_string($decoded['environment']) && $decoded['environment'] !== '') {
+                    return $decoded['environment'];
+                }
+            }
+        }
+
+        return $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? 'dev';
     }
 }
