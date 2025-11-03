@@ -1,0 +1,195 @@
+<div data-action-overlay class="action-overlay hidden fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/60"></div>
+    <div class="relative mx-auto mt-16 max-w-3xl rounded-lg bg-surface p-6 shadow-lg layout-stack layout-stack--loose">
+        <div class="flex items-center justify-between gap-4">
+            <h2 class="text-heading text-xl">{{ 'Execution Progress'|trans }}</h2>
+        </div>
+        <div class="relative">
+            <pre data-action-log class="h-72 overflow-auto rounded-md bg-transparent p-4 text-sm font-mono shadow-inner whitespace-pre-wrap"></pre>
+            <div data-action-spinner class="pointer-events-none absolute inset-0 hidden items-center justify-center">
+                <div class="h-72 flex flex-col items-center gap-4 text-center items-center justify-center">
+                    <svg class="h-16 w-16 animate-spin text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 017-7.938V1a10 10 0 00-9 9h2z"></path>
+                    </svg>
+                    <p class="font-medium text-text-muted">{{ 'Processing…'|trans }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end">
+            <button type="button" data-action-complete class="btn hidden">{{ 'Close'|trans }}</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    const overlay = document.querySelector('[data-action-overlay]');
+    if (!overlay) {
+        return;
+    }
+
+    const actionUrl = '{{ path('app_installer_action') }}';
+    const actionToken = '{{ action_token|default('')|e('js') }}';
+    const logElement = overlay.querySelector('[data-action-log]');
+    const spinner = overlay.querySelector('[data-action-spinner]');
+    const completeButton = overlay.querySelector('[data-action-complete]');
+
+    const resetOverlay = () => {
+        overlay.classList.add('hidden');
+        logElement.textContent = '';
+        completeButton.classList.add('hidden');
+        completeButton.classList.remove('btn-success', 'btn-danger');
+        completeButton.disabled = true;
+        if (spinner) {
+            spinner.classList.add('hidden');
+        }
+    };
+
+    const showOverlay = () => {
+        logElement.textContent = '';
+        completeButton.disabled = true;
+        completeButton.classList.add('hidden');
+        overlay.classList.remove('hidden');
+        if (spinner) {
+            spinner.classList.remove('hidden');
+        }
+    };
+
+    const appendLog = (message, isError = false) => {
+        const prefix = isError ? '[ERROR] ' : '';
+        logElement.textContent += prefix + message + '\n';
+        logElement.scrollTop = logElement.scrollHeight;
+    };
+
+    const handleCompletion = (status) => {
+        if (spinner) {
+            spinner.classList.add('hidden');
+        }
+        completeButton.disabled = false;
+        completeButton.classList.remove('hidden');
+        if (status === 'success') {
+            completeButton.classList.add('btn-success');
+        } else {
+            completeButton.classList.add('btn-danger');
+        }
+    };
+
+    const runAction = async (trigger) => {
+        const steps = trigger.dataset.actionSteps ? JSON.parse(trigger.dataset.actionSteps) : [];
+        const context = trigger.dataset.actionContext ?? 'generic';
+        if (!Array.isArray(steps) || steps.length === 0) {
+            console.error('No valid steps provided.');
+            return;
+        }
+
+        if (!actionToken) {
+            console.error('Missing installer session token. Refresh the page to continue.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('context', context);
+        formData.append('steps', JSON.stringify(steps));
+        formData.append('token', actionToken);
+
+        const fileInputId = trigger.dataset.actionFileInput;
+        if (fileInputId) {
+            const fileInput = document.getElementById(fileInputId);
+            if (fileInput && fileInput.files.length > 0) {
+                formData.append('package', fileInput.files[0]);
+            }
+        }
+
+        showOverlay();
+        let resultStatus = 'error';
+        try {
+            const response = await fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Setup-Token': actionToken,
+                },
+            });
+
+            if (!response.ok || !response.body) {
+                appendLog(`Error: ${response.status} ${response.statusText}`, true);
+                handleCompletion('error');
+                return;
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const {value, done} = await reader.read();
+                if (done) {
+                    break;
+                }
+
+                buffer += decoder.decode(value, {stream: true});
+                const lines = buffer.split('\n');
+                buffer = lines.pop() ?? '';
+
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed === '') {
+                        continue;
+                    }
+
+                    try {
+                        const entry = JSON.parse(trimmed);
+                        const message = typeof entry.message === 'string' ? entry.message : '';
+                        switch (entry.type) {
+                            case 'log':
+                                appendLog(message);
+                                break;
+                            case 'error':
+                                appendLog(message || 'Unknown error', true);
+                                resultStatus = 'error';
+                                break;
+                            case 'done':
+                                resultStatus = entry.message || 'success';
+                                break;
+                        }
+                    } catch (error) {
+                        appendLog(trimmed);
+                    }
+                }
+            }
+
+            if (buffer.trim() !== '') {
+                appendLog(buffer.trim());
+            }
+
+            handleCompletion(resultStatus);
+        } catch (error) {
+            appendLog(`Netzwerkfehler: ${error instanceof Error ? error.message : String(error)}`, true);
+            handleCompletion('error');
+        }
+    };
+
+    document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) {
+            return;
+        }
+
+        if (target.matches('[data-action-trigger]')) {
+            event.preventDefault();
+            runAction(target);
+        }
+
+        if (target === completeButton) {
+            window.location.href = window.location.href.split('#')[0];
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !overlay.classList.contains('hidden')) {
+            resetOverlay();
+        }
+    });
+})();
+</script>

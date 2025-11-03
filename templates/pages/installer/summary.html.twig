@@ -41,6 +41,33 @@
                 title: 'Next actions after review',
                 body: next_steps_body
             } only %}
+
+            {% if setup.databases_exist %}
+                {% include 'partials/components/card.html.twig' with {
+                    variant: 'warning',
+                    title: 'Provisioning pending',
+                    body: '<p class="text-sm text-text-muted">' ~ 'Database files exist, but the setup lock is missing. Finish the wizard to apply outstanding migrations and secure the installer.'|trans ~ '</p>'
+                } only %}
+            {% endif %}
+
+            <div class="surface border border-border-strong rounded-md p-6 layout-stack layout-stack--tight">
+                <div class="layout-stack layout-stack--tight">
+                    <h2 class="text-heading text-xl">Finalize installation</h2>
+                    <p class="text-sm text-text-muted">
+                        {{ 'Provision the SQLite databases, apply Doctrine migrations, and lock this setup wizard.'|trans }}
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    class="btn btn-primary btn--lg self-start"
+                    data-action-trigger
+                    data-action-context="setup"
+                    data-action-steps="{{ setup.action_steps|json_encode|e('html_attr') }}"
+                    data-action-token="{{ setup.action_token|e('html_attr') }}"
+                >
+                    {{ 'Create databases & finish setup'|trans }}
+                </button>
+            </div>
         </div>
 
         <div class="layout-stack layout-stack--tight">
@@ -58,4 +85,6 @@
             } only %}
         </div>
     </div>
+
+    {{ include('pages/installer/action.html.twig', { action_token: setup.action_token }) }}
 {% endblock %}

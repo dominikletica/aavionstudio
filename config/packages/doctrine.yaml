@@ -1,6 +1,7 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
+        schema_manager_factory: doctrine.dbal.default_schema_manager_factory
         types:
             ulid: Symfony\Bridge\Doctrine\Types\UlidType
             uuid: Symfony\Bridge\Doctrine\Types\UuidType
@@ -32,6 +33,7 @@ doctrine:
 when@test:
     doctrine:
         dbal:
+            url: 'sqlite:///%kernel.project_dir%/var/test/system.brain'
             # "TEST_TOKEN" is typically set by ParaTest
             dbname_suffix: '_test%env(default::TEST_TOKEN)%'
 

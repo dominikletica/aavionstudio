@@ -13,6 +13,7 @@ use App\Security\Authorization\ProjectMembershipRepository;
 use App\Security\Api\ApiKeyManager;
 use App\Security\Password\PasswordResetTokenManager;
 use App\Security\User\AppUser;
+use App\Security\User\UserProfileFieldRegistry;
 use App\Security\User\UserAdminManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -38,6 +39,7 @@ final class UserController extends AbstractController
         private readonly SecurityAuditLogger $auditLogger,
         private readonly MailerInterface $mailer,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly UserProfileFieldRegistry $profileFieldRegistry,
     ) {
     }
 
@@ -77,13 +79,21 @@ final class UserController extends AbstractController
             $membershipByProject[$membership->projectId] = $membership;
         }
 
-        $profileForm = $this->createForm(UserProfileType::class, [
+        $profileFields = $this->profileFieldRegistry->getFields();
+
+        $formData = [
             'display_name' => $user['display_name'],
             'locale' => $user['locale'],
             'timezone' => $user['timezone'],
             'status' => $user['status'],
             'roles' => $user['roles'] !== [] ? $user['roles'] : ['ROLE_VIEWER'],
-        ], [
+        ];
+
+        foreach ($profileFields as $field => $definition) {
+            $formData[$field] = $user['flags'][$field] ?? null;
+        }
+
+        $profileForm = $this->createForm(UserProfileType::class, $formData, [
             'role_choices' => $roleChoices,
         ]);
 
@@ -95,11 +105,14 @@ final class UserController extends AbstractController
 
                 $roles = array_map(static fn ($role): string => (string) $role, $data['roles'] ?? []);
 
+                $flags = $this->profileFieldRegistry->normalize($data);
+
                 $this->userAdminManager->updateUser($id, [
                     'display_name' => (string) $data['display_name'],
                     'locale' => $data['locale'] !== '' ? (string) $data['locale'] : 'en',
                     'timezone' => $data['timezone'] !== '' ? (string) $data['timezone'] : 'UTC',
                     'status' => (string) $data['status'],
+                    'flags' => $flags,
                 ], $roles, $this->getActorId());
 
                 $this->addFlash('success', 'User updated.');

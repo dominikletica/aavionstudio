@@ -17,7 +17,7 @@ BUILD_DIR="$ROOT_DIR/build"
 STAGE_DIR="$BUILD_DIR/${APP_ENV}-${VERSION}-${CHANNEL}"
 ZIP_NAME="aavionstudio-${VERSION}-${CHANNEL}.zip"
 ZIP_PATH="$BUILD_DIR/$ZIP_NAME"
-RELEASE_METADATA_PATH="$BUILD_DIR/release.json"
+RELEASE_METADATA_PATH="$BUILD_DIR/manifest.json"
 COMMIT_SHA="$(git -C "$ROOT_DIR" rev-parse --short HEAD)"
 GENERATED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
@@ -27,6 +27,7 @@ mkdir -p "$BUILD_DIR"
 
 cat > "$RELEASE_METADATA_PATH" <<JSON
 {
+  "product": "aavion Studio",
   "version": "$VERSION",
   "channel": "$CHANNEL",
   "environment": "$APP_ENV",
@@ -62,14 +63,10 @@ echo ">>> Syncing repository into staging directory"
 mkdir -p "$STAGE_DIR"
 rsync -a --delete "${EXCLUDES[@]}" "$ROOT_DIR"/ "$STAGE_DIR"/
 
-pushd "$STAGE_DIR" >/dev/null
-
-bin/init "${APP_ENV}"
-
-rm -rf var/log var/logs
-rm -rf var/tailwind var/tailwindcss
-
-popd >/dev/null
+# The release package must remain cold. Never pre-initialise caches or databases.
+# Ensure any stray runtime directories are gone (rsync excludes them, this is defensive).
+rm -rf "$STAGE_DIR/var"
+rm -rf "$STAGE_DIR/public/assets"
 
 rm -f "$ZIP_PATH"
 

@@ -9,10 +9,12 @@ use App\Theme\ThemeDiscovery;
 use App\Theme\ThemeManifest;
 use App\Theme\ThemeStateSynchronizer;
 use App\Twig\TemplatePathConfigurator;
+use App\Setup\MigrationSynchronizer;
 use App\Security\Capability\CapabilitySynchronizer;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Tools\DsnParser;
+use Doctrine\Deprecations\Deprecation;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -32,6 +34,8 @@ class Kernel extends BaseKernel
      * @var list<ThemeManifest>|null
      */
     private ?array $discoveredThemes = null;
+
+    private static bool $doctrineDeprecationsSilenced = false;
 
     protected function configureContainer(ContainerConfigurator $container, LoaderInterface $loader): void
     {
@@ -221,6 +225,14 @@ class Kernel extends BaseKernel
 
     public function boot(): void
     {
+        if (!self::$doctrineDeprecationsSilenced && class_exists(Deprecation::class)) {
+            Deprecation::ignoreDeprecations(
+                'https://github.com/doctrine/dbal/issues/4963',
+                'https://github.com/doctrine/dbal/issues/5812',
+            );
+            self::$doctrineDeprecationsSilenced = true;
+        }
+
         parent::boot();
 
         if ($this->container->has(ModuleStateSynchronizer::class)) {
@@ -245,6 +257,12 @@ class Kernel extends BaseKernel
             $capabilitySynchronizer = $this->container->get(CapabilitySynchronizer::class);
             \assert($capabilitySynchronizer instanceof CapabilitySynchronizer);
             $capabilitySynchronizer->synchronize();
+        }
+
+        if ($this->container->has(MigrationSynchronizer::class)) {
+            $migrationSynchronizer = $this->container->get(MigrationSynchronizer::class);
+            \assert($migrationSynchronizer instanceof MigrationSynchronizer);
+            $migrationSynchronizer->synchronize();
         }
     }
 
@@ -321,6 +339,27 @@ class Kernel extends BaseKernel
 
         try {
             $params = (new DsnParser())->parse($databaseUrl);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        $path = $params['path'] ?? null;
+
+        if (\is_string($path) && $path !== '' && !\is_file($path)) {
+            return null;
+        }
+
+        $url = $params['url'] ?? null;
+
+        if (\is_string($url) && \str_starts_with($url, 'sqlite')) {
+            $components = parse_url($url);
+
+            if (\is_array($components) && isset($components['path']) && $components['path'] !== '' && !\is_file($components['path'])) {
+                return null;
+            }
+        }
+
+        try {
             $connection = DriverManager::getConnection($params);
         } catch (\Throwable) {
             return null;

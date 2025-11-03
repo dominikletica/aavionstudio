@@ -36,7 +36,7 @@ Partial templates live under `templates/partials/` and are grouped by feature:
 - `partials/header/header.html.twig` – full-width hero header with optional background image/logo, overlay heading (`header_heading`) and subtitle. Admin/project/entity layouts can pass `header_image`, `header_logo`, `header_heading`, and `header_subtitle` to customise the hero.
 - `partials/navigation/*.html.twig` – global/header menus and sidebar sections.
 - `partials/forms/fields/*.html.twig` – form inputs; use `{% include %}` in pages or embed in custom form themes.
-- `partials/forms/buttons/*.html.twig` – button presets (`btn btn-primary`, etc.).
+- `partials/forms/buttons/*.html.twig` – button presets (`btn btn-primary`, `btn btn-secondary`, and status variants like `btn-success`, `btn-warning`, `btn-danger`).
 - `partials/feedback/*.html.twig` – legacy flash/alert snippets (replaced by the component collection below).
 - `partials/components/*.html.twig` – reusable building blocks (buttons, alerts, cards, empty states) with Tailwind-ready styling and illustration slots.
 - `partials/head/importmap.html.twig` – default importmap injection, can be overridden by themes.
@@ -110,6 +110,7 @@ Use it when building new themes or verifying Tailwind overrides—clone the temp
 ## 4. Theme tokens & Tailwind utilities
 
 - Theme tokens are defined in `assets/styles/base/theme.css` using Tailwind’s `@theme` directive. They expose colors, typography, radii, shadows, transitions, etc.
+- The `.dark` variant in the same file mirrors those tokens for dark mode; toggle the class on `<html>` or `<body>` when wiring the eventual theme switcher.
 - Shared component layers (`assets/styles/base/*.css`) rely exclusively on Tailwind utilities plus the tokens; you can safely use any Tailwind class in Twig templates.
 - Additional helper utilities live in `assets/styles/base/utilities.css` (`.text-primary`, `.bg-surface`, `.badge`, `.alert--*`, `.nav-*`, `.table`, `.modal`, `.skeleton`, etc.).
 - Rebuild the pipeline with `php bin/console app:assets:rebuild --force` whenever theme CSS changes; the command now clears `public/assets/` before regenerating bundles.

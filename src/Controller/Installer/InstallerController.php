@@ -7,6 +7,8 @@ namespace App\Controller\Installer;
 use App\Doctrine\Health\SqliteHealthChecker;
 use App\Installer\DefaultProjects;
 use App\Installer\DefaultSystemSettings;
+use App\Setup\SetupAccessToken;
+use App\Setup\SetupState;
 use App\Bootstrap\RootEntryPoint;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,12 +27,18 @@ final class InstallerController extends AbstractController
         private readonly Connection $connection,
         #[Autowire('%app.user_database_path%')] private readonly string $userDatabasePath,
         #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
+        private readonly SetupState $setupState,
+        private readonly SetupAccessToken $setupAccessToken,
     ) {
     }
 
-    #[Route('/setup', name: 'app_installer')]
+    #[Route('/setup', name: 'app_installer', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
+        if ($this->setupState->isCompleted()) {
+            return $this->redirect('/admin');
+        }
+
         $requestedStep = (string) $request->query->get('step', self::STEPS[0]);
         $currentStep = \in_array($requestedStep, self::STEPS, true) ? $requestedStep : self::STEPS[0];
 
@@ -46,6 +54,11 @@ final class InstallerController extends AbstractController
             'diagnostics' => $this->gatherDiagnostics(),
             'default_settings' => DefaultSystemSettings::all(),
             'default_projects' => DefaultProjects::all(),
+            'setup' => [
+                'databases_exist' => $this->setupState->databasesExist(),
+                'action_steps' => $this->buildSetupActionSteps(),
+                'action_token' => $this->setupAccessToken->issue(),
+            ],
         ]);
     }
 
@@ -65,18 +78,24 @@ final class InstallerController extends AbstractController
             $primaryPath = $this->projectDir.'/var/system.brain';
         }
 
-        try {
-            $sqliteReport = (new SqliteHealthChecker($this->connection, $this->userDatabasePath))->check()->toArray();
-        } catch (\Throwable $exception) {
-            $sqliteReport = [
-                'primary_path' => $primaryPath,
-                'secondary_path' => $this->userDatabasePath,
-                'primary_exists' => false,
-                'secondary_exists' => false,
-                'secondary_attached' => false,
-                'busy_timeout_ms' => 0,
-                'error' => $exception->getMessage(),
-            ];
+        $primaryExists = $primaryPath !== '' && is_file($primaryPath);
+        $secondaryExists = $this->userDatabasePath !== '' && is_file($this->userDatabasePath);
+
+        $sqliteReport = [
+            'primary_path' => $primaryPath,
+            'secondary_path' => $this->userDatabasePath,
+            'primary_exists' => $primaryExists,
+            'secondary_exists' => $secondaryExists,
+            'secondary_attached' => false,
+            'busy_timeout_ms' => 0,
+        ];
+
+        if ($primaryExists && $secondaryExists) {
+            try {
+                $sqliteReport = (new SqliteHealthChecker($this->connection, $this->userDatabasePath))->check()->toArray();
+            } catch (\Throwable $exception) {
+                $sqliteReport['error'] = $exception->getMessage();
+            }
         }
 
         return [
@@ -281,5 +300,51 @@ final class InstallerController extends AbstractController
         }
 
         return $reports;
+    }
+
+    /**
+     * @return list<array<string,mixed>>
+     */
+    private function buildSetupActionSteps(): array
+    {
+        $environment = $this->resolveTargetEnvironment();
+
+        return [
+            [
+                'type' => 'log',
+                'message' => 'Start setup routine...',
+            ],
+            [
+                'type' => 'init',
+                'environment' => $environment,
+            ],
+            [
+                'type' => 'configure',
+            ],
+            [
+                'type' => 'lock',
+            ],
+            [
+                'type' => 'log',
+                'message' => 'Setup completed successfully.',
+            ],
+        ];
+    }
+
+    private function resolveTargetEnvironment(): string
+    {
+        $manifest = $this->projectDir.'/manifest.json';
+
+        if (is_file($manifest)) {
+            $contents = file_get_contents($manifest);
+            if (\is_string($contents)) {
+                $decoded = json_decode($contents, true);
+                if (\is_array($decoded) && isset($decoded['environment']) && \is_string($decoded['environment']) && $decoded['environment'] !== '') {
+                    return $decoded['environment'];
+                }
+            }
+        }
+
+        return $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? 'dev';
     }
 }

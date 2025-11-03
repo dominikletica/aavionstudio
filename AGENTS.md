@@ -74,4 +74,5 @@
 - Confirm PR checklist items are addressed (testing, documentation, screenshots, security notes).
 - Flag any drift between code and feature drafts (`docs/codex/notes/*.md`) and update or log follow-ups.
 - Review tests (unit/integration/UI) for completeness and determinism; ensure coverage for new logic.
+- Revisit every markdown-file in `docs/` and check for coverage and completeness. Eliminate gaps when possible (excluding `docs/codex/notes/` as these are meant to be internal referenes only).
 - Run or schedule Markdown link checks; report broken references and update docs during review when possible.

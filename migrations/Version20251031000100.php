@@ -23,65 +23,75 @@ final class Version20251031000100 extends AbstractMigration
         $this->addSql("UPDATE app_user SET status = 'active' WHERE status IS NULL");
 
         // Roles and role assignments.
-        $this->addSql('CREATE TABLE IF NOT EXISTS app_role (
-            name VARCHAR(64) NOT NULL PRIMARY KEY,
-            label VARCHAR(190) NOT NULL,
-            is_system INTEGER NOT NULL DEFAULT 1,
-            metadata TEXT NOT NULL DEFAULT \'{}\'
-        )');
+        $this->addSql(<<<'SQL'
+CREATE TABLE IF NOT EXISTS app_role (
+    name VARCHAR(64) NOT NULL PRIMARY KEY,
+    label VARCHAR(190) NOT NULL,
+    is_system INTEGER NOT NULL DEFAULT 1,
+    metadata TEXT NOT NULL DEFAULT '{}'
+)
+SQL);
 
-        $this->addSql('CREATE TABLE IF NOT EXISTS app_user_role (
-            user_id CHAR(26) NOT NULL,
-            role_name VARCHAR(64) NOT NULL,
-            assigned_at DATETIME NOT NULL,
-            assigned_by CHAR(26) DEFAULT NULL,
-            PRIMARY KEY (user_id, role_name),
-            FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE,
-            FOREIGN KEY (role_name) REFERENCES app_role(name) ON DELETE CASCADE
-        )');
+        $this->addSql(<<<'SQL'
+CREATE TABLE IF NOT EXISTS app_user_role (
+    user_id CHAR(26) NOT NULL,
+    role_name VARCHAR(64) NOT NULL,
+    assigned_at DATETIME NOT NULL,
+    assigned_by CHAR(26) DEFAULT NULL,
+    PRIMARY KEY (user_id, role_name),
+    FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_name) REFERENCES app_role(name) ON DELETE CASCADE
+)
+SQL);
 
         // Project memberships with per-project overrides.
-        $this->addSql('CREATE TABLE IF NOT EXISTS app_project_user (
-            project_id CHAR(26) NOT NULL,
-            user_id CHAR(26) NOT NULL,
-            role_name VARCHAR(64) NOT NULL,
-            permissions TEXT NOT NULL DEFAULT \'{}\',
-            created_at DATETIME NOT NULL,
-            created_by CHAR(26) DEFAULT NULL,
-            PRIMARY KEY (project_id, user_id),
-            FOREIGN KEY (project_id) REFERENCES app_project(id) ON DELETE CASCADE,
-            FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE,
-            FOREIGN KEY (role_name) REFERENCES app_role(name) ON DELETE CASCADE
-        )');
+        $this->addSql(<<<'SQL'
+CREATE TABLE IF NOT EXISTS app_project_user (
+    project_id CHAR(26) NOT NULL,
+    user_id CHAR(26) NOT NULL,
+    role_name VARCHAR(64) NOT NULL,
+    permissions TEXT NOT NULL DEFAULT '{}',
+    created_at DATETIME NOT NULL,
+    created_by CHAR(26) DEFAULT NULL,
+    PRIMARY KEY (project_id, user_id),
+    FOREIGN KEY (project_id) REFERENCES app_project(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_name) REFERENCES app_role(name) ON DELETE CASCADE
+)
+SQL);
 
         // Password reset tokens (selector/verifier pair).
-        $this->addSql('CREATE TABLE IF NOT EXISTS app_password_reset_token (
-            id CHAR(26) NOT NULL PRIMARY KEY,
-            user_id CHAR(26) NOT NULL,
-            selector VARCHAR(24) NOT NULL UNIQUE,
-            verifier_hash VARCHAR(128) NOT NULL,
-            requested_at DATETIME NOT NULL,
-            expires_at DATETIME NOT NULL,
-            consumed_at DATETIME DEFAULT NULL,
-            metadata TEXT NOT NULL DEFAULT ''{}'',
-            FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE
-        )');
+        $this->addSql(<<<'SQL'
+CREATE TABLE IF NOT EXISTS app_password_reset_token (
+    id CHAR(26) NOT NULL PRIMARY KEY,
+    user_id CHAR(26) NOT NULL,
+    selector VARCHAR(24) NOT NULL UNIQUE,
+    verifier_hash VARCHAR(128) NOT NULL,
+    requested_at DATETIME NOT NULL,
+    expires_at DATETIME NOT NULL,
+    consumed_at DATETIME DEFAULT NULL,
+    metadata TEXT NOT NULL DEFAULT '{}',
+    FOREIGN KEY (user_id) REFERENCES app_user(id) ON DELETE CASCADE
+)
+SQL);
 
         // Invitations for new users.
-        $this->addSql('CREATE TABLE IF NOT EXISTS app_user_invitation (
-            id CHAR(26) NOT NULL PRIMARY KEY,
-            email VARCHAR(190) NOT NULL,
-            token_hash VARCHAR(128) NOT NULL,
-            status VARCHAR(16) NOT NULL DEFAULT ''pending'',
-            invited_by CHAR(26) DEFAULT NULL,
-            metadata TEXT NOT NULL DEFAULT ''{}'',
-            created_at DATETIME NOT NULL,
-            expires_at DATETIME NOT NULL,
-            accepted_at DATETIME DEFAULT NULL,
-            cancelled_at DATETIME DEFAULT NULL,
-            UNIQUE(email),
-            FOREIGN KEY (invited_by) REFERENCES app_user(id) ON DELETE SET NULL
-        )');
+        $this->addSql(<<<'SQL'
+CREATE TABLE IF NOT EXISTS app_user_invitation (
+    id CHAR(26) NOT NULL PRIMARY KEY,
+    email VARCHAR(190) NOT NULL,
+    token_hash VARCHAR(128) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'pending',
+    invited_by CHAR(26) DEFAULT NULL,
+    metadata TEXT NOT NULL DEFAULT '{}',
+    created_at DATETIME NOT NULL,
+    expires_at DATETIME NOT NULL,
+    accepted_at DATETIME DEFAULT NULL,
+    cancelled_at DATETIME DEFAULT NULL,
+    UNIQUE(email),
+    FOREIGN KEY (invited_by) REFERENCES app_user(id) ON DELETE SET NULL
+)
+SQL);
 
         // Remember-me tokens (persistent login).
         $this->addSql('CREATE TABLE IF NOT EXISTS app_remember_me_token (

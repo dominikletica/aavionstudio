@@ -6,6 +6,7 @@ namespace App\Security\Authorization;
 
 use App\Security\User\AppUser;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 final class ProjectCapabilityVoter extends Voter
@@ -23,7 +24,7 @@ final class ProjectCapabilityVoter extends Voter
         return $attribute === self::ATTRIBUTE && $subject instanceof ProjectCapabilityRequirement;
     }
 
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
         $user = $token->getUser();
 

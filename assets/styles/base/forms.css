@@ -62,6 +62,21 @@
         @apply bg-primary border border-primary shadow-sm hover:bg-primary-darker hover:border-primary-darker focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary;
     }
 
+    .btn-success {
+        color: var(--color-success-foreground);
+        @apply bg-success border border-success shadow-sm hover:bg-success-darker hover:border-success-darker focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success;
+    }
+
+    .btn-warning {
+        color: var(--color-warning-foreground);
+        @apply bg-warning border border-warning shadow-sm hover:bg-warning-darker hover:border-warning-darker focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-warning;
+    }
+
+    .btn-danger {
+        color: var(--color-danger-foreground);
+        @apply bg-danger border border-danger shadow-sm hover:bg-danger-darker hover:border-danger-darker focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger;
+    }
+
     .btn-secondary {
         color: var(--color-text);
         @apply bg-surface border border-border-strong hover:bg-surface-muted;
@@ -143,19 +158,19 @@
         transition: transform var(--transition-fast);
     }
 
-    .form-switch__input:checked + .form-switch__track {
+    .form-switch__input:checked+.form-switch__track {
         background-color: var(--color-primary);
     }
 
-    .form-switch__input:checked + .form-switch__track .form-switch__thumb {
+    .form-switch__input:checked+.form-switch__track .form-switch__thumb {
         transform: translateX(1.25rem);
     }
 
-    .form-switch__input:disabled + .form-switch__track {
+    .form-switch__input:disabled+.form-switch__track {
         background-color: var(--color-border-muted);
     }
 
-    .form-switch__input:disabled + .form-switch__track .form-switch__thumb {
+    .form-switch__input:disabled+.form-switch__track .form-switch__thumb {
         box-shadow: none;
     }
 

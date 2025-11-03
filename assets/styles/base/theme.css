@@ -1,6 +1,6 @@
 @theme {
     /* Brand & accent palette */
-    --color-primary: oklch(0.72 0.11 245);
+    --color-primary: oklch(0.605 0.201 223.16);
     --color-primary-foreground: oklch(0.98 0.02 250);
     --color-primary-lighter: color-mix(in oklch, var(--color-primary) 75%, white 25%);
     --color-primary-darker: color-mix(in oklch, var(--color-primary) 70%, black 30%);
@@ -34,6 +34,8 @@
     --color-success: oklch(0.72 0.12 152);
     --color-success-foreground: oklch(0.25 0.05 152);
     --color-success-muted: color-mix(in oklch, var(--color-success) 12%, white 88%);
+    --color-success-lighter: color-mix(in oklch, var(--color-success) 75%, white 25%);
+    --color-success-darker: color-mix(in oklch, var(--color-success) 70%, black 30%);
 
     --color-info: oklch(0.68 0.1 228);
     --color-info-foreground: oklch(0.24 0.04 226);
@@ -42,10 +44,14 @@
     --color-warning: oklch(0.79 0.18 83);
     --color-warning-foreground: oklch(0.3 0.08 83);
     --color-warning-muted: color-mix(in oklch, var(--color-warning) 15%, white 85%);
+    --color-warning-lighter: color-mix(in oklch, var(--color-warning) 75%, white 25%);
+    --color-warning-darker: color-mix(in oklch, var(--color-warning) 70%, black 30%);
 
     --color-danger: oklch(0.63 0.2 28);
     --color-danger-foreground: oklch(0.24 0.07 25);
     --color-danger-muted: color-mix(in oklch, var(--color-danger) 12%, white 88%);
+    --color-danger-lighter: color-mix(in oklch, var(--color-danger) 75%, white 25%);
+    --color-danger-darker: color-mix(in oklch, var(--color-danger) 70%, black 30%);
 
     /* Typography & radius */
     --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont;
@@ -70,6 +76,91 @@
     /* Skeleton / loaders */
     --color-skeleton-base: color-mix(in oklch, var(--color-surface) 78%, var(--color-text-muted) 22%);
     --color-skeleton-sheen: color-mix(in oklch, var(--color-skeleton-base) 60%, white 40%);
+
+    /* Transitions */
+    --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark {
+    /* Brand & accent palette */
+    --color-primary: oklch(0.605 0.201 223.16);
+    --color-primary-foreground: oklch(0.98 0.02 250);
+    --color-primary-lighter: color-mix(in oklch, var(--color-primary) 75%, white 25%);
+    --color-primary-darker: color-mix(in oklch, var(--color-primary) 70%, black 30%);
+
+    /* Neutral surfaces */
+    --color-surface: oklch(0.2 0.03 255);
+    --color-surface-muted: color-mix(in oklch, var(--color-surface) 75%, black 25%);
+    --color-surface-hover: color-mix(in oklch, var(--color-surface) 78%, var(--color-primary) 22%);
+    --color-surface-active: color-mix(in oklch, var(--color-surface) 70%, var(--color-primary) 30%);
+    --color-surface-selected: color-mix(in oklch, var(--color-surface) 60%, var(--color-primary) 40%);
+    --color-surface-zebra: color-mix(in oklch, var(--color-surface) 68%, var(--color-primary) 32%);
+    --color-surface-inverse: oklch(0.95 0.02 248);
+    --color-overlay: color-mix(in srgb, black 45%, transparent);
+
+    /* Text colors */
+    --color-text: oklch(0.92 0.02 255);
+    --color-text-strong: oklch(0.97 0.02 255);
+    --color-text-muted: oklch(0.7 0.02 255);
+    --color-text-inverse: oklch(0.2 0.03 257);
+    --color-heading: oklch(0.96 0.02 255);
+
+    /* Border & ring palette */
+    --color-border: oklch(0.35 0.03 260);
+    --color-border-strong: oklch(0.48 0.04 260);
+    --color-border-inverse: color-mix(in oklch, var(--color-surface-inverse) 60%, white 40%);
+    --ring-primary: color-mix(in oklch, var(--color-primary) 45%, transparent);
+    --color-surface-border: var(--color-border);
+    --color-surface-border-strong: var(--color-border-strong);
+
+    /* Status palette */
+    --color-success: oklch(0.65 0.14 152);
+    --color-success-foreground: oklch(0.22 0.06 152);
+    --color-success-muted: color-mix(in oklch, var(--color-success) 25%, var(--color-surface) 75%);
+    --color-success-lighter: color-mix(in oklch, var(--color-success) 65%, var(--color-surface) 35%);
+    --color-success-darker: color-mix(in oklch, var(--color-success) 70%, black 30%);
+
+    --color-info: oklch(0.6 0.12 228);
+    --color-info-foreground: oklch(0.22 0.05 226);
+    --color-info-muted: color-mix(in oklch, var(--color-info) 25%, var(--color-surface) 75%);
+
+    --color-warning: oklch(0.7 0.16 83);
+    --color-warning-foreground: oklch(0.28 0.07 83);
+    --color-warning-muted: color-mix(in oklch, var(--color-warning) 25%, var(--color-surface) 75%);
+    --color-warning-lighter: color-mix(in oklch, var(--color-warning) 65%, var(--color-surface) 35%);
+    --color-warning-darker: color-mix(in oklch, var(--color-warning) 70%, black 30%);
+
+    --color-danger: oklch(0.58 0.18 28);
+    --color-danger-foreground: oklch(0.22 0.07 25);
+    --color-danger-muted: color-mix(in oklch, var(--color-danger) 25%, var(--color-surface) 75%);
+    --color-danger-lighter: color-mix(in oklch, var(--color-danger) 65%, var(--color-surface) 35%);
+    --color-danger-darker: color-mix(in oklch, var(--color-danger) 70%, black 30%);
+
+    /* Typography & radius */
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont;
+    --font-heading: "Raleway", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
+
+    --radius-xs: 0.25rem;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+
+    /* Shadows */
+    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.45);
+    --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.5);
+    --shadow-md: 0 12px 32px rgba(15, 23, 42, 0.55);
+    --shadow-lg: 0 20px 45px rgba(15, 23, 42, 0.6);
+
+    /* Tooltip */
+    --color-tooltip-surface: color-mix(in oklch, var(--color-surface-inverse) 90%, black 10%);
+    --color-tooltip-foreground: var(--color-text-inverse);
+
+    /* Skeleton / loaders */
+    --color-skeleton-base: color-mix(in oklch, var(--color-surface) 65%, var(--color-text) 35%);
+    --color-skeleton-sheen: color-mix(in oklch, var(--color-skeleton-base) 55%, var(--color-surface-inverse) 45%);
 
     /* Transitions */
     --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);

@@ -113,8 +113,10 @@ final class AssetPipelineRefresher
      */
     private function runConsoleCommand(array $command): void
     {
+        $phpBinary = $this->resolvePhpBinary();
+
         $arguments = array_merge(
-            [PHP_BINARY, $this->projectDir.'/bin/console'],
+            [$phpBinary, $this->projectDir.'/bin/console'],
             $command,
             ['--no-ansi', '--no-interaction']
         );
@@ -134,5 +136,21 @@ final class AssetPipelineRefresher
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
+    }
+
+    private function resolvePhpBinary(): string
+    {
+        $binary = PHP_BINARY;
+
+        if ($binary !== '' && !str_contains(basename($binary), 'php-fpm')) {
+            return $binary;
+        }
+
+        $candidate = PHP_BINDIR.'/php';
+        if (is_file($candidate) && is_executable($candidate)) {
+            return $candidate;
+        }
+
+        return 'php';
     }
 }
