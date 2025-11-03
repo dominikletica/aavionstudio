@@ -37,6 +37,10 @@ final class SetupRedirectSubscriber implements EventSubscriberInterface
             return;
         }
 
+        if (\str_starts_with($path, '/_')) {
+            return;
+        }
+
         if (\str_starts_with($path, '/_error')) {
             return;
         }

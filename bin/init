@@ -72,7 +72,7 @@ fi
 echo ">>> Wrote $ENV_FILE for APP_ENV=$TARGET_ENV"
 
 echo ">>> Installing Composer dependencies"
-APP_ENV="$TARGET_ENV" APP_DEBUG="$TARGET_DEBUG" composer "${COMPOSER_FLAGS[@]}"
+APP_ENV="$TARGET_ENV" APP_DEBUG="$TARGET_DEBUG" php bin/composer.phar "${COMPOSER_FLAGS[@]}"
 
 ASSET_DIR="$ROOT_DIR/public/assets"
 if [[ -d "$ASSET_DIR" ]]; then

@@ -70,7 +70,7 @@ final class ErrorController extends AbstractController
             return $response;
         } catch (TwigError|\Throwable $renderException) {
             if ($renderException instanceof TwigError) {
-                fwrite(STDERR, 'Twig error while rendering error page: '.$renderException->getMessage()."\n");
+                \error_log('Twig error while rendering error page: '.$renderException->getMessage());
                 $renderer = new HtmlErrorRenderer($this->debug);
                 $flatten = $renderer->render($exception);
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\EventSubscriber;
 
 use App\Service\AssetRebuildScheduler;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -24,7 +24,11 @@ final class AssetBootstrapSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event): void
     {
-        if ($this->checked || ! $event->isMainRequest()) {
+        if (! $event->isMainRequest()) {
+            return;
+        }
+
+        if ($this->checked) {
             return;
         }
 
@@ -32,15 +36,11 @@ final class AssetBootstrapSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $assetsDir = $this->projectDir.'/public/assets';
-
-        if (is_dir($assetsDir) && ! $this->isDirectoryEmpty($assetsDir)) {
+        if (! $this->needsAssetRebuild()) {
             $this->checked = true;
 
             return;
         }
-
-        $this->checked = true;
 
         try {
             $this->assetRebuildScheduler->runNow(force: true);
@@ -48,6 +48,10 @@ final class AssetBootstrapSubscriber implements EventSubscriberInterface
             $this->logger?->error('Automatic asset rebuild failed.', [
                 'exception' => $exception,
             ]);
+
+            throw $exception;
+        } finally {
+            $this->checked = true;
         }
     }
 
@@ -61,14 +65,43 @@ final class AssetBootstrapSubscriber implements EventSubscriberInterface
         ];
     }
 
-    private function isDirectoryEmpty(string $path): bool
+    private function needsAssetRebuild(): bool
     {
-        if (! is_dir($path)) {
+        $assetsDir = $this->projectDir.'/public/assets';
+
+        if (!is_dir($assetsDir)) {
             return true;
         }
 
-        $iterator = new \FilesystemIterator($path, \FilesystemIterator::SKIP_DOTS);
+        $iterator = new \FilesystemIterator($assetsDir, \FilesystemIterator::SKIP_DOTS);
+        $hasRealEntries = false;
 
-        return ! $iterator->valid();
+        foreach ($iterator as $fileInfo) {
+            $filename = $fileInfo->getFilename();
+
+            if ($filename === '.gitignore' || $filename === '.gitkeep') {
+                continue;
+            }
+
+            $hasRealEntries = true;
+            break;
+        }
+
+        if (! $hasRealEntries) {
+            return true;
+        }
+
+        if (!is_file($assetsDir.'/entrypoint.app.json')) {
+            return true;
+        }
+
+        $cssFiles = glob($assetsDir.'/styles/app-*.css') ?: [];
+        $jsFiles = glob($assetsDir.'/app-*.js') ?: [];
+
+        if (empty($cssFiles) || empty($jsFiles)) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -52,7 +52,7 @@ This guide summarises the core Symfony platform put in place during Roadmap Step
 
 - `bin/init` still orchestrates dependency installation, asset builds, messenger transport setup, and cache warmup for local environments. Database provisioning now happens via the setup wizard so production builds stay cold.
 - `bin/release` stages a clean copy of the repository (excluding build artifacts, vendor, tests, docs), skips `bin/init`, prunes any stray runtime directories, and zips the contents into `build/aavionstudio-<version>-<channel>.zip`. Packages remain free of caches, databases, and compiled assets so setup can perform first-run initialisation. A `release.json` metadata file is generated for runtime version introspection during packaging.
-- `AssetBootstrapSubscriber` runs on early HTTP requests and triggers `app:assets:rebuild --force` via `AssetRebuildScheduler` whenever `public/assets` is missing or empty, preventing Twig/layout errors after fresh deploys.
+- `AssetBootstrapSubscriber` runs on early HTTP requests: if `public/assets` is missing (or only contains placeholder files) it triggers `app:assets:rebuild --force`, ensuring the full Tailwind/JS bundle exists before Twig renders even on cold deploys.
 - Documentation for operator workflows lives under `docs/dev/sections/workflows/release.md`; this guide focuses on how the release script ties into the core architecture.
 
 ## Security & Access Control Notes (Step 3 kick-off)
