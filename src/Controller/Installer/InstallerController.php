@@ -447,6 +447,9 @@ final class InstallerController extends AbstractController
                 'message' => 'Start setup routine...',
             ],
             [
+                'type' => 'write_env',
+            ],
+            [
                 'type' => 'init',
                 'environment' => $environment,
             ],

@@ -77,7 +77,7 @@
 #### Installer Completion Tasks (P0 | XL)
 - [x] Build installer forms + POST controllers for environment, storage, and admin steps (persist data via `SetupConfiguration`, add diagnostics refresh endpoint, update Twig templates to consume live session data).
 - [x] Extend `SetupConfiguration` with new getters/setters (environment overrides, storage root, admin payload, warning acknowledgements) and add integration tests for session persistence.
-- [ ] Implement `SetupEnvironmentWriter` to merge validated overrides into `.env.local` atomically (preserve existing keys, provide safe fallbacks, unit tests).
+- [x] Implement `SetupEnvironmentWriter` to merge validated overrides into `.env.local` atomically (preserve existing keys, provide safe fallbacks, unit tests).
 - [ ] Introduce JSON payload hand-off (`var/setup/runtime.json`) and update `ActionExecutor` steps (`write_env`, `configure`, `init`, `lock`) with log persistence enhancements.
 - [ ] Enhance `bin/init` with `--setup/--payload` support and create `app:setup:seed` console command to hash/persist the admin user, clear payload secrets, and log outcomes.
 - [ ] Update `SetupConfigurator` + `SystemSettings` reload flow to consume session data safely prior to `bin/init`, including default project metadata handling.
@@ -330,6 +330,7 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Incorporated maintainer feedback, rebuilt `feat-installer.md` from scratch (no `.env.local.php`, reuse `bin/init`, single storage root, inline admin password creation, JSON help catalogue) and removed inline annotations.
 - Documented the session→`bin/init` hand-off (env writer, JSON payload, `--setup/--payload` flags, post-run seeding command) and outlined validation & cleanup requirements.
 - Logged design decisions resolving earlier open questions (SQLite-only driver, no log downloads, lock/session handling) and updated next steps for implementation/test phases.
+- Implemented the environment writer + installer action step (`write_env`), added session-backed wizard tests, and ensured `.env.local` merging is covered by unit tests.
 
 ### 2025-11-03 (Session 3)
 - Started implementation: added installer environment/storage/admin forms with POST endpoints, session-backed persistence via `SetupConfiguration`, diagnostics refresh API, and summary view rendering of live selections.

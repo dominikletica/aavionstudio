@@ -27,7 +27,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
    - For root fallback testing, set `APP_FORCE_ROOT_ENTRY=1` and hit `index.php`.
    - The setup diagnostics flag compatibility mode when requests arrive via the root loader—fix docroot/rewrite configuration to clear the warning before going live.
    - Apache/IIS fallback files (`.htaccess`, `web.config`) ship with the repository, but production installs should point the web server directly at `public/`.
-   - Access the setup wizard at `http://localhost:8000/setup` to iterate through diagnostics and seed configuration. Each step now renders Symfony forms (environment, storage, administrator) that persist selections in the session before `bin/init` runs—handy for exercising the installer without touching `.env.local` manually.
+   - Access the setup wizard at `http://localhost:8000/setup` to iterate through diagnostics and seed configuration. Each step now renders Symfony forms (environment, storage, administrator) that persist selections in the session before `bin/init` runs—handy for exercising the installer without touching `.env.local` manually. The environment writer merges your overrides into `.env.local` atomically right before the init script executes.
 
 ---
 

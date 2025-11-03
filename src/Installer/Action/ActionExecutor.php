@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Installer\Action;
 
+use App\Setup\SetupConfiguration;
 use App\Setup\SetupConfigurator;
+use App\Setup\SetupEnvironmentWriter;
 use App\Setup\SetupState;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -19,7 +21,9 @@ final class ActionExecutor
         #[Autowire('%kernel.project_dir%')]
         private readonly string $projectDir,
         private readonly SetupState $setupState,
+        private readonly SetupConfiguration $setupConfiguration,
         private readonly SetupConfigurator $setupConfigurator,
+        private readonly SetupEnvironmentWriter $environmentWriter,
         private readonly Filesystem $filesystem,
     ) {
     }
@@ -44,6 +48,7 @@ final class ActionExecutor
                 'console' => $this->runConsoleCommand($rawStep, $emit),
                 'shell' => $this->runShellCommand($rawStep, $emit),
                 'init' => $this->runInit($rawStep, $emit),
+                'write_env' => $this->writeEnvironment($emit),
                 'configure' => $this->applyConfiguration($emit),
                 'lock' => $this->createLock(),
                 default => throw new \InvalidArgumentException(sprintf('Unsupported action type "%s".', $type)),
@@ -59,6 +64,7 @@ final class ActionExecutor
             'console' => sprintf('Run bin/console %s', $this->stringifyCommand($step['command'] ?? [])),
             'shell' => sprintf('Run %s', $this->stringifyCommand($step['command'] ?? [])),
             'init' => sprintf('Run bin/init (%s)', $step['environment'] ?? 'auto'),
+            'write_env' => 'Write environment overrides',
             'configure' => 'Persist system configuration',
             'lock' => 'Write setup.lock',
             default => 'Unknown step',
@@ -88,6 +94,18 @@ final class ActionExecutor
     {
         $emit('log', 'Applying configuration defaults...');
         $this->setupConfigurator->apply();
+    }
+
+    /**
+     * @param callable(string,string=):void $emit
+     */
+    private function writeEnvironment(callable $emit): void
+    {
+        $emit('log', 'Persisting environment overrides...');
+        $this->environmentWriter->write(
+            $this->setupConfiguration->getEnvironmentOverrides(),
+            $this->setupConfiguration->getStorageConfig()
+        );
     }
 
     private function extractUploadedPackage(?UploadedFile $package, array $step): void
