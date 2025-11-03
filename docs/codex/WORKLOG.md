@@ -310,3 +310,4 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Tightened installer bootstrap: redirects and summary guard rails are covered by tests, assets rebuild automatically, and `/setup/action` now streams NDJSON directly with buffering disabled so logs surface immediately.
 - Updated the overlay UI with a transparent log surface, inline spinner, and new status buttons (`btn-success|warning|danger`) powered by the expanded theme tokens.
 - Documentation refreshed where needed (developer theming guide, class map) to reflect the new component contracts and CLI behaviour.
+- Added session-scoped installer action tokens so `/setup/action` only executes requests issued by the active wizard session and blocked traversal attempts in uploaded archives to keep extractions inside the project directory.

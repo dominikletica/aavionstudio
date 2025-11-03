@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Bootstrap\RootEntryPoint;
+use App\Setup\SetupAccessToken;
 use App\Setup\SetupState;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 final class InstallerControllerTest extends WebTestCase
 {
@@ -104,6 +107,37 @@ final class InstallerControllerTest extends WebTestCase
         }
     }
 
+    public function testSetupActionRejectsRequestsWithoutToken(): void
+    {
+        $client = static::createClient();
+
+        $client->request('POST', '/setup/action', [
+            'context' => 'setup',
+            'steps' => json_encode([
+                ['type' => 'log', 'message' => 'noop'],
+            ], JSON_THROW_ON_ERROR),
+        ]);
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
+    public function testSetupActionAcceptsRequestsWithSessionToken(): void
+    {
+        $client = static::createClient();
+        $token = $this->issueSetupToken($client);
+
+        $client->request('POST', '/setup/action', [
+            'context' => 'setup',
+            'token' => $token,
+            'steps' => json_encode([
+                ['type' => 'log', 'message' => 'noop'],
+            ], JSON_THROW_ON_ERROR),
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        (string) $client->getResponse()->getContent();
+    }
+
     public function testNonSetupRoutesRedirectToSetupUntilProvisioned(): void
     {
         $client = static::createClient();
@@ -120,12 +154,15 @@ final class InstallerControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
+        $token = $this->issueSetupToken($client);
+
         $filesystem = new Filesystem();
         $filesystem->touch($this->systemDatabasePath);
         $filesystem->touch($this->userDatabasePath);
 
         $client->request('POST', '/setup/action', [
             'context' => 'setup',
+            'token' => $token,
             'steps' => json_encode([
                 ['type' => 'log', 'message' => 'Testrun'],
                 ['type' => 'lock'],
@@ -165,5 +202,20 @@ final class InstallerControllerTest extends WebTestCase
         $filesystem->touch($this->setupLockPath);
 
         parent::tearDown();
+    }
+
+    private function issueSetupToken(KernelBrowser $client): string
+    {
+        $client->request('GET', '/setup');
+        $request = $client->getRequest();
+        self::assertNotNull($request);
+
+        $session = $request->getSession();
+        self::assertNotNull($session);
+
+        $token = $session->get(SetupAccessToken::SESSION_KEY);
+        self::assertIsString($token);
+
+        return $token;
     }
 }

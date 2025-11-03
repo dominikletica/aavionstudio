@@ -26,6 +26,7 @@
 | `App\Theme\ThemeStateRepository` | `src/Theme/ThemeStateRepository.php` | Reads stored theme enable/metadata state | Simple helper for future management UI |
 | `App\Twig\TemplatePathConfigurator` | `src/Twig/TemplatePathConfigurator.php` | Rebuilds Twig search paths (active theme → modules → base templates) each boot | Injected into kernel during boot |
 | `App\Setup\SetupState` | `src/Setup/SetupState.php` | Tracks system/user SQLite paths and setup lock status | Consumed by installer, redirect subscriber, and migration synchroniser |
+| `App\Setup\SetupAccessToken` | `src/Setup/SetupAccessToken.php` | Issues and validates session-scoped installer action tokens | Protects `/setup/action` by requiring a wizard session |
 | `App\Setup\SetupFinalizer` | `src/Setup/SetupFinalizer.php` | Creates database files, runs pending migrations, and writes the `.setup.lock` marker | Triggered by `/setup/complete` |
 | `App\Setup\MigrationSynchronizer` | `src/Setup/MigrationSynchronizer.php` | Applies outstanding migrations automatically after setup is locked | Invoked during kernel boot; logs failures |
 | `App\Asset\AssetStateTracker` | `src/Asset/AssetStateTracker.php` | Hashes module/theme asset trees and stores checksum cache in `var/cache/assets-state.json` | Depends on `ModuleRegistry`/`ThemeRegistry` plus kernel dir parameters |

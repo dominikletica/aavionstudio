@@ -63,6 +63,7 @@
                     data-action-trigger
                     data-action-context="setup"
                     data-action-steps="{{ setup.action_steps|json_encode|e('html_attr') }}"
+                    data-action-token="{{ setup.action_token|e('html_attr') }}"
                 >
                     {{ 'Create databases & finish setup'|trans }}
                 </button>
@@ -85,5 +86,5 @@
         </div>
     </div>
 
-    {{ include('pages/installer/action.html.twig') }}
+    {{ include('pages/installer/action.html.twig', { action_token: setup.action_token }) }}
 {% endblock %}

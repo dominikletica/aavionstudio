@@ -7,6 +7,7 @@ namespace App\Controller\Installer;
 use App\Doctrine\Health\SqliteHealthChecker;
 use App\Installer\DefaultProjects;
 use App\Installer\DefaultSystemSettings;
+use App\Setup\SetupAccessToken;
 use App\Setup\SetupState;
 use App\Bootstrap\RootEntryPoint;
 use Doctrine\DBAL\Connection;
@@ -27,6 +28,7 @@ final class InstallerController extends AbstractController
         #[Autowire('%app.user_database_path%')] private readonly string $userDatabasePath,
         #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
         private readonly SetupState $setupState,
+        private readonly SetupAccessToken $setupAccessToken,
     ) {
     }
 
@@ -55,6 +57,7 @@ final class InstallerController extends AbstractController
             'setup' => [
                 'databases_exist' => $this->setupState->databasesExist(),
                 'action_steps' => $this->buildSetupActionSteps(),
+                'action_token' => $this->setupAccessToken->issue(),
             ],
         ]);
     }

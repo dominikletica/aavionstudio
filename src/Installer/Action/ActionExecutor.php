@@ -90,6 +90,12 @@ final class ActionExecutor
             $target = $this->projectDir.'/'.$target;
         }
 
+        $this->filesystem->mkdir($target);
+        $targetRoot = realpath($target);
+        if ($targetRoot === false) {
+            throw new \RuntimeException('Extraction target could not be resolved.');
+        }
+
         $zip = new ZipArchive();
         if ($zip->open($package->getPathname()) !== true) {
             throw new \RuntimeException('Uploaded archive could not be opened.');
@@ -97,18 +103,97 @@ final class ActionExecutor
 
         try {
             for ($i = 0; $i < $zip->numFiles; ++$i) {
-                $entry = $zip->getNameIndex($i);
-                if ($entry === false || str_contains($entry, '..')) {
+                $entryName = $zip->getNameIndex($i);
+
+                if ($entryName === false || $entryName === '') {
                     continue;
                 }
-            }
 
-            if (!$zip->extractTo($target)) {
-                throw new \RuntimeException('Extraction of the archive failed.');
+                [$destination, $isDirectory] = $this->resolveExtractionPath($entryName, $targetRoot);
+
+                if ($destination === null) {
+                    continue;
+                }
+
+                if ($isDirectory) {
+                    $this->filesystem->mkdir($destination);
+                    continue;
+                }
+
+                $stream = $zip->getStream($entryName);
+                if ($stream === false) {
+                    throw new \RuntimeException(sprintf('Failed to open "%s" from the archive.', $entryName));
+                }
+
+                $this->filesystem->mkdir(\dirname($destination));
+                $targetHandle = @fopen($destination, 'wb');
+                if ($targetHandle === false) {
+                    fclose($stream);
+                    throw new \RuntimeException(sprintf('Failed to write "%s" during extraction.', $destination));
+                }
+
+                try {
+                    if (stream_copy_to_stream($stream, $targetHandle) === false) {
+                        throw new \RuntimeException(sprintf('Failed to extract "%s".', $entryName));
+                    }
+                } finally {
+                    fclose($targetHandle);
+                    fclose($stream);
+                }
             }
         } finally {
             $zip->close();
         }
+    }
+
+    /**
+     * @return array{0: string|null, 1: bool}
+     */
+    private function resolveExtractionPath(string $entry, string $targetRoot): array
+    {
+        if (str_contains($entry, "\0")) {
+            throw new \RuntimeException('Archive entry contains invalid characters.');
+        }
+
+        $normalized = str_replace('\\', '/', $entry);
+        $isDirectory = str_ends_with($normalized, '/');
+        $normalized = trim($normalized, '/');
+
+        if ($normalized === '') {
+            return [null, $isDirectory];
+        }
+
+        if (preg_match('/^[A-Za-z]:/', $normalized) === 1) {
+            throw new \RuntimeException(sprintf('Archive entry "%s" references an absolute path.', $entry));
+        }
+
+        $segments = [];
+        foreach (explode('/', $normalized) as $segment) {
+            if ($segment === '' || $segment === '.') {
+                continue;
+            }
+
+            if ($segment === '..') {
+                throw new \RuntimeException(sprintf('Archive entry "%s" attempts directory traversal.', $entry));
+            }
+
+            $segments[] = $segment;
+        }
+
+        if ($segments === []) {
+            return [null, $isDirectory];
+        }
+
+        $root = rtrim($targetRoot, DIRECTORY_SEPARATOR);
+        $relativePath = implode(DIRECTORY_SEPARATOR, $segments);
+        $destination = $root.DIRECTORY_SEPARATOR.$relativePath;
+
+        $normalizedTarget = $root.DIRECTORY_SEPARATOR;
+        if (!str_starts_with($destination, $normalizedTarget) && $destination !== $root) {
+            throw new \RuntimeException(sprintf('Archive entry "%s" resolves outside the extraction target.', $entry));
+        }
+
+        return [$destination, $isDirectory];
     }
 
     /**

@@ -30,6 +30,7 @@
     }
 
     const actionUrl = '{{ path('app_installer_action') }}';
+    const actionToken = '{{ action_token|default('')|e('js') }}';
     const logElement = overlay.querySelector('[data-action-log]');
     const spinner = overlay.querySelector('[data-action-spinner]');
     const completeButton = overlay.querySelector('[data-action-complete]');
@@ -82,9 +83,15 @@
             return;
         }
 
+        if (!actionToken) {
+            console.error('Missing installer session token. Refresh the page to continue.');
+            return;
+        }
+
         const formData = new FormData();
         formData.append('context', context);
         formData.append('steps', JSON.stringify(steps));
+        formData.append('token', actionToken);
 
         const fileInputId = trigger.dataset.actionFileInput;
         if (fileInputId) {
@@ -100,6 +107,9 @@
             const response = await fetch(actionUrl, {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    'X-Setup-Token': actionToken,
+                },
             });
 
             if (!response.ok || !response.body) {

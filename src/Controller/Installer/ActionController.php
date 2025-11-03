@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Controller\Installer;
 
 use App\Installer\Action\ActionExecutor;
+use App\Setup\SetupAccessToken;
 use App\Setup\SetupState;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -22,6 +22,7 @@ final class ActionController extends AbstractController
     public function __construct(
         private readonly ActionExecutor $actionExecutor,
         private readonly SetupState $setupState,
+        private readonly SetupAccessToken $setupAccessToken,
         private readonly Security $security,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly ?Profiler $profiler = null,
@@ -36,6 +37,12 @@ final class ActionController extends AbstractController
         }
 
         $payload = $this->extractPayload($request);
+
+        $providedToken = $payload['token'] ?? $request->headers->get('X-Setup-Token');
+        if (! $this->setupAccessToken->validate(\is_string($providedToken) ? $providedToken : null)) {
+            return $this->json(['error' => 'Installer actions require a valid session token.'], Response::HTTP_FORBIDDEN);
+        }
+
         $context = (string) ($payload['context'] ?? 'generic');
         $steps = $payload['steps'] ?? $payload['commands'] ?? [];
 
