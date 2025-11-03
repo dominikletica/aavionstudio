@@ -64,12 +64,6 @@ final class ActionController extends AbstractController
                     @apache_setenv('no-gzip', '1');
                 }
 
-                if (!headers_sent()) {
-                    header('Content-Type: application/x-ndjson; charset=utf-8');
-                    header('Cache-Control: no-cache');
-                    header('X-Accel-Buffering: no');
-                }
-
                 while (ob_get_level() > 0) {
                     ob_end_flush();
                 }
@@ -106,6 +100,10 @@ final class ActionController extends AbstractController
                 $emit('done', 'error', ['context' => $context]);
             }
         });
+
+        $response->headers->set('Content-Type', 'application/x-ndjson; charset=utf-8');
+        $response->headers->set('Cache-Control', 'no-cache');
+        $response->headers->set('X-Accel-Buffering', 'no');
 
         return $response;
     }
