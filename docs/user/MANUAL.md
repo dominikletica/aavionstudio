@@ -64,6 +64,7 @@ Welcome! This manual will guide administrators, editors, and integrators through
 
 ## 6. Troubleshooting & FAQ
 
+- **Page Fails to Render** – Troubleshoot missing assets or Tailwind build problems (see [detailed guide](sections/troubleshooting/README.md#page-fails-to-render-or-shows-raw-html)).
 - **Installer Issues** – Common errors in shared hosting environments.
 - **Resolver Errors** – Interpreting error codes and fixing content.
 - **Snapshot Problems** – Debugging missing data or outdated views.
