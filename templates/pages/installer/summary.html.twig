@@ -3,43 +3,125 @@
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
         title: 'Summary'|trans,
-        subtitle: 'A consolidated overview of environment, storage, and admin choices will appear here.'|trans
+        subtitle: 'Review your selections before the installer provisions databases, writes configuration, and locks the wizard.'|trans
     } only %}
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div class="layout-stack layout-stack--loose">
-            {% set overview_body %}
-                <div class="layout-stack layout-stack--tight text-sm leading-relaxed text-text-muted">
-                    <p>{{ 'This recap confirms the data collected in previous steps. The final implementation will show live values for quick verification.'|trans }}</p>
-                    <ul class="list-disc space-y-2 pl-5">
-                        <li><strong>{{ 'Diagnostics'|trans }}</strong> – {{ 'Rewrite rules, PHP extensions, and filesystem permissions must all be green before launch.'|trans }}</li>
-                        <li><strong>{{ 'Environment'|trans }}</strong> – {{ 'Environment variables map to the generated <code>.env.local.php</code>; overrides flow into Symfony secrets where available.'|trans|raw }}</li>
-                        <li><strong>{{ 'Storage'|trans }}</strong> – {{ 'Media roots, backup targets, and retention policies will surface here once configured.'|trans }}</li>
-                        <li><strong>{{ 'Administrator'|trans }}</strong> – {{ 'Invited users, MFA requirements, and audit notification settings appear for a final review.'|trans }}</li>
-                    </ul>
-                </div>
+            {% set environment_body %}
+                <dl class="grid gap-2 text-sm leading-relaxed text-text-muted">
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Instance name'|trans }}</dt>
+                        <dd>{{ environment_settings['core.instance_name'] ?? '–' }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Tagline'|trans }}</dt>
+                        <dd>{{ environment_settings['core.tagline'] ?? '–' }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Support email'|trans }}</dt>
+                        <dd>{{ environment_settings['core.support_email'] ?? '–' }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Base URL'|trans }}</dt>
+                        <dd>{{ environment_settings['core.url'] ?? '–' }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Locale / Timezone'|trans }}</dt>
+                        <dd>{{ environment_settings['core.locale'] ?? 'en' }} · {{ environment_settings['core.timezone'] ?? 'UTC' }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'User registration'|trans }}</dt>
+                        <dd>{{ environment_settings['core.user_registration'] ? 'enabled'|trans : 'disabled'|trans }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Maintenance mode'|trans }}</dt>
+                        <dd>{{ environment_settings['core.maintenance_mode'] ? 'enabled'|trans : 'disabled'|trans }}</dd>
+                    </div>
+                </dl>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Overview',
-                title: 'Configuration recap',
-                subtitle: 'Live summaries arrive with the next wizard iteration.',
-                body: overview_body
+                eyebrow: 'Environment',
+                title: 'System defaults',
+                body: environment_body
             } only %}
 
-            {% set next_steps_body %}
-                <ol class="list-decimal space-y-3 pl-5 text-sm leading-relaxed text-text-muted">
-                    <li>{{ 'Download or copy the generated environment file and secrets for safekeeping.'|trans }}</li>
-                    <li>{{ 'Queue the asset pipeline rebuild to compile Tailwind, importmaps, and theme overrides.'|trans }}</li>
-                    <li>{{ 'Trigger the snapshot job once storage backends are connected (CLI helpers will be exposed here).'|trans }}</li>
-                    <li>{{ 'Invite additional collaborators so they can finish module or schema configuration.'|trans }}</li>
-                </ol>
+            {% set env_override_body %}
+                <dl class="grid gap-2 text-sm leading-relaxed text-text-muted font-mono">
+                    <div class="flex items-center justify-between gap-4">
+                        <dt>APP_ENV</dt>
+                        <dd>{{ environment_overrides.APP_ENV }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt>APP_DEBUG</dt>
+                        <dd>{{ environment_overrides.APP_DEBUG }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt>APP_SECRET</dt>
+                        <dd>{{ environment_overrides.APP_SECRET is empty ? 'will be generated'|trans : 'provided'|trans }}</dd>
+                    </div>
+                </dl>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Launch checklist',
-                title: 'Next actions after review',
-                body: next_steps_body
+                eyebrow: '.env.local',
+                title: 'Environment overrides',
+                body: env_override_body
+            } only %}
+
+            {% set storage_body %}
+                <p class="text-sm text-text-muted font-mono">{{ storage_config.root }}</p>
+                <p class="text-xs text-text-muted">{{ 'Databases, uploads, snapshots, and backups will live inside this directory.'|trans }}</p>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Storage',
+                title: 'Writable root',
+                body: storage_body
+            } only %}
+
+            {% set admin_body %}
+                <dl class="grid gap-2 text-sm leading-relaxed text-text-muted">
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Email'|trans }}</dt>
+                        <dd>{{ admin_account.email ?: '–' }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Display name'|trans }}</dt>
+                        <dd>{{ admin_account.display_name ?: '–' }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Locale / Timezone'|trans }}</dt>
+                        <dd>{{ admin_account.locale }} · {{ admin_account.timezone }}</dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Require MFA on first login'|trans }}</dt>
+                        <dd>{{ admin_account.require_mfa ? 'yes'|trans : 'no'|trans }}</dd>
+                    </div>
+                    {% if admin_account.recovery_email %}
+                        <div class="flex items-center justify-between gap-4">
+                            <dt class="font-semibold text-text">{{ 'Recovery email'|trans }}</dt>
+                            <dd>{{ admin_account.recovery_email }}</dd>
+                        </div>
+                    {% endif %}
+                    {% if admin_account.recovery_phone %}
+                        <div class="flex items-center justify-between gap-4">
+                            <dt class="font-semibold text-text">{{ 'Recovery phone'|trans }}</dt>
+                            <dd>{{ admin_account.recovery_phone }}</dd>
+                        </div>
+                    {% endif %}
+                    <div class="flex items-center justify-between gap-4">
+                        <dt class="font-semibold text-text">{{ 'Password'|trans }}</dt>
+                        <dd>{{ admin_account.password ? 'provided'|trans : 'pending'|trans }}</dd>
+                    </div>
+                </dl>
+            {% endset %}
+
+            {% include 'partials/components/card.html.twig' with {
+                eyebrow: 'Administrator',
+                title: 'First user',
+                body: admin_body
             } only %}
 
             {% if setup.databases_exist %}
@@ -81,7 +163,7 @@
             {% include 'partials/components/card.html.twig' with {
                 variant: 'muted',
                 title: 'Need help?'|trans,
-                body: '<p class="text-sm text-text-muted">' ~ 'Open the diagnostics sidebar or the upcoming command palette to jump directly to troubleshooting guides.'|trans ~ '</p>'
+                body: '<p class="text-sm text-text-muted">' ~ 'Open the diagnostics sidebar or the command palette (coming soon) to jump directly to troubleshooting guides.'|trans ~ '</p>'
             } only %}
         </div>
     </div>

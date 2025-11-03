@@ -3,25 +3,31 @@
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
         title: 'Storage configuration'|trans,
-        subtitle: 'Connect persistent stores for media and backups. This step will arrive in a later iteration.'|trans
+        subtitle: 'Pick the writable location for databases, uploads, snapshots, and backups. Additional backends will plug into this root later on.'|trans
     } only %}
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div class="layout-stack layout-stack--loose">
-            {% set roadmap_body %}
-                <ul class="list-disc space-y-2 pl-5 text-sm leading-relaxed text-text-muted">
-                    <li>{{ 'Local filesystem support with configurable root (default: <code>var/storage</code>).'|trans|raw }}</li>
-                    <li>{{ 'Object storage adapters (S3, Azure Blob, MinIO) with separate buckets for media and backups.'|trans }}</li>
-                    <li>{{ 'Automatic checksum generation and integrity reports surfaced in the diagnostics centre.'|trans }}</li>
-                    <li>{{ 'Retention policies for snapshots and scheduled pruning tasks via Messenger.'|trans }}</li>
-                    <li>{{ 'Optional CDN configuration for public assets served by projects.'|trans }}</li>
-                </ul>
-            {% endset %}
+        <div class="surface rounded-md border border-border p-6 layout-stack layout-stack--loose">
+            {{ form_start(storage_form, { attr: { class: 'layout-stack layout-stack--tight' } }) }}
+                <p class="text-sm text-text-muted">
+                    {{ 'Ensure the selected directory is writable by PHP. The installer will provision <code>databases</code>, <code>uploads</code>, <code>snapshots</code>, and <code>backups</code> subfolders automatically.'|trans|raw }}
+                </p>
+                {{ form_row(storage_form.root) }}
+                <div class="flex justify-end">
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'Save storage settings'|trans,
+                        attributes: { type: 'submit', class: 'btn btn-primary' }
+                    }) }}
+                </div>
+            {{ form_end(storage_form) }}
+        </div>
 
-            {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Roadmap',
-                title: 'Planned storage capabilities',
-                body: roadmap_body
+        <div class="layout-stack layout-stack--tight items-center">
+            {% include 'partials/components/illustration.html.twig' with {
+                name: 'add-files',
+                variant: 'lg',
+                attributes: { class: 'w-full max-w-md' },
+                alt: 'Storage illustration'|trans
             } only %}
 
             {% set preparation_body %}
@@ -38,20 +44,11 @@
                 title: 'Steps you can already take',
                 body: preparation_body
             } only %}
-        </div>
 
-        <div class="layout-stack layout-stack--tight items-center">
-            {% include 'partials/components/illustration.html.twig' with {
-                name: 'add-files',
-                variant: 'lg',
-                attributes: { class: 'w-full max-w-md' },
-                alt: 'Storage illustration'|trans
-            } only %}
-
-            {% include 'partials/components/empty_state.html.twig' with {
+            {% include 'partials/components/card.html.twig' with {
                 variant: 'muted',
-                title: 'Storage wizard coming soon'|trans,
-                description: 'We are designing an interactive flow to pick storage backends, credentials, and replication strategies.'|trans
+                title: 'Roadmap'|trans,
+                body: '<p class="text-sm text-text-muted">' ~ 'Remote adapters (S3, Azure, MinIO), retention policies, and CDN hooks land in upcoming milestones.'|trans ~ '</p>'
             } only %}
         </div>
     </div>

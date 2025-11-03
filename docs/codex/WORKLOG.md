@@ -330,3 +330,6 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Incorporated maintainer feedback, rebuilt `feat-installer.md` from scratch (no `.env.local.php`, reuse `bin/init`, single storage root, inline admin password creation, JSON help catalogue) and removed inline annotations.
 - Documented the session→`bin/init` hand-off (env writer, JSON payload, `--setup/--payload` flags, post-run seeding command) and outlined validation & cleanup requirements.
 - Logged design decisions resolving earlier open questions (SQLite-only driver, no log downloads, lock/session handling) and updated next steps for implementation/test phases.
+
+### 2025-11-03 (Session 3)
+- Started implementation: added installer environment/storage/admin forms with POST endpoints, session-backed persistence via `SetupConfiguration`, diagnostics refresh API, and summary view rendering of live selections.

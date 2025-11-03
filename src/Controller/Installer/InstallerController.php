@@ -5,14 +5,20 @@ declare(strict_types=1);
 namespace App\Controller\Installer;
 
 use App\Doctrine\Health\SqliteHealthChecker;
+use App\Form\Setup\AdminAccountType;
+use App\Form\Setup\EnvironmentSettingsType;
+use App\Form\Setup\StorageSettingsType;
 use App\Installer\DefaultProjects;
 use App\Installer\DefaultSystemSettings;
+use App\Setup\SetupConfiguration;
 use App\Setup\SetupAccessToken;
 use App\Setup\SetupState;
 use App\Bootstrap\RootEntryPoint;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -29,6 +35,7 @@ final class InstallerController extends AbstractController
         #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
         private readonly SetupState $setupState,
         private readonly SetupAccessToken $setupAccessToken,
+        private readonly SetupConfiguration $setupConfiguration,
     ) {
     }
 
@@ -42,24 +49,121 @@ final class InstallerController extends AbstractController
         $requestedStep = (string) $request->query->get('step', self::STEPS[0]);
         $currentStep = \in_array($requestedStep, self::STEPS, true) ? $requestedStep : self::STEPS[0];
 
-        $template = sprintf('pages/installer/%s.html.twig', $currentStep);
-        $templatePath = $this->getParameter('kernel.project_dir').'/templates/'.$template;
-        if (!is_file($templatePath)) {
-            $template = 'pages/installer/diagnostics.html.twig';
+        return $this->renderStep($request, $currentStep);
+    }
+
+    #[Route('/setup/diagnostics', name: 'app_installer_diagnostics', methods: ['POST'])]
+    public function diagnostics(): JsonResponse
+    {
+        if ($this->setupState->isCompleted()) {
+            return $this->json(['error' => 'Setup already completed.'], Response::HTTP_BAD_REQUEST);
         }
 
-        return $this->render($template, [
-            'steps' => self::STEPS,
-            'current_step' => $currentStep,
+        return $this->json([
             'diagnostics' => $this->gatherDiagnostics(),
-            'default_settings' => DefaultSystemSettings::all(),
-            'default_projects' => DefaultProjects::all(),
-            'setup' => [
-                'databases_exist' => $this->setupState->databasesExist(),
-                'action_steps' => $this->buildSetupActionSteps(),
-                'action_token' => $this->setupAccessToken->issue(),
-            ],
         ]);
+    }
+
+    #[Route('/setup/environment', name: 'app_installer_environment_save', methods: ['POST'])]
+    public function saveEnvironment(Request $request): Response
+    {
+        $form = $this->createEnvironmentForm();
+        $this->processForm($form, $request);
+
+        if (! $form->isSubmitted() || ! $form->isValid()) {
+            if ($this->isJsonRequest($request)) {
+                return $this->json(['errors' => $this->collectFormErrors($form)], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            return $this->renderStep($request, 'environment', ['environment_form' => $form]);
+        }
+
+        /** @var array<string, mixed> $data */
+        $data = $form->getData() ?? [];
+
+        $this->setupConfiguration->rememberSystemSettings($this->extractSystemSettings($data));
+        $this->setupConfiguration->rememberEnvironmentOverrides($this->extractEnvironmentOverrides($data));
+
+        if ($this->isJsonRequest($request)) {
+            return $this->json([
+                'success' => true,
+                'environment_overrides' => $this->setupConfiguration->getEnvironmentOverrides(),
+            ]);
+        }
+
+        $this->addFlash('success', 'Environment settings saved.');
+
+        return $this->redirectToRoute('app_installer', ['step' => 'environment']);
+    }
+
+    #[Route('/setup/storage', name: 'app_installer_storage_save', methods: ['POST'])]
+    public function saveStorage(Request $request): Response
+    {
+        $form = $this->createStorageForm();
+        $this->processForm($form, $request);
+
+        if (! $form->isSubmitted() || ! $form->isValid()) {
+            if ($this->isJsonRequest($request)) {
+                return $this->json(['errors' => $this->collectFormErrors($form)], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            return $this->renderStep($request, 'storage', ['storage_form' => $form]);
+        }
+
+        /** @var array{root:string} $data */
+        $data = $form->getData() ?? ['root' => ''];
+        $this->setupConfiguration->rememberStorageConfig($data);
+
+        if ($this->isJsonRequest($request)) {
+            return $this->json([
+                'success' => true,
+                'storage' => $this->setupConfiguration->getStorageConfig(),
+            ]);
+        }
+
+        $this->addFlash('success', 'Storage settings saved.');
+
+        return $this->redirectToRoute('app_installer', ['step' => 'storage']);
+    }
+
+    #[Route('/setup/admin', name: 'app_installer_admin_save', methods: ['POST'])]
+    public function saveAdmin(Request $request): Response
+    {
+        $form = $this->createAdminForm();
+        $this->processForm($form, $request);
+
+        if (! $form->isSubmitted() || ! $form->isValid()) {
+            if ($this->isJsonRequest($request)) {
+                return $this->json(['errors' => $this->collectFormErrors($form)], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            return $this->renderStep($request, 'admin', ['admin_form' => $form]);
+        }
+
+        /** @var array<string, mixed> $data */
+        $data = $form->getData() ?? [];
+
+        $this->setupConfiguration->rememberAdminAccount([
+            'email' => (string) ($data['email'] ?? ''),
+            'display_name' => (string) ($data['display_name'] ?? ''),
+            'password' => (string) ($data['password'] ?? ''),
+            'locale' => (string) ($data['locale'] ?? ''),
+            'timezone' => (string) ($data['timezone'] ?? ''),
+            'require_mfa' => (bool) ($data['require_mfa'] ?? false),
+            'recovery_email' => (string) ($data['recovery_email'] ?? ''),
+            'recovery_phone' => \is_string($data['recovery_phone'] ?? null) ? $data['recovery_phone'] : null,
+        ]);
+
+        if ($this->isJsonRequest($request)) {
+            return $this->json([
+                'success' => true,
+                'admin' => $this->setupConfiguration->getAdminAccount(),
+            ]);
+        }
+
+        $this->addFlash('success', 'Administrator details saved.');
+
+        return $this->redirectToRoute('app_installer', ['step' => 'admin']);
     }
 
     /**
@@ -105,6 +209,34 @@ final class InstallerController extends AbstractController
             'rewrite' => $this->gatherRewriteDiagnostics(),
             'filesystem' => $this->gatherFilesystemDiagnostics($this->projectDir),
         ];
+    }
+
+    private function renderStep(Request $request, string $currentStep, array $formOverrides = []): Response
+    {
+        $template = sprintf('pages/installer/%s.html.twig', $currentStep);
+        $templatePath = $this->getParameter('kernel.project_dir').'/templates/'.$template;
+        if (!is_file($templatePath)) {
+            $template = 'pages/installer/diagnostics.html.twig';
+        }
+
+        $forms = $this->buildFormViews($formOverrides);
+
+        return $this->render($template, array_merge([
+            'steps' => self::STEPS,
+            'current_step' => $currentStep,
+            'diagnostics' => $this->gatherDiagnostics(),
+            'default_settings' => DefaultSystemSettings::all(),
+            'default_projects' => DefaultProjects::all(),
+            'environment_settings' => $this->setupConfiguration->getSystemSettings(),
+            'environment_overrides' => $this->setupConfiguration->getEnvironmentOverrides(),
+            'storage_config' => $this->setupConfiguration->getStorageConfig(),
+            'admin_account' => $this->setupConfiguration->getAdminAccount(),
+            'setup' => [
+                'databases_exist' => $this->setupState->databasesExist(),
+                'action_steps' => $this->buildSetupActionSteps(),
+                'action_token' => $this->setupAccessToken->issue(),
+            ],
+        ], $forms));
     }
 
     private function extractPathFromUrl(string $url): string
@@ -346,5 +478,160 @@ final class InstallerController extends AbstractController
         }
 
         return $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? 'dev';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function extractSystemSettings(array $data): array
+    {
+        return [
+            'core.instance_name' => (string) ($data['instance_name'] ?? ''),
+            'core.tagline' => (string) ($data['tagline'] ?? ''),
+            'core.support_email' => (string) ($data['support_email'] ?? ''),
+            'core.url' => (string) ($data['base_url'] ?? ''),
+            'core.locale' => (string) ($data['locale'] ?? 'en'),
+            'core.timezone' => (string) ($data['timezone'] ?? 'UTC'),
+            'core.user_registration' => (bool) ($data['user_registration'] ?? false),
+            'core.maintenance_mode' => (bool) ($data['maintenance_mode'] ?? false),
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function extractEnvironmentOverrides(array $data): array
+    {
+        $overrides = [
+            'APP_ENV' => (string) ($data['environment'] ?? 'dev'),
+            'APP_DEBUG' => ((bool) ($data['debug'] ?? false)) ? '1' : '0',
+        ];
+
+        $secret = $data['secret'] ?? null;
+        if (\is_string($secret) && $secret !== '') {
+            $overrides['APP_SECRET'] = $secret;
+        }
+
+        return $overrides;
+    }
+
+    private function isJsonRequest(Request $request): bool
+    {
+        return $request->getContentTypeFormat() === 'json' || str_contains((string) $request->headers->get('Content-Type'), 'application/json');
+    }
+
+    private function processForm(FormInterface $form, Request $request): void
+    {
+        if ($this->isJsonRequest($request)) {
+            $data = json_decode((string) $request->getContent(), true);
+            if (!\is_array($data)) {
+                $data = [];
+            }
+
+            $form->submit($data);
+
+            return;
+        }
+
+        $form->handleRequest($request);
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    private function collectFormErrors(FormInterface $form): array
+    {
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $origin = $error->getOrigin();
+            $name = $origin instanceof FormInterface ? $origin->getName() : $form->getName();
+            $errors[$name][] = $error->getMessage();
+        }
+
+        return $errors;
+    }
+
+    /**
+     * @param array<string, FormInterface> $overrides
+     *
+     * @return array<string, mixed>
+     */
+    private function buildFormViews(array $overrides = []): array
+    {
+        $environmentForm = $overrides['environment_form'] ?? $this->createEnvironmentForm();
+        $storageForm = $overrides['storage_form'] ?? $this->createStorageForm();
+        $adminForm = $overrides['admin_form'] ?? $this->createAdminForm();
+
+        return [
+            'environment_form' => $environmentForm->createView(),
+            'storage_form' => $storageForm->createView(),
+            'admin_form' => $adminForm->createView(),
+        ];
+    }
+
+    private function createEnvironmentForm(): FormInterface
+    {
+        return $this->createForm(EnvironmentSettingsType::class, $this->prepareEnvironmentFormData(), [
+            'action' => $this->generateUrl('app_installer_environment_save'),
+            'method' => 'POST',
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function prepareEnvironmentFormData(): array
+    {
+        $settings = $this->setupConfiguration->getSystemSettings();
+        $env = $this->setupConfiguration->getEnvironmentOverrides();
+
+        return [
+            'environment' => $env['APP_ENV'] ?? 'dev',
+            'debug' => ($env['APP_DEBUG'] ?? '1') !== '0',
+            'secret' => $env['APP_SECRET'] ?? '',
+            'instance_name' => (string) ($settings['core.instance_name'] ?? ''),
+            'tagline' => (string) ($settings['core.tagline'] ?? ''),
+            'support_email' => (string) ($settings['core.support_email'] ?? ''),
+            'base_url' => (string) ($settings['core.url'] ?? ''),
+            'locale' => (string) ($settings['core.locale'] ?? 'en'),
+            'timezone' => (string) ($settings['core.timezone'] ?? 'UTC'),
+            'user_registration' => (bool) ($settings['core.user_registration'] ?? false),
+            'maintenance_mode' => (bool) ($settings['core.maintenance_mode'] ?? false),
+        ];
+    }
+
+    private function createStorageForm(): FormInterface
+    {
+        return $this->createForm(StorageSettingsType::class, $this->setupConfiguration->getStorageConfig(), [
+            'action' => $this->generateUrl('app_installer_storage_save'),
+            'method' => 'POST',
+        ]);
+    }
+
+    private function createAdminForm(): FormInterface
+    {
+        return $this->createForm(AdminAccountType::class, $this->prepareAdminFormData(), [
+            'action' => $this->generateUrl('app_installer_admin_save'),
+            'method' => 'POST',
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function prepareAdminFormData(): array
+    {
+        $admin = $this->setupConfiguration->getAdminAccount();
+
+        return [
+            'email' => $admin['email'],
+            'display_name' => $admin['display_name'],
+            'password' => '',
+            'locale' => $admin['locale'],
+            'timezone' => $admin['timezone'],
+            'require_mfa' => $admin['require_mfa'],
+            'recovery_email' => $admin['recovery_email'],
+            'recovery_phone' => $admin['recovery_phone'],
+        ];
     }
 }
