@@ -18,6 +18,9 @@ final class AdminAccountType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        /** @var array<string, mixed> $passwordPolicy */
+        $passwordPolicy = $options['password_policy'];
+
         $builder
             ->add('email', EmailType::class, [
                 'label' => 'Administrator email',
@@ -50,7 +53,7 @@ final class AdminAccountType extends AbstractType
                 ],
                 'constraints' => [
                     new Assert\NotBlank(),
-                    new Assert\Length(['min' => 12]),
+                    ...$this->buildPasswordConstraints($passwordPolicy),
                 ],
             ])
             ->add('locale', TextType::class, [
@@ -85,6 +88,53 @@ final class AdminAccountType extends AbstractType
             'data_class' => null,
             'csrf_protection' => true,
             'csrf_token_id' => 'setup_admin',
+            'password_policy' => [],
         ]);
+        $resolver->setAllowedTypes('password_policy', ['array']);
+    }
+
+    /**
+     * @param array<string, mixed> $policy
+     *
+     * @return list<Assert\Constraint>
+     */
+    private function buildPasswordConstraints(array $policy): array
+    {
+        $defaults = [
+            'min_length' => 12,
+            'require_numbers' => true,
+            'require_mixed_case' => true,
+            'require_special_characters' => false,
+        ];
+
+        $policy = array_merge($defaults, $policy);
+
+        $constraints = [
+            new Assert\NotBlank(),
+            new Assert\Length(min: (int) $policy['min_length']),
+        ];
+
+        if (!empty($policy['require_numbers'])) {
+            $constraints[] = new Assert\Regex(
+                pattern: '/\d/',
+                message: 'Password must contain at least one number.'
+            );
+        }
+
+        if (!empty($policy['require_mixed_case'])) {
+            $constraints[] = new Assert\Regex(
+                pattern: '/(?=.*[a-z])(?=.*[A-Z])/',
+                message: 'Password must contain both upper and lower case characters.'
+            );
+        }
+
+        if (!empty($policy['require_special_characters'])) {
+            $constraints[] = new Assert\Regex(
+                pattern: '/[^a-zA-Z0-9]/',
+                message: 'Password must contain at least one special character.'
+            );
+        }
+
+        return $constraints;
     }
 }

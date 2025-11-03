@@ -198,6 +198,108 @@ final class InstallerControllerTest extends WebTestCase
         $this->assertSame('setup', (string) $trigger->attr('data-action-context'));
     }
 
+    public function testEnvironmentFormSubmissionPersistsConfiguration(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/setup?step=environment');
+
+        $form = $crawler->selectButton('Save environment settings')->form();
+        $form['environment_settings[environment]'] = 'prod';
+        $form['environment_settings[debug]']->tick();
+        $form['environment_settings[secret]'] = 'test-secret';
+        $form['environment_settings[base_url]'] = 'https://example.com';
+        $form['environment_settings[instance_name]'] = 'Demo Studio';
+        $form['environment_settings[tagline]'] = 'Create boldly';
+        $form['environment_settings[support_email]'] = 'support@example.com';
+        $form['environment_settings[locale]'] = 'en_GB';
+        $form['environment_settings[timezone]'] = 'Europe/London';
+        $form['environment_settings[user_registration]']->tick();
+        $form['environment_settings[maintenance_mode]']->untick();
+
+        $client->submit($form);
+        $this->assertResponseRedirects('/setup?step=environment');
+        $client->followRedirect();
+
+        $session = $client->getRequest()?->getSession();
+        self::assertNotNull($session);
+        $data = $session->get('_app.setup.configuration');
+        self::assertIsArray($data);
+
+        $overrides = $data['environment_overrides'] ?? [];
+
+        self::assertSame('prod', $overrides['APP_ENV']);
+        self::assertSame('1', $overrides['APP_DEBUG']);
+        self::assertSame('test-secret', $overrides['APP_SECRET']);
+
+        $settings = $data['system_settings'] ?? [];
+        self::assertSame('Demo Studio', $settings['core.instance_name']);
+        self::assertTrue($settings['core.user_registration']);
+    }
+
+    public function testStorageFormSubmissionPersistsRoot(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/setup?step=storage');
+
+        $form = $crawler->selectButton('Save storage settings')->form();
+        $form['storage_settings[root]'] = '/mnt/data';
+
+        $client->submit($form);
+        $this->assertResponseRedirects('/setup?step=storage');
+        $client->followRedirect();
+
+        $session = $client->getRequest()?->getSession();
+        self::assertNotNull($session);
+        $data = $session->get('_app.setup.configuration');
+        self::assertIsArray($data);
+
+        self::assertSame('/mnt/data', $data['storage']['root'] ?? null);
+    }
+
+    public function testAdminFormSubmissionPersistsAccount(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/setup?step=admin');
+
+        $form = $crawler->selectButton('Save administrator')->form();
+        $form['admin_account[email]'] = 'admin@example.com';
+        $form['admin_account[display_name]'] = 'Admin';
+        $form['admin_account[password][first]'] = 'SecurePassword123!';
+        $form['admin_account[password][second]'] = 'SecurePassword123!';
+        $form['admin_account[locale]'] = 'en_US';
+        $form['admin_account[timezone]'] = 'America/New_York';
+        $form['admin_account[require_mfa]']->tick();
+        $form['admin_account[recovery_email]'] = 'security@example.com';
+        $form['admin_account[recovery_phone]'] = '+1555123456';
+
+        $client->submit($form);
+        $this->assertResponseRedirects('/setup?step=admin');
+        $client->followRedirect();
+
+        $session = $client->getRequest()?->getSession();
+        self::assertNotNull($session);
+        $data = $session->get('_app.setup.configuration');
+        self::assertIsArray($data);
+        $admin = $data['admin'] ?? [];
+
+        self::assertSame('admin@example.com', $admin['email']);
+        self::assertSame('Admin', $admin['display_name']);
+        self::assertSame('SecurePassword123!', $admin['password']);
+        self::assertTrue($admin['require_mfa']);
+    }
+
+    public function testDiagnosticsEndpointReturnsJsonPayload(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', '/setup/diagnostics', server: ['CONTENT_TYPE' => 'application/json'], content: '{}');
+
+        $this->assertResponseIsSuccessful();
+        $data = json_decode((string) $client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR);
+
+        self::assertArrayHasKey('diagnostics', $data);
+        self::assertArrayHasKey('extensions', $data['diagnostics']);
+    }
+
     protected function tearDown(): void
     {
         $filesystem = new Filesystem();

@@ -75,8 +75,8 @@
 - [ ] Provide integration tests validating snapshot generation and API responses
 
 #### Installer Completion Tasks (P0 | XL)
-- [ ] Build installer forms + POST controllers for environment, storage, and admin steps (persist data via `SetupConfiguration`, add diagnostics refresh endpoint, update Twig templates to consume live session data).
-- [ ] Extend `SetupConfiguration` with new getters/setters (environment overrides, storage root, admin payload, warning acknowledgements) and add integration tests for session persistence.
+- [x] Build installer forms + POST controllers for environment, storage, and admin steps (persist data via `SetupConfiguration`, add diagnostics refresh endpoint, update Twig templates to consume live session data).
+- [x] Extend `SetupConfiguration` with new getters/setters (environment overrides, storage root, admin payload, warning acknowledgements) and add integration tests for session persistence.
 - [ ] Implement `SetupEnvironmentWriter` to merge validated overrides into `.env.local` atomically (preserve existing keys, provide safe fallbacks, unit tests).
 - [ ] Introduce JSON payload hand-off (`var/setup/runtime.json`) and update `ActionExecutor` steps (`write_env`, `configure`, `init`, `lock`) with log persistence enhancements.
 - [ ] Enhance `bin/init` with `--setup/--payload` support and create `app:setup:seed` console command to hash/persist the admin user, clear payload secrets, and log outcomes.

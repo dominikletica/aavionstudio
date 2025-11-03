@@ -12,7 +12,7 @@
 | `App\Doctrine\Middleware\AttachUserDatabaseMiddleware` | `src/Doctrine/Middleware/AttachUserDatabaseMiddleware.php` | Attaches `user.brain` to primary SQLite connection via DBAL middleware and configures pragmas | Sets `PRAGMA busy_timeout`/`foreign_keys` and ensures secondary DB file exists |
 | `App\Doctrine\Health\SqliteHealthChecker` | `src/Doctrine/Health/SqliteHealthChecker.php` | Reports connection status for system + user SQLite stores | Used in tests/diagnostics to confirm attachment and busy timeout |
 | `App\Installer\DefaultSystemSettings` | `src/Installer/DefaultSystemSettings.php` | Loads shared default settings from `config/app/system_settings.php` | Consumed by migrations/installer to seed baseline values |
-| `App\Setup\SetupConfiguration` | `src/Setup/SetupConfiguration.php` | Stores installer form choices in the session and exposes merged defaults | Read by the configurator when persisting settings |
+| `App\Setup\SetupConfiguration` | `src/Setup/SetupConfiguration.php` | Stores installer form choices (environment, storage, admin) in the session and exposes merged defaults | Read by the configurator/environment writer during setup |
 | `App\Setup\SetupConfigurator` | `src/Setup/SetupConfigurator.php` | Persists system settings and project seeds after `bin/init` runs | Called by the installer action executor |
 | `App\Settings\SystemSettings` | `src/Settings/SystemSettings.php` | Lazy loads settings from `app_system_setting` with fallback to defaults | Shared by error resolver, profile registry, etc. |
 | `App\Security\User\UserProfileFieldRegistry` | `src/Security/User/UserProfileFieldRegistry.php` | Supplies configurable profile field metadata & normalisation helpers | Injected into the admin user form and manager |

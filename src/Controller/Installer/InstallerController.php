@@ -610,9 +610,16 @@ final class InstallerController extends AbstractController
 
     private function createAdminForm(): FormInterface
     {
+        $settings = $this->setupConfiguration->getSystemSettings();
+        $policy = [];
+        if (isset($settings['core.users.password_policy']) && \is_array($settings['core.users.password_policy'])) {
+            $policy = $settings['core.users.password_policy'];
+        }
+
         return $this->createForm(AdminAccountType::class, $this->prepareAdminFormData(), [
             'action' => $this->generateUrl('app_installer_admin_save'),
             'method' => 'POST',
+            'password_policy' => $policy,
         ]);
     }
 
