@@ -450,11 +450,14 @@ final class InstallerController extends AbstractController
                 'type' => 'write_env',
             ],
             [
-                'type' => 'init',
-                'environment' => $environment,
+                'type' => 'configure',
             ],
             [
-                'type' => 'configure',
+                'type' => 'prepare_payload',
+            ],
+            [
+                'type' => 'init',
+                'environment' => $environment,
             ],
             [
                 'type' => 'lock',

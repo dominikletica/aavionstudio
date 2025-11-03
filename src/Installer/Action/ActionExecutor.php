@@ -7,6 +7,7 @@ namespace App\Installer\Action;
 use App\Setup\SetupConfiguration;
 use App\Setup\SetupConfigurator;
 use App\Setup\SetupEnvironmentWriter;
+use App\Setup\SetupPayloadBuilder;
 use App\Setup\SetupState;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -24,9 +25,12 @@ final class ActionExecutor
         private readonly SetupConfiguration $setupConfiguration,
         private readonly SetupConfigurator $setupConfigurator,
         private readonly SetupEnvironmentWriter $environmentWriter,
+        private readonly SetupPayloadBuilder $payloadBuilder,
         private readonly Filesystem $filesystem,
     ) {
     }
+
+    private ?string $payloadPath = null;
 
     /**
      * @param callable(string,string=):void $emit
@@ -49,6 +53,7 @@ final class ActionExecutor
                 'shell' => $this->runShellCommand($rawStep, $emit),
                 'init' => $this->runInit($rawStep, $emit),
                 'write_env' => $this->writeEnvironment($emit),
+                'prepare_payload' => $this->preparePayload($emit),
                 'configure' => $this->applyConfiguration($emit),
                 'lock' => $this->createLock(),
                 default => throw new \InvalidArgumentException(sprintf('Unsupported action type "%s".', $type)),
@@ -65,6 +70,7 @@ final class ActionExecutor
             'shell' => sprintf('Run %s', $this->stringifyCommand($step['command'] ?? [])),
             'init' => sprintf('Run bin/init (%s)', $step['environment'] ?? 'auto'),
             'write_env' => 'Write environment overrides',
+            'prepare_payload' => 'Generate installer payload',
             'configure' => 'Persist system configuration',
             'lock' => 'Write setup.lock',
             default => 'Unknown step',
@@ -106,6 +112,15 @@ final class ActionExecutor
             $this->setupConfiguration->getEnvironmentOverrides(),
             $this->setupConfiguration->getStorageConfig()
         );
+    }
+
+    /**
+     * @param callable(string,string=):void $emit
+     */
+    private function preparePayload(callable $emit): void
+    {
+        $emit('log', 'Preparing installer payload...');
+        $this->payloadPath = $this->payloadBuilder->build();
     }
 
     private function extractUploadedPackage(?UploadedFile $package, array $step): void
@@ -273,6 +288,11 @@ final class ActionExecutor
             $arguments[] = $environment;
         }
 
+        $arguments[] = '--setup';
+        if ($this->payloadPath !== null) {
+            $arguments[] = sprintf('--payload=%s', $this->payloadPath);
+        }
+
         $process = new Process($arguments, $this->projectDir);
         $this->runProcess($process, $emit);
     }
@@ -282,6 +302,8 @@ final class ActionExecutor
         $this->filesystem->mkdir(\dirname($this->setupState->lockFilePath()));
         $this->setupState->markCompleted();
         $this->setupConfigurator->markCompleted();
+        $this->payloadBuilder->cleanup();
+        $this->payloadPath = null;
     }
 
     /**

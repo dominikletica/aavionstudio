@@ -15,6 +15,7 @@
 | `App\Setup\SetupConfiguration` | `src/Setup/SetupConfiguration.php` | Stores installer form choices (environment, storage, admin) in the session and exposes merged defaults | Read by the configurator/environment writer during setup |
 | `App\Setup\SetupConfigurator` | `src/Setup/SetupConfigurator.php` | Persists system settings and project seeds after `bin/init` runs | Called by the installer action executor |
 | `App\Setup\SetupEnvironmentWriter` | `src/Setup/SetupEnvironmentWriter.php` | Merges installer overrides into `.env.local` with fallback to existing keys | Invoked by the setup action executor before `bin/init` |
+| `App\Setup\SetupPayloadBuilder` | `src/Setup/SetupPayloadBuilder.php` | Serialises wizard state into `var/setup/runtime.json` for `bin/init --payload` | Cleaned up once setup locks |
 | `App\Settings\SystemSettings` | `src/Settings/SystemSettings.php` | Lazy loads settings from `app_system_setting` with fallback to defaults | Shared by error resolver, profile registry, etc. |
 | `App\Security\User\UserProfileFieldRegistry` | `src/Security/User/UserProfileFieldRegistry.php` | Supplies configurable profile field metadata & normalisation helpers | Injected into the admin user form and manager |
 | `App\Installer\DefaultProjects` | `src/Installer/DefaultProjects.php` | Provides default project seeds from `config/app/projects.php` | Initial migration inserts `default` project via this helper |
@@ -105,6 +106,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `app:api-key:issue` | `src/Command/IssueApiKeyCommand.php` | Issue API key for a user and print the secret | `ApiKeyManager`, `AppUserRepository` |
 | `app:assets:sync` | `src/Command/SyncDiscoveredAssetsCommand.php` | Clears the cache, respawns itself, then mirrors `modules/*/assets` and `themes/*/assets` into the core `assets/` tree so builds/tests see new manifests on the first run | `ModuleRegistry`, `ThemeRegistry`, `%kernel.project_dir%`, `Filesystem`, `Symfony\Component\Process\Process` |
 | `app:assets:rebuild` | `src/Command/RebuildAssetsCommand.php` | Runs or queues the full asset pipeline rebuild; supports `--force` and `--async` | `AssetRebuildScheduler` |
+| `app:setup:seed` | `src/Command/SetupSeedCommand.php` | Reads installer payload JSON and seeds the first administrator post `bin/init --setup` | `UserCreator`, DBAL connection, Filesystem |
 | ... |  |  |  |
 
 ---
