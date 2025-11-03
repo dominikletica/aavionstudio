@@ -319,7 +319,15 @@ final class InstallerController extends AbstractController
                 'environment' => $environment,
             ],
             [
+                'type' => 'log',
+                'message' => 'Placeholder for future setup steps.',
+            ],
+            [
                 'type' => 'lock',
+            ],
+            [
+                'type' => 'log',
+                'message' => 'Success.',
             ],
         ];
     }

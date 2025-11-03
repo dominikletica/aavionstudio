@@ -73,7 +73,7 @@ final class ActionExecutor
     {
         $message = (string) ($step['message'] ?? '');
         if ($message !== '') {
-            $emit('log', $message);
+            // $emit('log', $message);
         }
     }
 
