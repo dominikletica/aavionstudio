@@ -305,21 +305,8 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Refreshed admin user, invitation, security, and asset pipeline templates to reuse the new cards, tables, and form components for consistent styling ahead of Roadmap #4.
 
 ### 2025-11-03
-- Updated the Tailwind theme tokens to anchor the primary palette on the #5170ff brand colour (kept color-mix relationships intact for lighter/darker variants).
-- Added a scoped `.dark` variant mirroring the token set for future dark-mode toggles; follow-up when implementing the switcher: audit component coverage and wire the runtime class toggle.
-- Reworked the release pipeline so `bin/release` ships cold packages (skips `bin/init`, purges runtime directories) ensuring databases/caches never end up in the zip.
-- Added installer cold-start flow: `SetupRedirectSubscriber` forces non-setup routes to `/setup`, `SetupFinalizer` creates databases + applies migrations + writes `.setup.lock`, and `MigrationSynchronizer` keeps schemas updated on future boots.
-- Expanded installer functional coverage (`tests/Controller/InstallerControllerTest.php`) to cover redirect enforcement and setup completion lifecycle.
-- Hardened asset bootstrap: `AssetBootstrapSubscriber` now forces `app:assets:rebuild --force` on the first HTTP request when `public/assets` is empty and propagates rebuild failures, so deployments surface pipeline errors immediately while the error controller logs via `error_log()` instead of hitting undefined `STDERR`.
-- Hardened runtime bootstrap: the summary step now always requires the setup lock before unlocking routes, and `AssetBootstrapSubscriber` triggers an immediate `app:assets:rebuild --force` whenever `public/assets` is missing.
-- Quieted installer action streams by fixing `ActionExecutor` to pass process environment overrides (defaults `APP_DEBUG=0`, optional per-step env) instead of stuffing `APP_DEBUG=0` into the command line; added coverage to verify console steps run in non-debug mode so Doctrine deprecations stay silent while retaining live streaming.
-- Restored the live NDJSON stream for `/setup/action` by switching the process pump to Symfony's streaming callback, buffering partial lines safely, and emitting an initial heartbeat message so browsers start rendering immediately.
-- Added aggressive flush hints for `/setup/action` (no gzip, identity encoding, warm-up padding) so FastCGI buffers forward NDJSON chunks instantly, and updated security voters/checkers to match Symfony 7.4+ signatures to silence deprecation warnings.
-- Reverted the process pump to an incremental read loop with per-stream buffers so output drains as soon as Symfony's Process exposes bytes, matching the original live-log behaviour while keeping partial-line safety.
-- Disabled the Symfony profiler for `/setup/action` responses to prevent toolbar buffering from collapsing the live NDJSON stream in dev environments.
-- Increased the warm-up padding to 64 KiB so FastCGI buffers flush immediately even with the reduced command output volume after log noise suppression.
-- Force-disable PHP output buffering and zlib compression for the streamed response and clear any `Content-Length` header before emitting NDJSON, ensuring flushes reach the client immediately.
-- Restored NDJSON streaming for `/setup/action` so the overlay consumes a single chunked response; the controller now disables buffering, sends a warm-up pad, and flushes after every line from `ActionExecutor`.
-- Simplified the overlay client to consume the streamed response directly, handling inline errors and surfacing the completion button without polling.
-- Added a loading spinner behind the log window so long-running actions show progress while the stream is active, and made the log background transparent to keep the spinner visible until completion.
-- Suppressed Doctrine DBAL's SQLite create-database deprecation pairs application-wide now that we always provision the database files ourselves; future upgrades can drop the ignore once DBAL 4 lands.
+- Rebased the theme on the #5170ff brand colour, mirrored the palette for `.dark`, and added lighter/darker tokens for primary/success/warning/danger so hover states remain consistent.
+- Hardened the release/init pipeline: release stays cold (no caches or DBs), init enforces deterministic installs, and Doctrine’s noisy SQLite deprecations are now silenced because we provision files ourselves.
+- Tightened installer bootstrap: redirects and summary guard rails are covered by tests, assets rebuild automatically, and `/setup/action` now streams NDJSON directly with buffering disabled so logs surface immediately.
+- Updated the overlay UI with a transparent log surface, inline spinner, and new status buttons (`btn-success|warning|danger`) powered by the expanded theme tokens.
+- Documentation refreshed where needed (developer theming guide, class map) to reflect the new component contracts and CLI behaviour.

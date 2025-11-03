@@ -36,7 +36,7 @@ Partial templates live under `templates/partials/` and are grouped by feature:
 - `partials/header/header.html.twig` – full-width hero header with optional background image/logo, overlay heading (`header_heading`) and subtitle. Admin/project/entity layouts can pass `header_image`, `header_logo`, `header_heading`, and `header_subtitle` to customise the hero.
 - `partials/navigation/*.html.twig` – global/header menus and sidebar sections.
 - `partials/forms/fields/*.html.twig` – form inputs; use `{% include %}` in pages or embed in custom form themes.
-- `partials/forms/buttons/*.html.twig` – button presets (`btn btn-primary`, etc.).
+- `partials/forms/buttons/*.html.twig` – button presets (`btn btn-primary`, `btn btn-secondary`, and status variants like `btn-success`, `btn-warning`, `btn-danger`).
 - `partials/feedback/*.html.twig` – legacy flash/alert snippets (replaced by the component collection below).
 - `partials/components/*.html.twig` – reusable building blocks (buttons, alerts, cards, empty states) with Tailwind-ready styling and illustration slots.
 - `partials/head/importmap.html.twig` – default importmap injection, can be overridden by themes.
