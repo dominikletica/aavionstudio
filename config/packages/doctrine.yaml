@@ -32,6 +32,7 @@ doctrine:
 when@test:
     doctrine:
         dbal:
+            url: 'sqlite:///%kernel.project_dir%/var/test/system.brain'
             # "TEST_TOKEN" is typically set by ParaTest
             dbname_suffix: '_test%env(default::TEST_TOKEN)%'
 

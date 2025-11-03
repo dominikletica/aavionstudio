@@ -26,6 +26,10 @@ This guide summarises the core Symfony platform put in place during Roadmap Step
   - Rewrite status detection that differentiates between rewrite-first, compatibility fallback, and forced compatibility mode (flags set by `RootEntryPoint`).
   - Filesystem checks covering `var/*` directories and `public/assets` to ensure write permissions exist for caching, logs, snapshots, uploads, themes, and asset builds.
 - **Seeds**: Default system settings (`config/app/system_settings.php`) and projects (`config/app/projects.php`) are surfaced in environment/storage steps so operators understand pre-populated data.
+- **Provisioning & lock-in**:
+  - Non-setup routes are automatically redirected to `/setup` until the `.setup.lock` marker exists (enforced by `SetupRedirectSubscriber`).
+  - The summary step exposes a "Finalize installation" action that uses `SetupFinalizer` to create database files, execute outstanding Doctrine migrations, and drop a `.setup.lock` marker under `var/`.
+  - Once locked, `/setup` returns a 404 and `MigrationSynchronizer` keeps schemas current by applying pending migrations during future kernel boots.
 - Functional coverage lives in `tests/Controller/InstallerControllerTest.php`.
 
 ## Database & Doctrine
@@ -46,8 +50,9 @@ This guide summarises the core Symfony platform put in place during Roadmap Step
 
 ## Tooling & Release Packaging
 
-- `bin/init` orchestrates dependency installation, asset builds, database provisioning, messenger transport setup, and cache warmup. It now clears `public/assets` before rebuilding to avoid stale bundles.
-- `bin/release` stages a clean copy of the repository (excluding build artifacts, vendor, tests, docs), runs `bin/init` inside the staging area, removes caches/temporary Tailwind outputs, zips the contents (flattened), and drops the archive in `build/`. A `release.json` metadata file is generated for runtime version introspection during packaging.
+- `bin/init` still orchestrates dependency installation, asset builds, messenger transport setup, and cache warmup for local environments. Database provisioning now happens via the setup wizard so production builds stay cold.
+- `bin/release` stages a clean copy of the repository (excluding build artifacts, vendor, tests, docs), skips `bin/init`, prunes any stray runtime directories, and zips the contents into `build/aavionstudio-<version>-<channel>.zip`. Packages remain free of caches, databases, and compiled assets so setup can perform first-run initialisation. A `release.json` metadata file is generated for runtime version introspection during packaging.
+- `AssetBootstrapSubscriber` runs on early HTTP requests and triggers `app:assets:rebuild --force` via `AssetRebuildScheduler` whenever `public/assets` is missing or empty, preventing Twig/layout errors after fresh deploys.
 - Documentation for operator workflows lives under `docs/dev/sections/workflows/release.md`; this guide focuses on how the release script ties into the core architecture.
 
 ## Security & Access Control Notes (Step 3 kick-off)

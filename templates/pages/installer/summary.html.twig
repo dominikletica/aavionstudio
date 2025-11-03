@@ -41,6 +41,34 @@
                 title: 'Next actions after review',
                 body: next_steps_body
             } only %}
+
+            {% if setup.completed %}
+                {% include 'partials/components/card.html.twig' with {
+                    variant: 'success',
+                    title: 'Setup complete',
+                    body: '<p class="text-sm text-text-muted">' ~ 'System and user databases are provisioned and migrations applied. You can now sign in.'|trans ~ '</p>'
+                } only %}
+            {% else %}
+                {% if setup.databases_exist %}
+                    {% include 'partials/components/card.html.twig' with {
+                        variant: 'warning',
+                        title: 'Provisioning pending',
+                        body: '<p class="text-sm text-text-muted">' ~ 'Database files exist, but the setup lock is missing. Finish the wizard to apply outstanding migrations and secure the installer.'|trans ~ '</p>'
+                    } only %}
+                {% endif %}
+                <form method="post" action="{{ path('app_installer_complete') }}" class="surface border border-border-strong rounded-md p-6 layout-stack layout-stack--tight">
+                    <input type="hidden" name="_token" value="{{ setup.completion_token }}">
+                    <div class="layout-stack layout-stack--tight">
+                        <h2 class="text-heading text-xl">Finalize installation</h2>
+                        <p class="text-sm text-text-muted">
+                            {{ 'Provision the SQLite databases, apply Doctrine migrations, and lock this setup wizard.'|trans }}
+                        </p>
+                    </div>
+                    <button class="btn btn-primary btn--lg" type="submit">
+                        {{ 'Create databases & finish setup'|trans }}
+                    </button>
+                </form>
+            {% endif %}
         </div>
 
         <div class="layout-stack layout-stack--tight">

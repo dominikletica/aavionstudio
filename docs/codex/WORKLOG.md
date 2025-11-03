@@ -303,3 +303,11 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Filled installer environment, storage, admin, and summary pages with actionable guidance so the new layouts are exercised with realistic copy.
 - Mapped the Codemirror `twig` option to the built-in HTML highlighter so the showcase editor renders without missing-module errors.
 - Refreshed admin user, invitation, security, and asset pipeline templates to reuse the new cards, tables, and form components for consistent styling ahead of Roadmap #4.
+
+### 2025-11-03
+- Updated the Tailwind theme tokens to anchor the primary palette on the #5170ff brand colour (kept color-mix relationships intact for lighter/darker variants).
+- Added a scoped `.dark` @theme variant mirroring the token set for future dark-mode toggles; follow-up when implementing the switcher: audit component coverage and wire the runtime class toggle.
+- Reworked the release pipeline so `bin/release` ships cold packages (skips `bin/init`, purges runtime directories) ensuring databases/caches never end up in the zip.
+- Added installer cold-start flow: `SetupRedirectSubscriber` forces non-setup routes to `/setup`, `SetupFinalizer` creates databases + applies migrations + writes `.setup.lock`, and `MigrationSynchronizer` keeps schemas updated on future boots.
+- Expanded installer functional coverage (`tests/Controller/InstallerControllerTest.php`) to cover redirect enforcement and setup completion lifecycle.
+- Hardened runtime bootstrap: the summary step now always requires the setup lock before unlocking routes, and `AssetBootstrapSubscriber` triggers an immediate `app:assets:rebuild --force` whenever `public/assets` is missing.

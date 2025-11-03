@@ -9,6 +9,7 @@ use App\Theme\ThemeDiscovery;
 use App\Theme\ThemeManifest;
 use App\Theme\ThemeStateSynchronizer;
 use App\Twig\TemplatePathConfigurator;
+use App\Setup\MigrationSynchronizer;
 use App\Security\Capability\CapabilitySynchronizer;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -246,6 +247,12 @@ class Kernel extends BaseKernel
             \assert($capabilitySynchronizer instanceof CapabilitySynchronizer);
             $capabilitySynchronizer->synchronize();
         }
+
+        if ($this->container->has(MigrationSynchronizer::class)) {
+            $migrationSynchronizer = $this->container->get(MigrationSynchronizer::class);
+            \assert($migrationSynchronizer instanceof MigrationSynchronizer);
+            $migrationSynchronizer->synchronize();
+        }
     }
 
     /**
@@ -321,6 +328,27 @@ class Kernel extends BaseKernel
 
         try {
             $params = (new DsnParser())->parse($databaseUrl);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        $path = $params['path'] ?? null;
+
+        if (\is_string($path) && $path !== '' && !\is_file($path)) {
+            return null;
+        }
+
+        $url = $params['url'] ?? null;
+
+        if (\is_string($url) && \str_starts_with($url, 'sqlite')) {
+            $components = parse_url($url);
+
+            if (\is_array($components) && isset($components['path']) && $components['path'] !== '' && !\is_file($components['path'])) {
+                return null;
+            }
+        }
+
+        try {
             $connection = DriverManager::getConnection($params);
         } catch (\Throwable) {
             return null;

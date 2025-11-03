@@ -5,13 +5,36 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Bootstrap\RootEntryPoint;
+use App\Setup\SetupState;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Filesystem\Filesystem;
 
 final class InstallerControllerTest extends WebTestCase
 {
+    private string $projectDir;
+    private string $systemDatabasePath;
+    private string $userDatabasePath;
+    private string $setupLockPath;
+
     protected static function getKernelClass(): string
     {
         return \App\Kernel::class;
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->projectDir = \dirname(__DIR__, 2);
+        $varDir = $this->projectDir.'/var/test';
+
+        $this->systemDatabasePath = $varDir.'/system.brain';
+        $this->userDatabasePath = $varDir.'/user.brain';
+        $this->setupLockPath = $varDir.'/.setup.lock';
+
+        $filesystem = new Filesystem();
+        $filesystem->remove([$this->systemDatabasePath, $this->userDatabasePath, $this->setupLockPath]);
+        $filesystem->mkdir($varDir);
     }
 
     public function testSetupWizardRendersSteps(): void
@@ -79,5 +102,74 @@ final class InstallerControllerTest extends WebTestCase
                 $_SERVER[RootEntryPoint::FLAG_REQUEST_URI],
             );
         }
+    }
+
+    public function testNonSetupRoutesRedirectToSetupUntilProvisioned(): void
+    {
+        $client = static::createClient();
+        $setupState = self::getContainer()->get(SetupState::class);
+
+        self::assertTrue($setupState->missingDatabases(), 'Expected databases to be absent before guarding non-setup routes.');
+
+        $client->request('GET', '/login');
+
+        $this->assertResponseRedirects('/setup');
+    }
+
+    public function testSetupCompletionCreatesDatabasesAndLocksWizard(): void
+    {
+        $client = static::createClient();
+
+        $crawler = $client->request('GET', '/setup?step=summary');
+        $tokenNode = $crawler->filter('form[action="/setup/complete"] input[name="_token"]');
+
+        self::assertNotSame(0, $tokenNode->count(), 'Setup completion form should render a CSRF token.');
+
+        $token = (string) $tokenNode->attr('value');
+
+        $client->request('POST', '/setup/complete', [
+            '_token' => $token,
+        ]);
+
+        $requestSession = $client->getRequest()->getSession();
+        $flashMessages = $requestSession !== null ? $requestSession->getFlashBag()->peek('setup_error') : [];
+
+        if (!empty($flashMessages)) {
+            self::fail('Setup finalization failed: '.implode(' | ', $flashMessages));
+        }
+
+        $this->assertResponseRedirects('/login');
+
+        $filesystem = new Filesystem();
+        self::assertFileExists($this->systemDatabasePath, 'Primary database should be created during setup completion.');
+        self::assertFileExists($this->userDatabasePath, 'User database should be created during setup completion.');
+        self::assertFileExists($this->setupLockPath, 'Setup completion should lock the wizard.');
+
+        $client->followRedirect();
+        $client->request('GET', '/setup');
+
+        $this->assertResponseStatusCodeSame(404);
+    }
+
+    public function testSummaryShowsFinalizeFormEvenIfDatabasesExist(): void
+    {
+        $filesystem = new Filesystem();
+        $filesystem->touch($this->systemDatabasePath);
+        $filesystem->touch($this->userDatabasePath);
+
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/setup?step=summary');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSame(1, $crawler->filter('form[action="/setup/complete"] button[type="submit"]')->count());
+        $this->assertSelectorTextContains('form[action="/setup/complete"] h2', 'Finalize installation');
+    }
+
+    protected function tearDown(): void
+    {
+        $filesystem = new Filesystem();
+        $filesystem->touch($this->setupLockPath);
+
+        parent::tearDown();
     }
 }

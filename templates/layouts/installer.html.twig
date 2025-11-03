@@ -20,6 +20,12 @@
                     {% endfor %}
                 </ol>
             </nav>
+            {% for message in app.flashes('setup_error') %}
+                <div class="alert alert--danger">
+                    <div class="alert__title">Setup failed</div>
+                    <p class="alert__body">{{ message }}</p>
+                </div>
+            {% endfor %}
             <section class="surface shadow-sm p-6 layout-stack layout-stack--loose">
                 {% block content %}{% endblock %}
             </section>

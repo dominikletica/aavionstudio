@@ -110,6 +110,7 @@ Use it when building new themes or verifying Tailwind overrides—clone the temp
 ## 4. Theme tokens & Tailwind utilities
 
 - Theme tokens are defined in `assets/styles/base/theme.css` using Tailwind’s `@theme` directive. They expose colors, typography, radii, shadows, transitions, etc.
+- The `.dark` variant in the same file mirrors those tokens for dark mode; toggle the class on `<html>` or `<body>` when wiring the eventual theme switcher.
 - Shared component layers (`assets/styles/base/*.css`) rely exclusively on Tailwind utilities plus the tokens; you can safely use any Tailwind class in Twig templates.
 - Additional helper utilities live in `assets/styles/base/utilities.css` (`.text-primary`, `.bg-surface`, `.badge`, `.alert--*`, `.nav-*`, `.table`, `.modal`, `.skeleton`, etc.).
 - Rebuild the pipeline with `php bin/console app:assets:rebuild --force` whenever theme CSS changes; the command now clears `public/assets/` before regenerating bundles.
