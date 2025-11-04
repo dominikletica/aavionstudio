@@ -43,6 +43,16 @@ final class ActionController extends AbstractController
             return $this->json(['error' => 'Installer actions require a valid session token.'], Response::HTTP_FORBIDDEN);
         }
 
+        $session = $request->getSession();
+        if ($session !== null) {
+            if (! $session->isStarted()) {
+                $session->start();
+            }
+
+            // Close the session before streaming output so headers can be flushed safely.
+            $session->save();
+        }
+
         $context = (string) ($payload['context'] ?? 'generic');
         $steps = $payload['steps'] ?? $payload['commands'] ?? [];
 

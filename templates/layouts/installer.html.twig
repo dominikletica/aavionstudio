@@ -11,11 +11,19 @@
             </header>
             <nav aria-label="Wizard Steps" class="surface shadow-sm p-4 rounded-md">
                 <ol class="flex flex-wrap items-center justify-center gap-4">
+                    {% set step_pointer = 0 %}
                     {% for step in steps %}
+                        {% set enabled = step in available_steps %}
                         <li>
-                            <a class="btn {{ step == current_step ? 'btn-primary' : 'btn-secondary' }}" href="{{ path('app_installer', { step: step }) }}">
-                                {{ step|title }}
-                            </a>
+                            {% if enabled %}
+                                <a class="btn {{ step == current_step ? 'btn-primary' : 'btn-secondary' }}" href="{{ path('app_installer', { step: step }) }}">
+                                    {{ step|title }}
+                                </a>
+                            {% else %}
+                                <span class="btn btn-secondary opacity-60 cursor-not-allowed" aria-disabled="true">
+                                    {{ step|title }}
+                                </span>
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ol>

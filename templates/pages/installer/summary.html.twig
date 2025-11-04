@@ -124,6 +124,10 @@
                 body: admin_body
             } only %}
 
+            {% include 'partials/components/help_entries.html.twig' with {
+                entries: help['setup.summary']|default([])
+            } only %}
+
             {% if setup.databases_exist %}
                 {% include 'partials/components/card.html.twig' with {
                     variant: 'warning',
@@ -131,6 +135,9 @@
                     body: '<p class="text-sm text-text-muted">' ~ 'Database files exist, but the setup lock is missing. Finish the wizard to apply outstanding migrations and secure the installer.'|trans ~ '</p>'
                 } only %}
             {% endif %}
+
+            {% set finalize_tooltip = help_tooltips['summary.finalize'] ?? null %}
+            {% set finalize_tooltip_text = finalize_tooltip is iterable ? finalize_tooltip.body|default('')|striptags|replace({'\n': ' '})|trim : '' %}
 
             <div class="surface border border-border-strong rounded-md p-6 layout-stack layout-stack--tight">
                 <div class="layout-stack layout-stack--tight">
@@ -141,7 +148,11 @@
                 </div>
                 <button
                     type="button"
-                    class="btn btn-primary btn--lg self-start"
+                    class="btn btn-primary btn--lg self-start{{ finalize_tooltip_text ? ' tooltip' : '' }}"
+                    {% if finalize_tooltip_text %}
+                        data-tooltip="{{ finalize_tooltip_text }}"
+                        aria-label="{{ ('Create databases & finish setup. ' ~ finalize_tooltip_text)|trim }}"
+                    {% endif %}
                     data-action-trigger
                     data-action-context="setup"
                     data-action-steps="{{ setup.action_steps|json_encode|e('html_attr') }}"

@@ -80,10 +80,15 @@
 - [x] Implement `SetupEnvironmentWriter` to merge validated overrides into `.env.local` atomically (preserve existing keys, provide safe fallbacks, unit tests).
 - [x] Introduce JSON payload hand-off (`var/setup/runtime.json`), update action steps (`prepare_payload`, `write_env`), add payload builder & cleanup, and extend `bin/init` with `--setup/--payload` wiring plus dedicated tests.
 - [x] Enhance `bin/init` with `--setup/--payload` support and create `app:setup:seed` console command to hash/persist the admin user, clear payload secrets, and log outcomes.
-- [ ] Add persistent setup log writer (stream to `var/log/setup/*.ndjson`) within `ActionExecutor`.
+- [x] Add persistent setup log writer (stream to `var/log/setup/*.ndjson`) within `ActionExecutor`.
+- [x] Wire new help-content JSON loader and replace inline doc links in installer templates.
+- [x] Harden `/setup/action` streaming response by starting/saving the session before flushing NDJSON output (prevents "headers already sent" errors reported on step 2).
+- [x] Split help JSON entries into inline panels vs. targeted tooltips; update installer templates/macros to attach tooltips to environment/storage/admin fields and to surface summary actions as hoverable badges.
+- [x] Tighten wizard navigation gating (disable future steps, redirect invalid `step` query selections) and add accessibility metadata (`aria-disabled`).
+- [x] Expand installer functional coverage (tooltip rendering, summary action badges, step gating) and add unit tests for `SetupConfiguration` boolean helpers + `SetupHelpLoader` target propagation.
 - [ ] Update `SetupConfigurator` + `SystemSettings` reload flow to consume session data safely prior to `bin/init`, including default project metadata handling.
-- [ ] Wire new help-content JSON loader and replace inline doc links in installer templates.
 - [ ] Add unit/integration/functional coverage for the full installer pipeline (forms, env writer, action executor, bin/init seeding) and document manual verification steps in developer/user manuals.
+- [ ] Introduce field-aware tooltip binding (Stimulus helper or Twig extensions) so targeted help entries decorate the precise form controls without manual badge duplication.
 
 ### Feat: Frontend Delivery & Rendering (P0 | L)
 - [ ] Implement catch-all frontend controller backed by snapshots and schema templates
@@ -331,7 +336,9 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Incorporated maintainer feedback, rebuilt `feat-installer.md` from scratch (no `.env.local.php`, reuse `bin/init`, single storage root, inline admin password creation, JSON help catalogue) and removed inline annotations.
 - Documented the session→`bin/init` hand-off (env writer, JSON payload, `--setup/--payload` flags, post-run seeding command) and outlined validation & cleanup requirements.
 - Logged design decisions resolving earlier open questions (SQLite-only driver, no log downloads, lock/session handling) and updated next steps for implementation/test phases.
-- Implemented the environment writer + installer action step (`write_env`), added session-backed wizard tests, and ensured `.env.local` merging is covered by unit tests.
 
 ### 2025-11-03 (Session 3)
 - Started implementation: added installer environment/storage/admin forms with POST endpoints, session-backed persistence via `SetupConfiguration`, diagnostics refresh API, and summary view rendering of live selections.
+- Implemented the environment writer + installer action step (`write_env`), added session-backed wizard tests, and ensured `.env.local` merging is covered by unit tests.
+- Added persistent setup logging (`var/log/setup/*.ndjson`), JSON payload builder/cleanup, seeded admin command, and contextual handler diagnostics tests.
+- Introduced help-content loader + JSON catalogue with inline/tooltip cards rendered across installer steps.

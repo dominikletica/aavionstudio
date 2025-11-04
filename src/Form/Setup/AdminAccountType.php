@@ -6,6 +6,7 @@ namespace App\Form\Setup;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -20,6 +21,8 @@ final class AdminAccountType extends AbstractType
     {
         /** @var array<string, mixed> $passwordPolicy */
         $passwordPolicy = $options['password_policy'];
+        $localeChoices = $this->normalizeChoices($options['locale_choices']);
+        $timezoneChoices = $this->normalizeChoices($options['timezone_choices']);
 
         $builder
             ->add('email', EmailType::class, [
@@ -56,17 +59,23 @@ final class AdminAccountType extends AbstractType
                     ...$this->buildPasswordConstraints($passwordPolicy),
                 ],
             ])
-            ->add('locale', TextType::class, [
+            ->add('locale', ChoiceType::class, [
                 'label' => 'Preferred locale',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
+                'choices' => $localeChoices,
+                'placeholder' => 'Select locale',
+                'choice_translation_domain' => false,
             ])
-            ->add('timezone', TextType::class, [
+            ->add('timezone', ChoiceType::class, [
                 'label' => 'Preferred timezone',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
+                'choices' => $timezoneChoices,
+                'placeholder' => 'Select timezone',
+                'choice_translation_domain' => false,
             ])
             ->add('require_mfa', CheckboxType::class, [
                 'label' => 'Require multi-factor authentication on first login',
@@ -89,8 +98,12 @@ final class AdminAccountType extends AbstractType
             'csrf_protection' => true,
             'csrf_token_id' => 'setup_admin',
             'password_policy' => [],
+            'locale_choices' => [],
+            'timezone_choices' => [],
         ]);
         $resolver->setAllowedTypes('password_policy', ['array']);
+        $resolver->setAllowedTypes('locale_choices', ['array']);
+        $resolver->setAllowedTypes('timezone_choices', ['array']);
     }
 
     /**
@@ -136,5 +149,30 @@ final class AdminAccountType extends AbstractType
         }
 
         return $constraints;
+    }
+
+    /**
+     * @param array<string,string>|array<int,string> $choices
+     *
+     * @return array<string,string>
+     */
+    private function normalizeChoices(array $choices): array
+    {
+        if ($choices === []) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($choices as $key => $value) {
+            if (is_int($key)) {
+                $normalized[$value] = $value;
+            } else {
+                $normalized[$key] = $value;
+            }
+        }
+
+        ksort($normalized);
+
+        return $normalized;
     }
 }

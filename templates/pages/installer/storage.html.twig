@@ -1,4 +1,5 @@
 {% extends 'layouts/installer.html.twig' %}
+{% import 'partials/components/_macros.html.twig' as ui %}
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
@@ -12,7 +13,7 @@
                 <p class="text-sm text-text-muted">
                     {{ 'Ensure the selected directory is writable by PHP. The installer will provision <code>databases</code>, <code>uploads</code>, <code>snapshots</code>, and <code>backups</code> subfolders automatically.'|trans|raw }}
                 </p>
-                {{ form_row(storage_form.root) }}
+                {{ ui.form_row_with_tooltip(storage_form.root, help_tooltips['storage.root'] ?? null) }}
                 <div class="flex justify-end">
                     {{ include('partials/components/button.html.twig', {
                         label: 'Save storage settings'|trans,
@@ -49,6 +50,10 @@
                 variant: 'muted',
                 title: 'Roadmap'|trans,
                 body: '<p class="text-sm text-text-muted">' ~ 'Remote adapters (S3, Azure, MinIO), retention policies, and CDN hooks land in upcoming milestones.'|trans ~ '</p>'
+            } only %}
+
+            {% include 'partials/components/help_entries.html.twig' with {
+                entries: help['setup.storage']|default([])
             } only %}
         </div>
     </div>

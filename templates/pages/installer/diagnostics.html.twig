@@ -167,6 +167,10 @@
                 body: sqlite_body,
                 eyebrow: 'Database'|trans
             } only %}
+
+            {% include 'partials/components/help_entries.html.twig' with {
+                entries: help['setup.diagnostics']|default([])
+            } only %}
         </div>
     </div>
 

@@ -63,18 +63,25 @@ final class EnvironmentSettingsType extends AbstractType
                     new Assert\NotBlank(),
                     new Url(requireTld: false),
                 ],
+                'default_protocol' => null,
             ])
-            ->add('locale', TextType::class, [
+            ->add('locale', ChoiceType::class, [
                 'label' => 'Default locale',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
+                'choices' => $this->normalizeChoices($options['locale_choices']),
+                'placeholder' => 'Select locale',
+                'choice_translation_domain' => false,
             ])
-            ->add('timezone', TextType::class, [
+            ->add('timezone', ChoiceType::class, [
                 'label' => 'Default timezone',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
+                'choices' => $this->normalizeChoices($options['timezone_choices']),
+                'placeholder' => 'Select timezone',
+                'choice_translation_domain' => false,
             ])
             ->add('user_registration', CheckboxType::class, [
                 'label' => 'Allow user self-registration',
@@ -92,6 +99,35 @@ final class EnvironmentSettingsType extends AbstractType
             'data_class' => null,
             'csrf_protection' => true,
             'csrf_token_id' => 'setup_environment',
+            'locale_choices' => [],
+            'timezone_choices' => [],
         ]);
+        $resolver->setAllowedTypes('locale_choices', ['array']);
+        $resolver->setAllowedTypes('timezone_choices', ['array']);
+    }
+
+    /**
+     * @param array<string,string>|array<int,string> $choices
+     *
+     * @return array<string,string>
+     */
+    private function normalizeChoices(array $choices): array
+    {
+        if ($choices === []) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($choices as $key => $value) {
+            if (is_int($key)) {
+                $normalized[$value] = $value;
+            } else {
+                $normalized[$key] = $value;
+            }
+        }
+
+        ksort($normalized);
+
+        return $normalized;
     }
 }

@@ -12,6 +12,7 @@ use App\Installer\DefaultProjects;
 use App\Installer\DefaultSystemSettings;
 use App\Setup\SetupConfiguration;
 use App\Setup\SetupAccessToken;
+use App\Setup\SetupHelpLoader;
 use App\Setup\SetupState;
 use App\Bootstrap\RootEntryPoint;
 use Doctrine\DBAL\Connection;
@@ -36,6 +37,7 @@ final class InstallerController extends AbstractController
         private readonly SetupState $setupState,
         private readonly SetupAccessToken $setupAccessToken,
         private readonly SetupConfiguration $setupConfiguration,
+        private readonly SetupHelpLoader $helpLoader,
     ) {
     }
 
@@ -46,10 +48,13 @@ final class InstallerController extends AbstractController
             return $this->redirect('/admin');
         }
 
+        $availableSteps = $this->computeAvailableSteps();
         $requestedStep = (string) $request->query->get('step', self::STEPS[0]);
-        $currentStep = \in_array($requestedStep, self::STEPS, true) ? $requestedStep : self::STEPS[0];
+        $currentStep = \in_array($requestedStep, $availableSteps, true)
+            ? $requestedStep
+            : ($availableSteps[array_key_last($availableSteps)] ?? self::STEPS[0]);
 
-        return $this->renderStep($request, $currentStep);
+        return $this->renderStep($request, $currentStep, [], $availableSteps);
     }
 
     #[Route('/setup/diagnostics', name: 'app_installer_diagnostics', methods: ['POST'])]
@@ -75,7 +80,7 @@ final class InstallerController extends AbstractController
                 return $this->json(['errors' => $this->collectFormErrors($form)], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            return $this->renderStep($request, 'environment', ['environment_form' => $form]);
+            return $this->renderStep($request, 'environment', ['environment_form' => $form], $this->computeAvailableSteps());
         }
 
         /** @var array<string, mixed> $data */
@@ -88,6 +93,7 @@ final class InstallerController extends AbstractController
             return $this->json([
                 'success' => true,
                 'environment_overrides' => $this->setupConfiguration->getEnvironmentOverrides(),
+                'available_steps' => $this->computeAvailableSteps(),
             ]);
         }
 
@@ -107,7 +113,7 @@ final class InstallerController extends AbstractController
                 return $this->json(['errors' => $this->collectFormErrors($form)], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            return $this->renderStep($request, 'storage', ['storage_form' => $form]);
+            return $this->renderStep($request, 'storage', ['storage_form' => $form], $this->computeAvailableSteps());
         }
 
         /** @var array{root:string} $data */
@@ -118,6 +124,7 @@ final class InstallerController extends AbstractController
             return $this->json([
                 'success' => true,
                 'storage' => $this->setupConfiguration->getStorageConfig(),
+                'available_steps' => $this->computeAvailableSteps(),
             ]);
         }
 
@@ -137,7 +144,7 @@ final class InstallerController extends AbstractController
                 return $this->json(['errors' => $this->collectFormErrors($form)], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            return $this->renderStep($request, 'admin', ['admin_form' => $form]);
+            return $this->renderStep($request, 'admin', ['admin_form' => $form], $this->computeAvailableSteps());
         }
 
         /** @var array<string, mixed> $data */
@@ -158,6 +165,7 @@ final class InstallerController extends AbstractController
             return $this->json([
                 'success' => true,
                 'admin' => $this->setupConfiguration->getAdminAccount(),
+                'available_steps' => $this->computeAvailableSteps(),
             ]);
         }
 
@@ -211,7 +219,7 @@ final class InstallerController extends AbstractController
         ];
     }
 
-    private function renderStep(Request $request, string $currentStep, array $formOverrides = []): Response
+    private function renderStep(Request $request, string $currentStep, array $formOverrides = [], ?array $availableSteps = null): Response
     {
         $template = sprintf('pages/installer/%s.html.twig', $currentStep);
         $templatePath = $this->getParameter('kernel.project_dir').'/templates/'.$template;
@@ -220,6 +228,9 @@ final class InstallerController extends AbstractController
         }
 
         $forms = $this->buildFormViews($formOverrides);
+        $helpEntries = $this->helpLoader->load($request->getLocale());
+        $helpTooltips = $this->mapHelpTooltips($helpEntries);
+        $availableSteps ??= $this->computeAvailableSteps();
 
         return $this->render($template, array_merge([
             'steps' => self::STEPS,
@@ -231,12 +242,128 @@ final class InstallerController extends AbstractController
             'environment_overrides' => $this->setupConfiguration->getEnvironmentOverrides(),
             'storage_config' => $this->setupConfiguration->getStorageConfig(),
             'admin_account' => $this->setupConfiguration->getAdminAccount(),
+            'help' => $helpEntries,
+            'help_tooltips' => $helpTooltips,
+            'locale_choices' => $this->collectLocaleChoices(),
+            'timezone_choices' => $this->collectTimezoneChoices(),
+            'available_steps' => $availableSteps,
             'setup' => [
                 'databases_exist' => $this->setupState->databasesExist(),
                 'action_steps' => $this->buildSetupActionSteps(),
                 'action_token' => $this->setupAccessToken->issue(),
             ],
         ], $forms));
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    private function collectLocaleChoices(): array
+    {
+        $choices = [];
+
+        $translationDir = $this->projectDir.'/translations';
+        if (is_dir($translationDir)) {
+            foreach (scandir($translationDir) ?: [] as $file) {
+                if ($file === '.' || $file === '..') {
+                    continue;
+                }
+
+                if (!is_file($translationDir.'/'.$file)) {
+                    continue;
+                }
+
+                $parts = explode('.', $file);
+                if (count($parts) < 3) {
+                    continue;
+                }
+
+                $locale = $parts[count($parts) - 2] ?? '';
+                if (!is_string($locale) || $locale === '') {
+                    continue;
+                }
+
+                $choices[$locale] = $locale;
+            }
+        }
+
+        if ($choices === []) {
+            $choices['en'] = 'en';
+        }
+
+        ksort($choices);
+
+        return $choices;
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    private function collectTimezoneChoices(): array
+    {
+        $timezones = [];
+        foreach (\DateTimeZone::listIdentifiers() as $identifier) {
+            $timezones[$identifier] = $identifier;
+        }
+
+        return $timezones;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function computeAvailableSteps(): array
+    {
+        $available = ['diagnostics', 'environment'];
+
+        if ($this->setupConfiguration->hasEnvironmentOverrides()) {
+            $available[] = 'storage';
+        }
+
+        if ($this->setupConfiguration->hasStorageConfig()) {
+            $available[] = 'admin';
+        }
+
+        if ($this->setupConfiguration->hasAdminAccount()) {
+            $available[] = 'summary';
+        }
+
+        return $available;
+    }
+
+    /**
+     * @param array<string, list<array<string, mixed>>> $groupedHelp
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function mapHelpTooltips(array $groupedHelp): array
+    {
+        $indexed = [];
+
+        foreach ($groupedHelp as $entries) {
+            if (!\is_iterable($entries)) {
+                continue;
+            }
+
+            foreach ($entries as $entry) {
+                if (!\is_array($entry)) {
+                    continue;
+                }
+
+                if (($entry['type'] ?? null) !== 'tooltip') {
+                    continue;
+                }
+
+                $target = $entry['target'] ?? null;
+                if (!\is_string($target) || $target === '') {
+                    continue;
+                }
+
+                $indexed[$target] = $entry;
+            }
+        }
+
+        return $indexed;
     }
 
     private function extractPathFromUrl(string $url): string
@@ -580,6 +707,8 @@ final class InstallerController extends AbstractController
         return $this->createForm(EnvironmentSettingsType::class, $this->prepareEnvironmentFormData(), [
             'action' => $this->generateUrl('app_installer_environment_save'),
             'method' => 'POST',
+            'locale_choices' => $this->collectLocaleChoices(),
+            'timezone_choices' => $this->collectTimezoneChoices(),
         ]);
     }
 
@@ -626,6 +755,8 @@ final class InstallerController extends AbstractController
             'action' => $this->generateUrl('app_installer_admin_save'),
             'method' => 'POST',
             'password_policy' => $policy,
+            'locale_choices' => $this->collectLocaleChoices(),
+            'timezone_choices' => $this->collectTimezoneChoices(),
         ]);
     }
 

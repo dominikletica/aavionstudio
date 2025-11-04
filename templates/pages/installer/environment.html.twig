@@ -1,4 +1,5 @@
 {% extends 'layouts/installer.html.twig' %}
+{% import 'partials/components/_macros.html.twig' as ui %}
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
@@ -10,17 +11,17 @@
         <div class="surface rounded-md border border-border p-6 layout-stack layout-stack--loose">
             {{ form_start(environment_form, { attr: { class: 'layout-stack layout-stack--tight' } }) }}
                 <div class="grid gap-4 md:grid-cols-2">
-                    {{ form_row(environment_form.environment) }}
-                    {{ form_row(environment_form.debug) }}
-                    {{ form_row(environment_form.secret) }}
-                    {{ form_row(environment_form.base_url) }}
-                    {{ form_row(environment_form.instance_name) }}
-                    {{ form_row(environment_form.tagline) }}
-                    {{ form_row(environment_form.support_email) }}
-                    {{ form_row(environment_form.locale) }}
-                    {{ form_row(environment_form.timezone) }}
-                    {{ form_row(environment_form.user_registration) }}
-                    {{ form_row(environment_form.maintenance_mode) }}
+                    {{ ui.form_row_with_tooltip(environment_form.environment, help_tooltips['environment.environment'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(environment_form.debug, help_tooltips['environment.debug'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(environment_form.secret, help_tooltips['environment.secret'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(environment_form.base_url, help_tooltips['environment.base_url'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(environment_form.instance_name, help_tooltips['environment.instance_name'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(environment_form.tagline, help_tooltips['environment.tagline'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(environment_form.support_email, help_tooltips['environment.support_email'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(environment_form.locale, help_tooltips['environment.locale'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(environment_form.timezone, help_tooltips['environment.timezone'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(environment_form.user_registration, help_tooltips['environment.user_registration'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(environment_form.maintenance_mode, help_tooltips['environment.maintenance_mode'] ?? null) }}
                 </div>
                 <div class="flex justify-end">
                     {{ include('partials/components/button.html.twig', {
@@ -73,6 +74,10 @@
                 variant: 'muted',
                 title: 'Tip'|trans,
                 body: '<p class="text-sm text-text-muted">' ~ 'Values can be fine-tuned later in the admin UI; keep secrets out of version control.'|trans ~ '</p>'
+            } only %}
+
+            {% include 'partials/components/help_entries.html.twig' with {
+                entries: help['setup.environment']|default([])
             } only %}
         </div>
     </div>

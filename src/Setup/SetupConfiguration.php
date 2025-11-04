@@ -156,6 +156,13 @@ final class SetupConfiguration
         $this->setSessionValue(self::KEY_ENVIRONMENT_OVERRIDES, $stored);
     }
 
+    public function hasEnvironmentOverrides(): bool
+    {
+        $value = $this->getSessionValue(self::KEY_ENVIRONMENT_OVERRIDES);
+
+        return \is_array($value) && $value !== [];
+    }
+
     /**
      * @return array{root: string}
      */
@@ -184,6 +191,13 @@ final class SetupConfiguration
         }
 
         $this->setSessionValue(self::KEY_STORAGE, $data);
+    }
+
+    public function hasStorageConfig(): bool
+    {
+        $config = $this->getSessionValue(self::KEY_STORAGE);
+
+        return \is_array($config) && isset($config['root']) && \is_string($config['root']) && $config['root'] !== '';
     }
 
     /**
@@ -258,6 +272,20 @@ final class SetupConfiguration
         $data['require_mfa'] = filter_var($account['require_mfa'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         $this->setSessionValue(self::KEY_ADMIN, $data);
+    }
+
+    public function hasAdminAccount(): bool
+    {
+        $stored = $this->getSessionValue(self::KEY_ADMIN);
+
+        if (!\is_array($stored)) {
+            return false;
+        }
+
+        $email = (string) ($stored['email'] ?? '');
+        $password = (string) ($stored['password'] ?? '');
+
+        return $email !== '' && $password !== '';
     }
 
     public function clear(): void

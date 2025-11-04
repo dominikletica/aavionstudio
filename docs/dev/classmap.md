@@ -15,6 +15,7 @@
 | `App\Setup\SetupConfiguration` | `src/Setup/SetupConfiguration.php` | Stores installer form choices (environment, storage, admin) in the session and exposes merged defaults | Read by the configurator/environment writer during setup |
 | `App\Setup\SetupConfigurator` | `src/Setup/SetupConfigurator.php` | Persists system settings and project seeds after `bin/init` runs | Called by the installer action executor |
 | `App\Setup\SetupEnvironmentWriter` | `src/Setup/SetupEnvironmentWriter.php` | Merges installer overrides into `.env.local` with fallback to existing keys | Invoked by the setup action executor before `bin/init` |
+| `App\Setup\SetupHelpLoader` | `src/Setup/SetupHelpLoader.php` | Loads contextual help entries from `docs/setup/help.<locale>.json`, merges locale fallbacks, and preserves `target` metadata for field-level tooltips | Used by installer controller/templates |
 | `App\Setup\SetupPayloadBuilder` | `src/Setup/SetupPayloadBuilder.php` | Serialises wizard state into `var/setup/runtime.json` for `bin/init --payload` | Cleaned up once setup locks |
 | `App\Settings\SystemSettings` | `src/Settings/SystemSettings.php` | Lazy loads settings from `app_system_setting` with fallback to defaults | Shared by error resolver, profile registry, etc. |
 | `App\Security\User\UserProfileFieldRegistry` | `src/Security/User/UserProfileFieldRegistry.php` | Supplies configurable profile field metadata & normalisation helpers | Injected into the admin user form and manager |

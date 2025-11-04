@@ -1,0 +1,35 @@
+{# Renders installer help entries, splitting inline content from freestanding tooltips. #}
+{% set entries = entries|default([]) %}
+{% if entries is iterable %}
+    {% set inline_entries = entries|filter(e => (e.type ?? 'inline_help') != 'tooltip') %}
+    {% set floating_tooltips = entries|filter(e => (e.type ?? '') == 'tooltip' and (e.target ?? '') == '') %}
+
+    {% if floating_tooltips is not empty %}
+        <div class="flex flex-wrap gap-2">
+            {% for entry in floating_tooltips %}
+                {% set tooltip_text = entry.body|default('')|striptags|replace({'\n': ' '})|trim %}
+                {% if tooltip_text is not empty %}
+                    <span class="tooltip inline-flex items-center gap-2 rounded-full border border-border bg-surface-muted px-3 py-1 text-xs font-medium text-text"
+                          data-tooltip="{{ tooltip_text }}"
+                          aria-label="{{ (entry.title|default('Tip') ~ ': ' ~ tooltip_text)|trim }}">
+                        <span aria-hidden="true" class="text-sm font-semibold text-text-muted">?</span>
+                        {{ entry.title|default('Tip') }}
+                    </span>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if inline_entries is not empty %}
+        <div class="layout-stack layout-stack--tight">
+            {% for entry in inline_entries %}
+                <article class="rounded-md border border-border bg-surface-muted p-4">
+                    <h3 class="text-sm font-semibold text-text">{{ entry.title|default('Tip') }}</h3>
+                    {% if entry.body is defined and entry.body is not same as('') %}
+                        <p class="mt-2 text-sm leading-relaxed text-text-muted">{{ entry.body|raw }}</p>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endif %}
