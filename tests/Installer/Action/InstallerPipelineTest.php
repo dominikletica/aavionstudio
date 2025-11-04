@@ -160,7 +160,7 @@ final class InstallerPipelineTest extends KernelTestCase
                 ['type' => 'lock'],
             ],
             null,
-            static function (): void {
+            static function (string $type, string $message = '', array $extra = []): void {
             }
         );
 
