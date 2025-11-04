@@ -6,6 +6,7 @@ namespace App\Controller\Installer;
 
 use App\Installer\Action\ActionExecutorInterface;
 use App\Setup\SetupAccessToken;
+use App\Setup\SetupConfiguration;
 use App\Setup\SetupState;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -16,6 +17,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
@@ -30,6 +33,7 @@ final class ActionController extends AbstractController
         private readonly ActionExecutorInterface $actionExecutor,
         private readonly SetupState $setupState,
         private readonly SetupAccessToken $setupAccessToken,
+        private readonly SetupConfiguration $setupConfiguration,
         private readonly Security $security,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly TranslatorInterface $translator,
@@ -54,8 +58,20 @@ final class ActionController extends AbstractController
         }
 
         $session = $request->getSession();
-        if ($session !== null && ! $session->isStarted()) {
-            $session->start();
+        $streamSession = null;
+        if ($session !== null) {
+            if (! $session->isStarted()) {
+                $session->start();
+            }
+
+            $this->setupConfiguration->freeze();
+            $this->setupAccessToken->invalidate();
+
+            $session->save();
+
+            $streamSession = new Session(new MockArraySessionStorage());
+            $streamSession->start();
+            $request->setSession($streamSession);
         }
 
         $context = (string) ($payload['context'] ?? 'generic');
@@ -71,8 +87,8 @@ final class ActionController extends AbstractController
         $this->profiler?->disable();
 
         return match ($this->actionMode) {
-            self::MODE_BUFFERED => $this->createBufferedResponse($steps, $package, $context, $session),
-            default => $this->createStreamedResponse($steps, $package, $context, $session),
+            self::MODE_BUFFERED => $this->createBufferedResponse($steps, $package, $context, $streamSession),
+            default => $this->createStreamedResponse($steps, $package, $context, $streamSession),
         };
     }
 
@@ -117,6 +133,7 @@ final class ActionController extends AbstractController
                 $this->actionExecutor->execute($steps, $package, $emit);
                 $emit('done', 'success', ['context' => $context]);
             } catch (\Throwable $exception) {
+                $this->logStreamError($exception);
                 $emit('error', $exception->getMessage());
                 $emit('done', 'error', ['context' => $context]);
             } finally {
@@ -179,6 +196,33 @@ final class ActionController extends AbstractController
     {
         if ($session !== null && $session->isStarted()) {
             $session->save();
+        }
+    }
+
+    private function logStreamError(\Throwable $exception): void
+    {
+        try {
+            $projectDir = $this->getParameter('kernel.project_dir');
+            if (!\is_string($projectDir) || $projectDir === '') {
+                return;
+            }
+
+            $logDir = $projectDir.'/var/log/setup';
+            if (!is_dir($logDir) && !mkdir($logDir, 0775, true) && !is_dir($logDir)) {
+                return;
+            }
+
+            $message = sprintf(
+                "[%s] %s: %s\nTrace:\n%s\n\n",
+                (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM),
+                $exception::class,
+                $exception->getMessage(),
+                $exception->getTraceAsString(),
+            );
+
+            file_put_contents($logDir.'/stream-errors.log', $message, FILE_APPEND);
+        } catch (\Throwable) {
+            // ignore logging failures
         }
     }
 

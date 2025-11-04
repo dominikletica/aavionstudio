@@ -383,3 +383,10 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Added `InstallerPipelineTest` covering the full action pipeline (env write → payload → configure → lock) and seeded the test session/configuration so system settings persist without running `bin/init`.
 - Documented manual verification steps in `docs/dev/MANUAL.md` (new subsection under onboarding) and marked the installer coverage TODO as complete.
 - Tests: `php bin/phpunit`, `php bin/phpunit --filter InstallerPipelineTest`.
+
+### 2025-11-04 (Session 4)
+- Detached the installer runtime from the HTTP session by snapshotting `SetupConfiguration`, invalidating the action token, and swapping in an in-memory session before streaming to remove “headers already sent” failures during the lock step.
+- Added the `ActionExecutorInterface` contract, wired the controller to honour the `INSTALLER_ACTION_MODE` parameter, and expanded controller tests to cover both streaming and buffered execution with the new session lifecycle.
+- Extended `SetupConfiguration` with `freeze()`/snapshot support so action steps can read wizard data without touching the persisted session payload, and added a lightweight NDJSON error logger for streamed failures.
+- Updated developer documentation (manual + class map) to describe the session strategy and new configuration hooks.
+- Tests: `php bin/phpunit`, `php bin/phpunit tests/Controller/Installer/ActionControllerTest.php`.

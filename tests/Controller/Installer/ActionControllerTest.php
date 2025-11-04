@@ -7,6 +7,7 @@ namespace App\Tests\Controller\Installer;
 use App\Controller\Installer\ActionController;
 use App\Installer\Action\ActionExecutorInterface;
 use App\Setup\SetupAccessToken;
+use App\Setup\SetupConfiguration;
 use App\Setup\SetupState;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -116,6 +117,8 @@ final class ActionControllerTest extends KernelTestCase
         /** @var SetupState $setupState */
         $setupState = self::getContainer()->get(SetupState::class);
         $setupState->clearLock();
+        /** @var SetupConfiguration $setupConfiguration */
+        $setupConfiguration = self::getContainer()->get(SetupConfiguration::class);
         /** @var Security $security */
         $security = self::getContainer()->get(Security::class);
         /** @var UrlGeneratorInterface $urlGenerator */
@@ -128,6 +131,7 @@ final class ActionControllerTest extends KernelTestCase
             $executor,
             $setupState,
             $accessToken,
+            $setupConfiguration,
             $security,
             $urlGenerator,
             $translator,
