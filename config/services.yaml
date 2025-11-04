@@ -11,6 +11,8 @@ parameters:
     app.sqlite_busy_timeout_default: 5000
     app.sqlite_busy_timeout_ms: '%env(int:default:app.sqlite_busy_timeout_default:SQLITE_BUSY_TIMEOUT_MS)%'
     app.default_project_slug: 'default'
+    app.installer_action_mode_default: 'stream_keep_session'
+    app.installer_action_mode: '%env(default:app.installer_action_mode_default:INSTALLER_ACTION_MODE)%'
 
 services:
     # default configuration for services in *this* file
@@ -47,6 +49,8 @@ services:
     App\Theme\ThemeRegistry:
         arguments:
             $manifestsData: '%app.themes%'
+
+    App\Installer\Action\ActionExecutorInterface: '@App\Installer\Action\ActionExecutor'
 
     App\Setup\SetupState:
         bind:

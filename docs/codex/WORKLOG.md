@@ -93,6 +93,7 @@
 - [x] Add persistent setup log writer (stream to `var/log/setup/*.ndjson`) within `ActionExecutor`.
 - [x] Wire new help-content JSON loader and replace inline doc links in installer templates.
 - [x] Harden `/setup/action` streaming response by starting/saving the session before flushing NDJSON output (prevents "headers already sent" errors reported on step 2).
+- [x] Introduce configurable installer action session strategy (`INSTALLER_ACTION_MODE`) to choose between streaming with an open session or buffered JSON output; add controller tests and developer manual updates covering both options.
 - [x] Split help JSON entries into inline panels vs. targeted tooltips; update installer templates/macros to attach tooltips to environment/storage/admin fields and to surface summary actions as hoverable badges.
 - [x] Polish tooltip UX (0.5s hover delay, wider responsive container, label-level wiring for password confirmation) to keep wizard copy readable without layout jitter.
 - [x] Correct button component defaults so installer forms submit properly without passing explicit `type` parameters hook-ups.
