@@ -9,3 +9,22 @@
         {%- endif -%}
     {%- endfor -%}
 {% endmacro %}
+
+{% macro form_row_with_tooltip(field, tooltip, options = {}) %}
+    {% set config = options|default({}) %}
+    {% if tooltip is iterable %}
+        {% set tooltip_text = tooltip.body|default('')|striptags|replace({'\n': ' '})|trim %}
+        {% if tooltip_text is not empty %}
+            {% set current_label_attr = field.vars.label_attr|default({}) %}
+            {% set extra_label_attr = config.label_attr|default({}) %}
+            {% set merged_label_attr = current_label_attr|merge(extra_label_attr) %}
+            {% set merged_label_attr = merged_label_attr|merge({
+                class: ((merged_label_attr.class|default('') ~ ' tooltip')|trim),
+                'data-tooltip': tooltip_text,
+                'aria-label': (tooltip.title|default('ui.tip'|trans) ~ ': ' ~ tooltip_text)|trim
+            }) %}
+            {% set config = config|merge({ label_attr: merged_label_attr }) %}
+        {% endif %}
+    {% endif %}
+    {{ form_row(field, config) }}
+{% endmacro %}

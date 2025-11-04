@@ -22,20 +22,20 @@ final class DemoController extends AbstractController
     {
         $tips = [
             [
-                'title' => 'Keep Tailwind tokens in sync',
-                'description' => 'Theme overrides should ship their own theme.css but continue importing the base tokens to avoid regressions.',
+                'title_key' => 'demo.tips.keep_tokens.title',
+                'description_key' => 'demo.tips.keep_tokens.description',
             ],
             [
-                'title' => 'Prefer partial components',
-                'description' => 'Composer-facing templates stay lean when they reuse buttons, cards, tables, and forms from the component library.',
+                'title_key' => 'demo.tips.prefer_partials.title',
+                'description_key' => 'demo.tips.prefer_partials.description',
             ],
             [
-                'title' => 'Bundle hero content',
-                'description' => 'Use the header partial with project- or admin-specific imagery. Themes can override the same block without touching controllers.',
+                'title_key' => 'demo.tips.bundle_hero.title',
+                'description_key' => 'demo.tips.bundle_hero.description',
             ],
             [
-                'title' => 'Document overrides',
-                'description' => 'Whenever you override templates, update the developer docs and class map so contributors discover them quickly.',
+                'title_key' => 'demo.tips.document_overrides.title',
+                'description_key' => 'demo.tips.document_overrides.description',
             ],
         ];
 

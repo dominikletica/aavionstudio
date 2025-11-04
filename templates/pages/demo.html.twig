@@ -1,54 +1,54 @@
 {% extends 'layouts/project.html.twig' %}
 
-{% set project_title = 'Component Showcase' %}
-{% set page_title = 'UI Component Showcase' %}
+{% set project_title = 'demo.page.project_title'|trans %}
+{% set page_title = 'demo.page.page_title'|trans %}
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
-        title: 'UI Component Showcase',
-        subtitle: 'A quick overview of the base theme components and Tailwind utilities available for installer/admin screens.'
+        title: 'demo.page.heading.title'|trans,
+        subtitle: 'demo.page.heading.subtitle'|trans
     } only %}
 
     <section class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div class="layout-stack layout-stack--loose">
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Buttons',
-                title: 'Button variants',
+                eyebrow: 'demo.buttons.card.eyebrow'|trans,
+                title: 'demo.buttons.card.title'|trans,
                 body: '
                     <div class="flex flex-wrap items-center gap-3">
-                        ' ~ include("partials/components/button.html.twig", { label: "Primary", icon: "bolt" }, with_context = false) ~ '
-                        ' ~ include("partials/components/button.html.twig", { label: "Secondary", variant: "secondary" }, with_context = false) ~ '
-                        ' ~ include("partials/components/button.html.twig", { label: "Ghost", variant: "ghost" }, with_context = false) ~ '
-                        ' ~ include("partials/components/button.html.twig", { label: "Full width", block: true }, with_context = false) ~ '
+                        ' ~ include("partials/components/button.html.twig", { label: 'demo.buttons.primary'|trans, icon: "bolt" }, with_context = false) ~ '
+                        ' ~ include("partials/components/button.html.twig", { label: 'demo.buttons.secondary'|trans, variant: "secondary" }, with_context = false) ~ '
+                        ' ~ include("partials/components/button.html.twig", { label: 'demo.buttons.ghost'|trans, variant: "ghost" }, with_context = false) ~ '
+                        ' ~ include("partials/components/button.html.twig", { label: 'demo.buttons.full'|trans, block: true }, with_context = false) ~ '
                     </div>
                 '
             } only %}
 
             {% include 'partials/components/alert.html.twig' with {
                 variant: 'success',
-                title: 'All systems operational',
-                description: 'You can reuse the alert component for inline feedback, toast-style callouts, or hero notes.'
+                title: 'demo.alerts.success.title'|trans,
+                description: 'demo.alerts.success.description'|trans
             } only %}
 
             {% set table_body %}
                 {% include 'partials/components/table.html.twig' with {
                     columns: [
-                        { label: 'Feature', key: 'feature' },
-                        { label: 'Status', key: 'status' },
-                        { label: 'Notes', key: 'notes' }
+                        { label: 'demo.table.columns.feature'|trans, key: 'feature' },
+                        { label: 'demo.table.columns.status'|trans, key: 'status' },
+                        { label: 'demo.table.columns.notes'|trans, key: 'notes' }
                     ],
                     rows: [
-                        { feature: 'Navigation', status: 'Complete', notes: 'Sidebar + hero menus ready.' },
-                        { feature: 'Installer Wizard', status: 'In progress', notes: 'Cards, tables, illustrations available.' },
-                        { feature: 'Admin UI', status: 'Next up', notes: 'Navigation + module scaffolding queued.' }
+                        { feature: 'demo.table.rows.navigation.feature'|trans, status: 'demo.table.rows.navigation.status'|trans, notes: 'demo.table.rows.navigation.notes'|trans },
+                        { feature: 'demo.table.rows.installer.feature'|trans, status: 'demo.table.rows.installer.status'|trans, notes: 'demo.table.rows.installer.notes'|trans },
+                        { feature: 'demo.table.rows.admin.feature'|trans, status: 'demo.table.rows.admin.status'|trans, notes: 'demo.table.rows.admin.notes'|trans }
                     ],
                     compact: true
                 } only %}
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Tables',
-                title: 'Feature status',
+                eyebrow: 'demo.table.card.eyebrow'|trans,
+                title: 'demo.table.card.title'|trans,
                 body: table_body
             } only %}
 
@@ -57,49 +57,49 @@
                     {% include 'partials/forms/fields/input.html.twig' with {
                         id: 'demo-name',
                         name: 'name',
-                        label: 'Name',
-                        placeholder: 'Jane Doe',
-                        help: 'Text input and help text styling.'
+                        label: 'demo.forms.input.label'|trans,
+                        placeholder: 'demo.forms.input.placeholder'|trans,
+                        help: 'demo.forms.input.help'|trans
                     } only %}
                     {% include 'partials/forms/fields/select.html.twig' with {
                         id: 'demo-role',
                         name: 'role',
-                        label: 'Role',
-                        placeholder: 'Choose a role',
+                        label: 'demo.forms.select.label'|trans,
+                        placeholder: 'demo.forms.select.placeholder'|trans,
                         options: [
-                            { value: 'admin', label: 'Administrator' },
-                            { value: 'editor', label: 'Editor' },
-                            { value: 'viewer', label: 'Viewer' }
+                            { value: 'admin', label: 'demo.forms.select.option.admin'|trans },
+                            { value: 'editor', label: 'demo.forms.select.option.editor'|trans },
+                            { value: 'viewer', label: 'demo.forms.select.option.viewer'|trans }
                         ]
                     } only %}
                     {% include 'partials/forms/fields/textarea.html.twig' with {
                         id: 'demo-notes',
                         name: 'notes',
-                        label: 'Notes',
-                        placeholder: 'Optional notes ...'
+                        label: 'demo.forms.textarea.label'|trans,
+                        placeholder: 'demo.forms.textarea.placeholder'|trans
                     } only %}
                     {% include 'partials/forms/fields/checkbox.html.twig' with {
                         id: 'demo-checkbox',
                         name: 'accept_terms',
-                        label: 'I agree to the guidelines',
-                        description: 'Checkbox component with description copy.'
+                        label: 'demo.forms.checkbox.label'|trans,
+                        description: 'demo.forms.checkbox.description'|trans
                     } only %}
                     {% include 'partials/forms/fields/switch.html.twig' with {
                         id: 'demo-switch',
                         name: 'notifications',
-                        label: 'Enable notifications',
-                        description: 'Switches reuse the same color tokens as buttons.'
+                        label: 'demo.forms.switch.label'|trans,
+                        description: 'demo.forms.switch.description'|trans
                     } only %}
                     <div class="flex items-center gap-3">
-                        {% include 'partials/components/button.html.twig' with { label: 'Submit form', icon: 'thumb-up' } only %}
-                        {% include 'partials/components/button.html.twig' with { label: 'Cancel', variant: 'ghost' } only %}
+                        {% include 'partials/components/button.html.twig' with { label: 'demo.forms.actions.submit'|trans, icon: 'thumb-up' } only %}
+                        {% include 'partials/components/button.html.twig' with { label: 'demo.forms.actions.cancel'|trans, variant: 'ghost' } only %}
                     </div>
                 </form>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Forms',
-                title: 'Form field collection',
+                eyebrow: 'demo.forms.eyebrow'|trans,
+                title: 'demo.forms.title'|trans,
                 body: form_body
             } only %}
 
@@ -107,44 +107,44 @@
                 <div class="layout-stack layout-stack--tight">
                     <div data-controller="themedemo" data-themedemo-count-value="2" class="rounded-xl border border-dashed border-border/60 bg-surface p-4">
                         <div class="flex items-center justify-between gap-3">
-                            <p class="text-sm font-medium text-text">{{ 'Active modules'|trans }}</p>
-                            <span class="badge badge--info">{{ 'Stimulus'|trans }}</span>
+                            <p class="text-sm font-medium text-text">{{ 'demo.modules.active_title'|trans }}</p>
+                            <span class="badge badge--info">{{ 'demo.modules.badge'|trans }}</span>
                         </div>
                         <p class="text-3xl font-semibold tracking-tight text-primary"><span data-themedemo-target="output">2</span></p>
                         <div class="flex flex-wrap gap-3 pt-3">
                             {{ include('partials/components/button.html.twig', {
-                                label: 'Add module'|trans,
+                                label: 'demo.modules.actions.add'|trans,
                                 icon: 'plus',
                                 attributes: { 'data-action': 'click->themedemo#increment' }
                             }, with_context = false) }}
                             {{ include('partials/components/button.html.twig', {
-                                label: 'Reset'|trans,
+                                label: 'demo.modules.actions.reset'|trans,
                                 variant: 'ghost',
                                 icon: 'refresh',
                                 attributes: { 'data-action': 'click->themedemo#reset' }
                             }, with_context = false) }}
                         </div>
                     </div>
-                    <p class="text-xs text-text-muted">{{ 'Stimulus keeps the counter in sync without reloading the page. Attach the controller to any dashboard metric for live previews.'|trans }}</p>
+                    <p class="text-xs text-text-muted">{{ 'demo.modules.description'|trans }}</p>
                 </div>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Interactions',
-                title: 'Stimulus counter demo',
+                eyebrow: 'demo.modules.eyebrow'|trans,
+                title: 'demo.modules.title'|trans,
                 body: stimulus_body
             } only %}
 
             {% set codemirror_body %}
                 <div class="layout-stack layout-stack--tight">
-                    <p class="text-sm text-text-muted">{{ 'The Codemirror Stimulus controller transforms any textarea into an editor with language-aware highlighting.'|trans }}</p>
+                    <p class="text-sm text-text-muted">{{ 'demo.codemirror.description'|trans }}</p>
                     <textarea
                         id="themedemo-editor"
                         name="themedemo_editor"
                         rows="8"
                         data-controller="codemirror"
                         data-codemirror-language-value="twig"
-                        data-codemirror-placeholder-value="{{ 'Paste Twig here…'|trans }}"
+                        data-codemirror-placeholder-value="{{ 'demo.codemirror.placeholder'|trans }}"
                     >{% verbatim %}{% extends 'layouts/project.html.twig' %}
 {% block content %}
     <h1>{{ page.title }}</h1>
@@ -153,8 +153,8 @@
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Code editor',
-                title: 'CodeMirror integration',
+                eyebrow: 'demo.codemirror.eyebrow'|trans,
+                title: 'demo.codemirror.title'|trans,
                 body: codemirror_body
             } only %}
         </div>
@@ -162,44 +162,44 @@
         <aside class="layout-stack layout-stack--loose">
             {% set turbo_body %}
                 <turbo-frame id="themedemo_tip" src="{{ path('_theme_demo_tip') }}" loading="lazy" class="layout-stack layout-stack--tight rounded-xl border border-dashed border-border/60 bg-surface p-4">
-                    <p class="text-sm text-text-muted">{{ 'Loading tip…'|trans }}</p>
+                    <p class="text-sm text-text-muted">{{ 'demo.turbo.loading'|trans }}</p>
                 </turbo-frame>
                 <div class="flex flex-wrap gap-2">
                     {{ include('partials/components/button.html.twig', {
-                        label: 'Refresh tip'|trans,
+                        label: 'demo.turbo.refresh'|trans,
                         icon: 'arrows-rotate',
                         tag: 'a',
                         url: path('_theme_demo_tip', { refresh: random(10000) }),
                         attributes: { 'data-turbo-frame': 'themedemo_tip' }
                     }, with_context = false) }}
                     {{ include('partials/components/button.html.twig', {
-                        label: 'Show docs reminder'|trans,
+                        label: 'demo.turbo.reminder'|trans,
                         variant: 'ghost',
                         tag: 'a',
                         url: path('_theme_demo_tip', { i: 3 }),
                         attributes: { 'data-turbo-frame': 'themedemo_tip' }
                     }, with_context = false) }}
                 </div>
-                <p class="text-xs text-text-muted">{{ 'Turbo frames lazy-load snippets and refresh inline without manual JavaScript.'|trans }}</p>
+                <p class="text-xs text-text-muted">{{ 'demo.turbo.description'|trans }}</p>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                title: 'Turbo frame tips',
-                subtitle: 'Inline refreshable help blocks.',
+                title: 'demo.turbo.title'|trans,
+                subtitle: 'demo.turbo.subtitle'|trans,
                 body: turbo_body
             } only %}
 
             {% include 'partials/components/card.html.twig' with {
                 variant: 'emphasis',
-                title: 'Illustrations',
-                body: include('partials/components/illustration.html.twig', { name: 'a-whole-year', variant: 'lg', attributes: { class: 'w-full' }, alt: 'Illustration sample' }, with_context = false)
+                title: 'demo.illustrations.title'|trans,
+                body: include('partials/components/illustration.html.twig', { name: 'a-whole-year', variant: 'lg', attributes: { class: 'w-full' }, alt: 'demo.illustrations.alt'|trans }, with_context = false)
             } only %}
 
             {% include 'partials/components/card.html.twig' with {
-                title: 'Empty state',
+                title: 'demo.empty.card_title'|trans,
                 body: include('partials/components/empty_state.html.twig', {
-                    title: 'Nothing queued',
-                    description: 'Use empty states to onboard users when a section has not yet been configured.',
+                    title: 'demo.empty.headline'|trans,
+                    description: 'demo.empty.description'|trans,
                     variant: 'muted'
                 }, with_context = false)
             } only %}
@@ -207,11 +207,11 @@
             {% set alpine_body %}
                 <div x-data="{ tab: 'preview' }" x-cloak class="layout-stack layout-stack--tight rounded-xl border border-border/60 bg-surface p-4">
                     <div class="flex flex-wrap gap-2">
-                        <button type="button" class="btn btn-secondary" :class="{ 'btn--ghost': tab !== 'preview' }" @click="tab = 'preview'">{{ 'Preview'|trans }}</button>
-                        <button type="button" class="btn btn-secondary" :class="{ 'btn--ghost': tab !== 'code' }" @click="tab = 'code'">{{ 'Code'|trans }}</button>
+                        <button type="button" class="btn btn-secondary" :class="{ 'btn--ghost': tab !== 'preview' }" @click="tab = 'preview'">{{ 'ui.preview'|trans }}</button>
+                        <button type="button" class="btn btn-secondary" :class="{ 'btn--ghost': tab !== 'code' }" @click="tab = 'code'">{{ 'ui.code'|trans }}</button>
                     </div>
                     <div class="rounded-lg bg-muted/40 p-4 text-sm leading-relaxed text-text-muted" x-show="tab === 'preview'" x-transition>
-                        {{ 'Alpine.js is available globally for lightweight UI helpers—ideal for toggles, tabs, or progressive disclosure without adding bespoke controllers.'|trans }}
+                        {{ 'demo.alpine.description'|trans }}
                     </div>
                     <pre class="overflow-x-auto rounded-lg bg-muted/70 p-4 text-xs leading-relaxed text-text-muted" x-show="tab === 'code'" x-transition>
 <code>&lt;div x-data="{ open: true }"&gt;

@@ -1,44 +1,58 @@
 {% extends 'layouts/installer.html.twig' %}
+{% import 'partials/components/_macros.html.twig' as ui %}
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
-        title: 'Administrator account'|trans,
-        subtitle: 'Invite the first administrator, configure MFA, and seed recovery contacts.'|trans
+        title: 'installer.admin.heading.title'|trans,
+        subtitle: 'installer.admin.heading.subtitle'|trans
     } only %}
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div class="layout-stack layout-stack--loose">
-            {% set admin_requirements %}
-                <ul class="list-disc space-y-2 pl-5 text-sm leading-relaxed text-text-muted">
-                    <li>{{ 'Full name and primary email address for the first administrator.'|trans }}</li>
-                    <li>{{ 'Temporary password or invitation token delivery method (email recommended).'|trans }}</li>
-                    <li>{{ 'Optional recovery email or phone number for account reset notifications.'|trans }}</li>
-                    <li>{{ 'Decision on mandatory MFA provider (TOTP or WebAuthn) before launch.'|trans }}</li>
-                    <li>{{ 'Security questions or backup codes policy to cover lost-second-factor scenarios.'|trans }}</li>
-                </ul>
-            {% endset %}
+        <div class="surface rounded-md border border-border p-6 layout-stack layout-stack--loose">
+            {{ form_start(admin_form, { attr: { class: 'layout-stack layout-stack--tight' } }) }}
+                {% set admin_tooltip_badges = [] %}
+                {% for entry in help['setup.admin']|default([]) %}
+                    {% if entry.type|default('') == 'tooltip'
+                        and entry.body is defined
+                        and entry.body is not same as('')
+                        and (entry.target is not defined or entry.target is same as(''))
+                    %}
+                        {% set admin_tooltip_badges = admin_tooltip_badges|merge([entry]) %}
+                    {% endif %}
+                {% endfor %}
 
-            {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Checklist',
-                title: 'Collect these details',
-                subtitle: 'Prepare the first admin invitation before the UI opens.',
-                body: admin_requirements
-            } only %}
+                {% if admin_tooltip_badges is not empty %}
+                    <div class="flex flex-wrap gap-2 text-xs font-medium text-text-muted">
+                        {% for entry in admin_tooltip_badges %}
+                            {% set tooltip_text = entry.body|striptags|replace({'\n': ' '})|trim %}
+                            {% if tooltip_text %}
+                                <span class="tooltip inline-flex items-center gap-2 rounded-full border border-border bg-surface-muted px-3 py-1"
+                                      data-tooltip="{{ tooltip_text }}">
+                                    <span aria-hidden="true" class="text-sm font-semibold text-text-muted">?</span>
+                                    {{ entry.title|default('ui.tip'|trans) }}
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
-            {% set admin_practices %}
-                <ol class="list-decimal space-y-3 pl-5 text-sm leading-relaxed text-text-muted">
-                    <li>{{ 'Create at least two administrator accounts to avoid lockouts during MFA rollout.'|trans }}</li>
-                    <li>{{ 'Document emergency contact paths and keep recovery codes in a secure vault (password manager, HSM, etc.).'|trans }}</li>
-                    <li>{{ 'Restrict SMTP access to the installer host to prevent invitation spoofing while the system is bootstrapping.'|trans }}</li>
-                    <li>{{ 'Enable audit logging notifications so credential changes trigger alerts for the initial team.'|trans }}</li>
-                </ol>
-            {% endset %}
-
-            {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Good practice',
-                title: 'Secure onboarding guidance',
-                body: admin_practices
-            } only %}
+                <div class="grid gap-4 md:grid-cols-2">
+                    {{ ui.form_row_with_tooltip(admin_form.email, help_tooltips['admin.email'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(admin_form.display_name, help_tooltips['admin.display_name'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(admin_form.password, help_tooltips['admin.password'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(admin_form.locale, help_tooltips['admin.locale'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(admin_form.timezone, help_tooltips['admin.timezone'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(admin_form.require_mfa, help_tooltips['admin.require_mfa'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(admin_form.recovery_email, help_tooltips['admin.recovery_email'] ?? null) }}
+                    {{ ui.form_row_with_tooltip(admin_form.recovery_phone, help_tooltips['admin.recovery_phone'] ?? null) }}
+                </div>
+                <div class="flex justify-end">
+                    {{ include('partials/components/button.html.twig', {
+                        label: 'installer.admin.actions.save'|trans,
+                        attributes: { type: 'submit', class: 'btn btn-primary' }
+                    }) }}
+                </div>
+            {{ form_end(admin_form) }}
         </div>
 
         <div class="layout-stack layout-stack--tight items-center">
@@ -46,13 +60,26 @@
                 name: 'add-user',
                 variant: 'lg',
                 attributes: { class: 'w-full max-w-md' },
-                alt: 'Admin invitation illustration'|trans
+                alt: 'installer.admin.illustration_alt'|trans
             } only %}
 
+            {% set admin_requirements %}
+                <ul class="list-disc space-y-2 pl-5 text-sm leading-relaxed text-text-muted">
+                    <li>{{ 'installer.admin.requirements.item1'|trans }}</li>
+                    <li>{{ 'installer.admin.requirements.item2'|trans }}</li>
+                    <li>{{ 'installer.admin.requirements.item3'|trans }}</li>
+                    <li>{{ 'installer.admin.requirements.item4'|trans }}</li>
+                </ul>
+            {% endset %}
+
             {% include 'partials/components/card.html.twig' with {
-                variant: 'muted',
-                title: 'Coming soon'|trans,
-                body: '<p class="text-sm text-text-muted">' ~ 'The onboarding screen will let you invite administrators, enforce MFA, and seed audit notifications directly from this step.'|trans ~ '</p>'
+                eyebrow: 'installer.admin.requirements.eyebrow'|trans,
+                title: 'installer.admin.requirements.title'|trans,
+                body: admin_requirements
+            } only %}
+
+            {% include 'partials/components/help_entries.html.twig' with {
+                entries: help['setup.admin']|default([])
             } only %}
         </div>
     </div>

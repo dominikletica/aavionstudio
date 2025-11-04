@@ -19,6 +19,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 final class UserInvitationController extends AbstractController
@@ -30,6 +31,7 @@ final class UserInvitationController extends AbstractController
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
         private readonly MailerInterface $mailer,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -52,18 +54,18 @@ final class UserInvitationController extends AbstractController
 
                 $message = (new Email())
                     ->to($invitation->email)
-                    ->subject('You are invited to aavion Studio')
+                    ->subject($this->translator->trans('email.invitation.subject'))
                     ->text($this->renderView('emails/user_invitation.txt.twig', [
                         'accept_url' => $acceptUrl,
                     ]));
 
                 $this->mailer->send($message);
-                $this->addFlash('success', sprintf('Invitation sent to %s.', $invitation->email));
+                $this->addFlash('success', $this->translator->trans('flash.invitations.sent', ['%email%' => $invitation->email]));
 
                 return $this->redirectToRoute('admin_user_invitations');
             }
 
-            $form->addError(new FormError('Please provide a valid email address.'));
+            $form->addError(new FormError($this->translator->trans('validation.invitations.invalid_email')));
         }
 
         $invitations = $this->invitationManager->list();
@@ -80,13 +82,13 @@ final class UserInvitationController extends AbstractController
         $token = new CsrfToken('cancel_invite_'.$id, (string) $request->request->get('_token'));
 
         if (!$this->csrfTokenManager->isTokenValid($token)) {
-            $this->addFlash('error', 'Invalid CSRF token.');
+            $this->addFlash('error', $this->translator->trans('flash.common.invalid_csrf'));
 
             return $this->redirectToRoute('admin_user_invitations');
         }
 
         $this->invitationManager->cancel($id, $this->getAppUserId());
-        $this->addFlash('success', 'Invitation cancelled.');
+        $this->addFlash('success', $this->translator->trans('flash.invitations.cancelled'));
 
         return $this->redirectToRoute('admin_user_invitations');
     }

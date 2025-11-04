@@ -10,6 +10,8 @@ use App\Setup\SetupState;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionFactoryInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 final class InstallerControllerTest extends WebTestCase
@@ -179,17 +181,26 @@ final class InstallerControllerTest extends WebTestCase
         self::assertFileExists($this->userDatabasePath, 'User database should be created during setup completion.');
         self::assertFileExists($this->setupLockPath, 'Setup completion should lock the wizard.');
 
+        $logFiles = glob($this->projectDir.'/var/log/setup/*.ndjson');
+        self::assertIsArray($logFiles);
+        self::assertNotEmpty($logFiles, 'Setup should write a log file to var/log/setup/.');
+
         $client->request('GET', '/setup');
         $this->assertResponseRedirects('/admin');
     }
 
     public function testSummaryShowsFinalizeFormEvenIfDatabasesExist(): void
     {
+        $client = static::createClient();
+
         $filesystem = new Filesystem();
         $filesystem->touch($this->systemDatabasePath);
         $filesystem->touch($this->userDatabasePath);
 
-        $client = static::createClient();
+        $this->completeEnvironmentStep($client);
+        $this->completeStorageStep($client);
+        $this->completeAdminStep($client);
+
         $crawler = $client->request('GET', '/setup?step=summary');
 
         $this->assertResponseIsSuccessful();
@@ -198,10 +209,172 @@ final class InstallerControllerTest extends WebTestCase
         $this->assertSame('setup', (string) $trigger->attr('data-action-context'));
     }
 
+    public function testWizardRestrictsDirectNavigationToFutureSteps(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/setup?step=summary');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('main h2', 'Environment defaults');
+        $this->assertGreaterThan(
+            0,
+            $crawler->filter('nav[aria-label="Wizard Steps"] span[aria-disabled="true"]')->count()
+        );
+    }
+
+    public function testInstallerFormsExposeContextualTooltips(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/setup?step=environment');
+
+        $this->assertSelectorExists('label.tooltip[for="environment_settings_environment"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="environment_settings_debug"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="environment_settings_secret"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="environment_settings_timezone"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="environment_settings_user_registration"][data-tooltip]');
+        $this->assertSelectorExists('[data-controller="setup-secret"] button[data-action="setup-secret#generate"]');
+
+        $this->completeEnvironmentStep($client);
+        $this->completeStorageStep($client);
+
+        $client->request('GET', '/setup?step=admin');
+        $this->assertSelectorExists('label.tooltip[for="admin_account_email"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="admin_account_password_first"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="admin_account_require_mfa"][data-tooltip]');
+    }
+
+    public function testSummaryFinalizeButtonHasTooltip(): void
+    {
+        $client = static::createClient();
+        $this->completeEnvironmentStep($client);
+        $this->completeStorageStep($client);
+        $this->completeAdminStep($client);
+
+        $crawler = $client->request('GET', '/setup?step=summary');
+
+        $button = $crawler->filter('button[data-action-trigger]');
+        $this->assertSame(1, $button->count());
+        $classAttr = (string) $button->attr('class');
+        $this->assertStringContainsString('btn', $classAttr);
+        $this->assertStringContainsString('tooltip', $classAttr);
+        $this->assertNotSame('', (string) $button->attr('data-tooltip'));
+    }
+
+    public function testEnvironmentFormSubmissionPersistsConfiguration(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/setup?step=environment');
+
+        $formButton = $crawler->selectButton('Save environment settings');
+        $this->assertSame(1, $formButton->count(), 'Environment step should be reachable.');
+        $form = $formButton->form();
+        $form['environment_settings[environment]'] = 'prod';
+        $form['environment_settings[debug]']->tick();
+        $form['environment_settings[secret]'] = 'test-secret';
+        $form['environment_settings[base_url]'] = 'https://example.com';
+        $form['environment_settings[instance_name]'] = 'Demo Studio';
+        $form['environment_settings[tagline]'] = 'Create boldly';
+        $form['environment_settings[support_email]'] = 'support@example.com';
+        $form['environment_settings[locale]'] = 'en';
+        $form['environment_settings[timezone]'] = 'UTC';
+        $form['environment_settings[user_registration]']->tick();
+        $form['environment_settings[maintenance_mode]']->untick();
+
+        $client->submit($form);
+        $this->assertResponseRedirects('/setup?step=environment');
+        $client->followRedirect();
+
+        $data = $this->getInstallerSession($client)->get('_app.setup.configuration');
+        self::assertIsArray($data);
+
+        $overrides = $data['environment_overrides'] ?? [];
+
+        self::assertSame('prod', $overrides['APP_ENV']);
+        self::assertSame('1', $overrides['APP_DEBUG']);
+        self::assertSame('test-secret', $overrides['APP_SECRET']);
+
+        $settings = $data['system_settings'] ?? [];
+        self::assertSame('Demo Studio', $settings['core.instance_name']);
+        self::assertTrue($settings['core.user_registration']);
+    }
+
+    public function testStorageFormSubmissionPersistsRoot(): void
+    {
+        $client = static::createClient();
+        $this->completeEnvironmentStep($client);
+        $crawler = $client->request('GET', '/setup?step=storage');
+
+        $formButton = $crawler->selectButton('Save storage settings');
+        $this->assertSame(1, $formButton->count(), 'Storage step should be reachable.');
+        $form = $formButton->form();
+        $form['storage_settings[root]'] = '/mnt/data';
+
+        $client->submit($form);
+        $this->assertResponseRedirects('/setup?step=storage');
+        $client->followRedirect();
+
+        $data = $this->getInstallerSession($client)->get('_app.setup.configuration');
+        self::assertIsArray($data);
+
+        self::assertSame('/mnt/data', $data['storage']['root'] ?? null);
+    }
+
+    public function testAdminFormSubmissionPersistsAccount(): void
+    {
+        $client = static::createClient();
+        $this->completeEnvironmentStep($client);
+        $this->completeStorageStep($client);
+        $crawler = $client->request('GET', '/setup?step=admin');
+
+        $response = $client->getResponse();
+        if ($response->isRedirection()) {
+            $this->fail(sprintf('Admin step redirected to %s', $response->headers->get('Location')));
+        }
+
+        $formButton = $crawler->selectButton('Save administrator');
+        $this->assertSame(1, $formButton->count(), 'Admin step should be reachable.');
+        $form = $formButton->form();
+        $form['admin_account[email]'] = 'admin@example.com';
+        $form['admin_account[display_name]'] = 'Admin';
+        $form['admin_account[password][first]'] = 'SecurePassword123!';
+        $form['admin_account[password][second]'] = 'SecurePassword123!';
+        $form['admin_account[locale]'] = 'en';
+        $form['admin_account[timezone]'] = 'America/New_York';
+        $form['admin_account[require_mfa]']->tick();
+        $form['admin_account[recovery_email]'] = 'security@example.com';
+        $form['admin_account[recovery_phone]'] = '+1555123456';
+
+        $client->submit($form);
+        $this->assertResponseRedirects('/setup?step=admin');
+        $client->followRedirect();
+
+        $data = $this->getInstallerSession($client)->get('_app.setup.configuration');
+        self::assertIsArray($data);
+        $admin = $data['admin'] ?? [];
+
+        self::assertSame('admin@example.com', $admin['email']);
+        self::assertSame('Admin', $admin['display_name']);
+        self::assertSame('SecurePassword123!', $admin['password']);
+        self::assertTrue($admin['require_mfa']);
+    }
+
+    public function testDiagnosticsEndpointReturnsJsonPayload(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', '/setup/diagnostics', server: ['CONTENT_TYPE' => 'application/json'], content: '{}');
+
+        $this->assertResponseIsSuccessful();
+        $data = json_decode((string) $client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR);
+
+        self::assertArrayHasKey('diagnostics', $data);
+        self::assertArrayHasKey('extensions', $data['diagnostics']);
+    }
+
     protected function tearDown(): void
     {
         $filesystem = new Filesystem();
         $filesystem->touch($this->setupLockPath);
+        $filesystem->remove(glob($this->projectDir.'/var/log/setup/*.ndjson') ?: []);
 
         parent::tearDown();
     }
@@ -209,15 +382,77 @@ final class InstallerControllerTest extends WebTestCase
     private function issueSetupToken(KernelBrowser $client): string
     {
         $client->request('GET', '/setup');
-        $request = $client->getRequest();
-        self::assertNotNull($request);
-
-        $session = $request->getSession();
-        self::assertNotNull($session);
+        $session = $this->getInstallerSession($client);
 
         $token = $session->get(SetupAccessToken::SESSION_KEY);
         self::assertIsString($token);
 
         return $token;
+    }
+
+    private function completeEnvironmentStep(KernelBrowser $client): void
+    {
+        $crawler = $client->request('GET', '/setup?step=environment');
+
+        $form = $crawler->selectButton('Save environment settings')->form();
+        $form['environment_settings[environment]'] = 'prod';
+        $form['environment_settings[debug]']->tick();
+        $form['environment_settings[secret]'] = 'secret-value';
+        $form['environment_settings[base_url]'] = 'https://example.com';
+        $form['environment_settings[instance_name]'] = 'Demo';
+        $form['environment_settings[tagline]'] = 'Tagline';
+        $form['environment_settings[support_email]'] = 'support@example.com';
+        $form['environment_settings[locale]'] = 'en';
+        $form['environment_settings[timezone]'] = 'UTC';
+
+        $client->submit($form);
+        $this->assertResponseRedirects('/setup?step=environment');
+        $client->followRedirect();
+    }
+
+    private function completeStorageStep(KernelBrowser $client): void
+    {
+        $crawler = $client->request('GET', '/setup?step=storage');
+
+        $form = $crawler->selectButton('Save storage settings')->form();
+        $form['storage_settings[root]'] = '/var/storage/app';
+
+        $client->submit($form);
+        $this->assertResponseRedirects('/setup?step=storage');
+        $client->followRedirect();
+    }
+
+    private function completeAdminStep(KernelBrowser $client): void
+    {
+        $crawler = $client->request('GET', '/setup?step=admin');
+
+        $form = $crawler->selectButton('Save administrator')->form();
+        $form['admin_account[email]'] = 'admin@example.com';
+        $form['admin_account[display_name]'] = 'Admin';
+        $form['admin_account[password][first]'] = 'StrongPassword123!';
+        $form['admin_account[password][second]'] = 'StrongPassword123!';
+        $form['admin_account[locale]'] = 'en';
+        $form['admin_account[timezone]'] = 'UTC';
+
+        $client->submit($form);
+        $this->assertResponseRedirects('/setup?step=admin');
+        $client->followRedirect();
+    }
+
+    private function getInstallerSession(KernelBrowser $client): SessionInterface
+    {
+        /** @var SessionFactoryInterface $sessionFactory */
+        $sessionFactory = self::getContainer()->get('session.factory');
+        $session = $sessionFactory->createSession();
+
+        $cookie = $client->getCookieJar()->get($session->getName());
+        self::assertNotNull($cookie, 'Expected installer session cookie to be set.');
+
+        $session->setId($cookie->getValue());
+        if (!$session->isStarted()) {
+            $session->start();
+        }
+
+        return $session;
     }
 }

@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Installer\Action;
 
+use App\Setup\SetupConfiguration;
 use App\Setup\SetupConfigurator;
+use App\Setup\SetupEnvironmentWriter;
+use App\Setup\SetupPayloadBuilder;
 use App\Setup\SetupState;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
+use DateTimeImmutable;
 use ZipArchive;
 
 final class ActionExecutor
@@ -19,16 +23,29 @@ final class ActionExecutor
         #[Autowire('%kernel.project_dir%')]
         private readonly string $projectDir,
         private readonly SetupState $setupState,
+        private readonly SetupConfiguration $setupConfiguration,
         private readonly SetupConfigurator $setupConfigurator,
+        private readonly SetupEnvironmentWriter $environmentWriter,
+        private readonly SetupPayloadBuilder $payloadBuilder,
         private readonly Filesystem $filesystem,
     ) {
     }
+
+    private ?string $payloadPath = null;
+    private ?string $logPath = null;
 
     /**
      * @param callable(string,string=):void $emit
      */
     public function execute(array $steps, ?UploadedFile $package, callable $emit): void
     {
+        $this->startLog();
+
+        $logger = function (string $type, string $message = '', array $extra = []) use ($emit): void {
+            $this->appendLog($type, $message, $extra);
+            $emit($type, $message, $extra);
+        };
+
         foreach ($steps as $index => $rawStep) {
             if (!\is_array($rawStep) || !isset($rawStep['type'])) {
                 throw new \InvalidArgumentException(sprintf('Invalid action definition at index %d.', $index));
@@ -36,16 +53,18 @@ final class ActionExecutor
 
             $type = (string) $rawStep['type'];
 
-            $emit('log', sprintf('> [%d/%d] %s', $index + 1, \count($steps), $this->describeStep($rawStep)));
+            $logger('log', sprintf('> [%d/%d] %s', $index + 1, \count($steps), $this->describeStep($rawStep)));
 
             match ($type) {
-                'log' => $this->emitMessageStep($rawStep, $emit),
+                'log' => $this->emitMessageStep($rawStep, $logger),
                 'extract_upload' => $this->extractUploadedPackage($package, $rawStep),
-                'console' => $this->runConsoleCommand($rawStep, $emit),
-                'shell' => $this->runShellCommand($rawStep, $emit),
-                'init' => $this->runInit($rawStep, $emit),
-                'configure' => $this->applyConfiguration($emit),
-                'lock' => $this->createLock(),
+                'console' => $this->runConsoleCommand($rawStep, $logger),
+                'shell' => $this->runShellCommand($rawStep, $logger),
+                'init' => $this->runInit($rawStep, $logger),
+                'write_env' => $this->writeEnvironment($logger),
+                'prepare_payload' => $this->preparePayload($logger),
+                'configure' => $this->applyConfiguration($logger),
+                'lock' => $this->createLock($logger),
                 default => throw new \InvalidArgumentException(sprintf('Unsupported action type "%s".', $type)),
             };
         }
@@ -59,6 +78,8 @@ final class ActionExecutor
             'console' => sprintf('Run bin/console %s', $this->stringifyCommand($step['command'] ?? [])),
             'shell' => sprintf('Run %s', $this->stringifyCommand($step['command'] ?? [])),
             'init' => sprintf('Run bin/init (%s)', $step['environment'] ?? 'auto'),
+            'write_env' => 'Write environment overrides',
+            'prepare_payload' => 'Generate installer payload',
             'configure' => 'Persist system configuration',
             'lock' => 'Write setup.lock',
             default => 'Unknown step',
@@ -88,6 +109,27 @@ final class ActionExecutor
     {
         $emit('log', 'Applying configuration defaults...');
         $this->setupConfigurator->apply();
+    }
+
+    /**
+     * @param callable(string,string=):void $emit
+     */
+    private function writeEnvironment(callable $emit): void
+    {
+        $emit('log', 'Persisting environment overrides...');
+        $this->environmentWriter->write(
+            $this->setupConfiguration->getEnvironmentOverrides(),
+            $this->setupConfiguration->getStorageConfig()
+        );
+    }
+
+    /**
+     * @param callable(string,string=):void $emit
+     */
+    private function preparePayload(callable $emit): void
+    {
+        $emit('log', 'Preparing installer payload...');
+        $this->payloadPath = $this->payloadBuilder->build();
     }
 
     private function extractUploadedPackage(?UploadedFile $package, array $step): void
@@ -255,15 +297,64 @@ final class ActionExecutor
             $arguments[] = $environment;
         }
 
+        $arguments[] = '--setup';
+        if ($this->payloadPath !== null) {
+            $arguments[] = sprintf('--payload=%s', $this->payloadPath);
+        }
+
         $process = new Process($arguments, $this->projectDir);
         $this->runProcess($process, $emit);
     }
 
-    private function createLock(): void
+    private function createLock(callable $emit): void
     {
         $this->filesystem->mkdir(\dirname($this->setupState->lockFilePath()));
         $this->setupState->markCompleted();
         $this->setupConfigurator->markCompleted();
+        $this->payloadBuilder->cleanup();
+        $this->payloadPath = null;
+        if ($this->logPath !== null) {
+            $emit('log', sprintf('Setup log stored at %s', $this->relativeLogPath($this->logPath)));
+        }
+    }
+
+    private function startLog(): void
+    {
+        if ($this->logPath !== null) {
+            return;
+        }
+
+        $directory = $this->projectDir.'/var/log/setup';
+        $this->filesystem->mkdir($directory);
+        $this->logPath = sprintf('%s/setup-%s.ndjson', $directory, (new DateTimeImmutable())->format('Ymd-His'));
+    }
+
+    private function appendLog(string $type, string $message, array $extra = []): void
+    {
+        if ($this->logPath === null) {
+            return;
+        }
+
+        $entry = json_encode([
+            'type' => $type,
+            'message' => $message,
+            'extra' => $extra,
+            'timestamp' => (new DateTimeImmutable())->format(\DateTimeInterface::ATOM),
+        ], JSON_UNESCAPED_SLASHES);
+
+        if ($entry !== false) {
+            file_put_contents($this->logPath, $entry."\n", FILE_APPEND);
+        }
+    }
+
+    private function relativeLogPath(string $path): string
+    {
+        $prefix = $this->projectDir.'/';
+        if (str_starts_with($path, $prefix)) {
+            return substr($path, \strlen($prefix));
+        }
+
+        return $path;
     }
 
     /**

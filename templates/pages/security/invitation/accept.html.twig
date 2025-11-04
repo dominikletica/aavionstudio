@@ -1,11 +1,11 @@
 {% extends 'layouts/security.html.twig' %}
 
-{% set security_title = 'Complete your invitation'|trans %}
+{% set security_title = 'security.invitation.page_title'|trans %}
 
 {% block content %}
     <header class="layout-stack--tight">
-        <h1 class="text-heading text-2xl">{{ 'Welcome to %site%'|trans({ '%site%': header_title is defined and header_title ? header_title : (site_title is defined and site_title ? site_title : 'aavion Studio') }) }}</h1>
-        <p class="text-text-muted">{{ "You're joining as <strong class=\"text-text\">%email%</strong>. Choose a display name and password to activate your account."|trans({ '%email%': email })|raw }}</p>
+        <h1 class="text-heading text-2xl">{{ 'security.invitation.heading'|trans({ '%site%': header_title is defined and header_title ? header_title : (site_title is defined and site_title ? site_title : 'app.name'|trans) }) }}</h1>
+        <p class="text-text-muted">{{ 'security.invitation.intro'|trans({ '%email%': email })|raw }}</p>
     </header>
 
     {{ form_start(acceptForm, { attr: { class: 'layout-stack' } }) }}
@@ -13,11 +13,11 @@
         {{ form_row(acceptForm.plainPassword.first) }}
         {{ form_row(acceptForm.plainPassword.second) }}
         {% include 'partials/forms/buttons/primary.html.twig' with {
-            label: 'Activate account'|trans
+            label: 'security.invitation.activate'|trans
         } %}
     {{ form_end(acceptForm) }}
 
     <p class="text-sm text-text-muted">
-        <a class="text-primary hover:text-primary-darker" href="{{ path('app_login') }}">{{ 'Back to sign in'|trans }}</a>
+        <a class="text-primary hover:text-primary-darker" href="{{ path('app_login') }}">{{ 'security.invitation.back_to_login'|trans }}</a>
     </p>
 {% endblock %}

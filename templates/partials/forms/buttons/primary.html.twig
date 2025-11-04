@@ -1,4 +1,4 @@
 <button type="{{ type|default('submit') }}" class="btn btn-primary">
     {% if icon is defined %}<i class="ti ti-{{ icon }}"></i>{% endif %}
-    {{ label|default('Submit') }}
+    {{ label|default('ui.actions.submit'|trans) }}
 </button>

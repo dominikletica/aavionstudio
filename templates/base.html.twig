@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="{{ app.request and app.request.locale ? app.request.locale : "en" }}" data-theme="{{ theme.slug|default('base') }}">
+{% set appContext = app|default(null) %}
+{% set request = appContext and appContext.request is defined ? appContext.request : null %}
+{% set current_locale = request and request.locale ? request.locale : 'en' %}
+{% set is_debug = appContext and appContext.debug is defined ? appContext.debug : false %}
+<html lang="{{ current_locale }}" data-theme="{{ theme.slug|default('base') }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}{{ site_title is defined and site_title ? site_title : 'aavion Studio'|trans }}{% endblock %}</title>
+    <title>{% block title %}{{ site_title is defined and site_title ? site_title : 'app.name'|trans }}{% endblock %}</title>
 
     {% block head_meta %}{% endblock %}
 
@@ -11,18 +15,42 @@
         <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
     {% endblock %}
 
-    {% block head %}
+{% block head %}
+    {% if appContext %}
         {% include 'partials/head/importmap.html.twig' %}
-    {% endblock %}
+    {% endif %}
+{% endblock %}
 </head>
 {% set body_class_attribute = body_class is defined and body_class ? ' ' ~ body_class : '' %}
 <body class="min-h-screen bg-surface text-text{{ body_class_attribute }}">
+{% set flash_messages = [] %}
+{% if appContext and request and request.hasPreviousSession() %}
+    {% set flash_messages = appContext.flashes %}
+{% endif %}
 {% block body %}
     {% block header %}{% include 'partials/header/header.html.twig' %}{% endblock %}
-    {% block alerts %}{% include 'partials/alerts/alerts.html.twig' %}{% endblock %} 
+    {% block alerts %}{% include 'partials/alerts/alerts.html.twig' with { flashes: flash_messages } only %}{% endblock %}
     {% block main %}{% include 'partials/main/main.html.twig' %}{% endblock %}
     {% block footer %}{% include 'partials/footer/footer.html.twig' %}{% endblock %}
 {% endblock %}
+{% if is_debug and request %}
+    {% set available_locales = request.attributes.get('_available_locales', []) %}
+    {% set debug_mode = request.attributes.get('_debug_locale_mode', 'auto') %}
+    <div class="fixed bottom-4 right-4 z-50 rounded-md border border-border bg-surface px-4 py-3 shadow-lg">
+        <form action="{{ path('app_debug_locale') }}" method="post" class="flex items-center gap-3 text-sm">
+            <label for="debug-locale" class="font-medium">{{ 'debug.locale.label'|trans }}</label>
+            <select id="debug-locale" name="mode" class="min-w-[10rem] rounded-md border border-border bg-surface px-2 py-1 text-sm">
+                <option value="auto" {{ debug_mode == 'auto' ? 'selected' }}>{{ 'debug.locale.option.auto'|trans }}</option>
+                {% for locale in available_locales %}
+                    <option value="{{ locale }}" {{ debug_mode == locale ? 'selected' }}>{{ 'debug.locale.option.locale'|trans({'%locale%': locale|upper}) }}</option>
+                {% endfor %}
+                <option value="keys" {{ debug_mode == 'keys' ? 'selected' }}>{{ 'debug.locale.option.keys'|trans }}</option>
+            </select>
+            <input type="hidden" name="_target" value="{{ request.getRequestUri() }}">
+            <button type="submit" class="btn btn-secondary btn--sm">{{ 'debug.locale.apply'|trans }}</button>
+        </form>
+    </div>
+{% endif %}
 {% block footer_scripts %}{% endblock %}
 </body>
 </html>

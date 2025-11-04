@@ -29,14 +29,14 @@ final class UserProfileType extends AbstractType
     {
         $builder
             ->add('display_name', TextType::class, [
-                'label' => 'Display name',
+                'label' => 'admin.users.edit.profile.form.display_name',
                 'constraints' => [
                     new NotBlank(),
                     new Length(min: 2, max: 190),
                 ],
             ])
             ->add('locale', TextType::class, [
-                'label' => 'Locale',
+                'label' => 'admin.users.edit.profile.form.locale',
                 'empty_data' => 'en',
                 'constraints' => [
                     new NotBlank(),
@@ -44,7 +44,7 @@ final class UserProfileType extends AbstractType
                 ],
             ])
             ->add('timezone', TextType::class, [
-                'label' => 'Timezone',
+                'label' => 'admin.users.edit.profile.form.timezone',
                 'empty_data' => 'UTC',
                 'constraints' => [
                     new NotBlank(),
@@ -52,23 +52,25 @@ final class UserProfileType extends AbstractType
                 ],
             ])
             ->add('status', ChoiceType::class, [
-                'label' => 'Account status',
+                'label' => 'admin.users.edit.profile.form.status',
                 'choices' => [
-                    'Active' => 'active',
-                    'Pending' => 'pending',
-                    'Disabled' => 'disabled',
-                    'Archived' => 'archived',
+                    'admin.users.status.active' => 'active',
+                    'admin.users.status.pending' => 'pending',
+                    'admin.users.status.disabled' => 'disabled',
+                    'admin.users.status.archived' => 'archived',
                 ],
+                'choice_translation_domain' => 'messages',
                 'constraints' => [
                     new NotBlank(),
                     new Choice(choices: ['active', 'pending', 'disabled', 'archived']),
                 ],
             ])
             ->add('roles', ChoiceType::class, [
-                'label' => 'Roles',
+                'label' => 'admin.users.edit.profile.form.roles',
                 'choices' => $options['role_choices'],
                 'multiple' => true,
                 'expanded' => true,
+                'choice_translation_domain' => false,
             ]);
 
         $this->addProfileFields($builder);

@@ -19,20 +19,28 @@ final class InvitationAcceptType extends AbstractType
     {
         $builder
             ->add('display_name', TextType::class, [
-                'label' => 'Display name',
+                'label' => 'security.invitation.form.display_name',
                 'constraints' => [
-                    new NotBlank(),
-                    new Length(min: 2, max: 190),
+                    new NotBlank(message: 'security.invitation.form.display_name.not_blank'),
+                    new Length(
+                        min: 2,
+                        max: 190,
+                        minMessage: 'security.invitation.form.display_name.min_length',
+                        maxMessage: 'security.invitation.form.display_name.max_length'
+                    ),
                 ],
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'first_options' => ['label' => 'Password'],
-                'second_options' => ['label' => 'Confirm password'],
-                'invalid_message' => 'Passwords must match.',
+                'first_options' => ['label' => 'security.invitation.form.password'],
+                'second_options' => ['label' => 'security.invitation.form.password_confirmation'],
+                'invalid_message' => 'security.invitation.form.password_mismatch',
                 'constraints' => [
-                    new NotBlank(),
-                    new Length(min: 8),
+                    new NotBlank(message: 'security.invitation.form.password.not_blank'),
+                    new Length(
+                        min: 8,
+                        minMessage: 'security.invitation.form.password.min_length'
+                    ),
                 ],
             ]);
     }

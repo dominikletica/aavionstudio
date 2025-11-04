@@ -7,6 +7,7 @@ namespace App\Security\User;
 use App\Security\Audit\SecurityAuditLogger;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Provides admin tooling for listing and updating users.
@@ -16,6 +17,7 @@ final class UserAdminManager
     public function __construct(
         private readonly Connection $connection,
         private readonly SecurityAuditLogger $auditLogger,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -167,11 +169,11 @@ final class UserAdminManager
         foreach ($rows as $row) {
             $name = (string) $row['name'];
             $label = (string) ($row['label'] ?: $name);
-            $choices[$label] = $name;
+            $choices[$this->translateRoleLabel($name, $label)] = $name;
         }
 
         if (!in_array('ROLE_VIEWER', array_values($choices), true)) {
-            $choices['Viewer'] = 'ROLE_VIEWER';
+            $choices[$this->translateRoleLabel('ROLE_VIEWER', 'Viewer')] = 'ROLE_VIEWER';
         }
 
         ksort($choices);
@@ -342,5 +344,13 @@ final class UserAdminManager
         }
 
         return \is_array($flags) ? $flags : [];
+    }
+
+    private function translateRoleLabel(string $role, string $fallback): string
+    {
+        $key = 'security.roles.'.$role;
+        $translated = $this->translator->trans($key);
+
+        return $translated !== $key ? $translated : $fallback;
     }
 }

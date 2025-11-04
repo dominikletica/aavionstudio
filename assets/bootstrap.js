@@ -17,5 +17,7 @@ if (typeof window !== 'undefined') {
 }
 
 const app = startStimulusApp();
-// register any custom, 3rd party controllers here
-// app.register('some_controller_name', SomeImportedController);
+
+import SetupSecretController from './controllers/setup_secret_controller.js';
+app.register('setup-secret', SetupSecretController);
+// register any additional custom controllers below

@@ -27,7 +27,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
    - For root fallback testing, set `APP_FORCE_ROOT_ENTRY=1` and hit `index.php`.
    - The setup diagnostics flag compatibility mode when requests arrive via the root loader—fix docroot/rewrite configuration to clear the warning before going live.
    - Apache/IIS fallback files (`.htaccess`, `web.config`) ship with the repository, but production installs should point the web server directly at `public/`.
-   - Access the setup wizard at `http://localhost:8000/setup` to iterate through diagnostics and seed configuration (plain layout for now).
+   - Access the setup wizard at `http://localhost:8000/setup` to iterate through diagnostics and seed configuration. Each step now renders Symfony forms (environment, storage, administrator) that persist selections in the session before `bin/init` runs—handy for exercising the installer without touching `.env.local` manually. The environment writer merges your overrides into `.env.local` atomically right before the init script executes; `bin/init --setup --payload=var/setup/runtime.json` is then invoked automatically to seed the first administrator via `app:setup:seed`.
 
 ---
 
@@ -51,7 +51,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 - **Coding Standards**
   - PHP: PSR-12, strict types when applicable, service autowiring/autoconfigure.
   - Frontend: Tailwind utility classes, Stimulus controllers (`snake_controller.js`), AssetMapper imports.
-  - Translations: English only (`admin`, `validators`, etc.).
+  - Translations: Use deterministic keys (`namespace.section.token`). The runtime loads catalogues in this order: active theme → enabled module manifests (DB state, highest priority first) → base theme fallback → core `translations/`. See [Internationalisation & Translation Cascade](sections/internationalization/translations.md) for details on key naming, caching, and localisation workflows.
 
 - **Testing**
   - PHPUnit for unit/integration; plan to add Panther/Cypress for UI flows.

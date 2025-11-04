@@ -55,6 +55,16 @@
 - [ ] Implement search palette and contextual help drawer
 - [ ] Add Cypress/Stimulus integration tests (or Symfony Panther) for core navigation UX
 
+### Localization & Translation (P0 | M)
+- [x] Switch installer environment/storage/admin forms to deterministic translation keys with updated session writers.
+- [x] Add debug footer locale selector + translator decorator with PHPUnit coverage.
+- [x] Implement translation catalogue manager to cascade theme/module/system resources with caching + tests.
+- [x] Migrate remaining Twig templates (security/auth flows, admin audit/system screens, demo) to deterministic translation keys.
+- [x] Extend German `messages.*` catalogue for outstanding UI strings beyond installer/admin steps.
+- [x] Audit validator error messages to ensure every constraint surfaces localized keys.
+- [x] Localize UI timestamps via translation-driven date/time formats.
+- [x] Normalise built-in/admin role labels to translation keys and document how module-defined roles should supply translated display names.
+
 ### Feat: Schema & Template System (P0 | L)
 - [ ] Implement schema/template persistence with versioning
 - [ ] Integrate JSON schema validation into draft workflow
@@ -73,6 +83,24 @@
 - [ ] Expose read-only API endpoints with caching headers and rate limiting
 - [ ] Add CLI commands for snapshot rebuild and pruning
 - [ ] Provide integration tests validating snapshot generation and API responses
+
+### Installer Completion Tasks (P0 | XL)
+- [x] Build installer forms + POST controllers for environment, storage, and admin steps (persist data via `SetupConfiguration`, add diagnostics refresh endpoint, update Twig templates to consume live session data).
+- [x] Extend `SetupConfiguration` with new getters/setters (environment overrides, storage root, admin payload, warning acknowledgements) and add integration tests for session persistence.
+- [x] Implement `SetupEnvironmentWriter` to merge validated overrides into `.env.local` atomically (preserve existing keys, provide safe fallbacks, unit tests).
+- [x] Introduce JSON payload hand-off (`var/setup/runtime.json`), update action steps (`prepare_payload`, `write_env`), add payload builder & cleanup, and extend `bin/init` with `--setup/--payload` wiring plus dedicated tests.
+- [x] Enhance `bin/init` with `--setup/--payload` support and create `app:setup:seed` console command to hash/persist the admin user, clear payload secrets, and log outcomes.
+- [x] Add persistent setup log writer (stream to `var/log/setup/*.ndjson`) within `ActionExecutor`.
+- [x] Wire new help-content JSON loader and replace inline doc links in installer templates.
+- [x] Harden `/setup/action` streaming response by starting/saving the session before flushing NDJSON output (prevents "headers already sent" errors reported on step 2).
+- [x] Split help JSON entries into inline panels vs. targeted tooltips; update installer templates/macros to attach tooltips to environment/storage/admin fields and to surface summary actions as hoverable badges.
+- [x] Polish tooltip UX (0.5s hover delay, wider responsive container, label-level wiring for password confirmation) to keep wizard copy readable without layout jitter.
+- [x] Correct button component defaults so installer forms submit properly without passing explicit `type` parameters hook-ups.
+- [x] Tighten wizard navigation gating (disable future steps, redirect invalid `step` query selections) and add accessibility metadata (`aria-disabled`).
+- [x] Expand installer functional coverage (tooltip rendering, summary action badges, step gating) and add unit tests for `SetupConfiguration` boolean helpers + `SetupHelpLoader` target propagation.
+- [ ] Update `SetupConfigurator` + `SystemSettings` reload flow to consume session data safely prior to `bin/init`, including default project metadata handling.
+- [ ] Add unit/integration/functional coverage for the full installer pipeline (forms, env writer, action executor, bin/init seeding) and document manual verification steps in developer/user manuals.
+- [ ] Introduce field-aware tooltip binding (Stimulus helper or Twig extensions) so targeted help entries decorate the precise form controls without manual badge duplication.
 
 ### Feat: Frontend Delivery & Rendering (P0 | L)
 - [ ] Implement catch-all frontend controller backed by snapshots and schema templates
@@ -320,3 +348,37 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Incorporated maintainer feedback, rebuilt `feat-installer.md` from scratch (no `.env.local.php`, reuse `bin/init`, single storage root, inline admin password creation, JSON help catalogue) and removed inline annotations.
 - Documented the session→`bin/init` hand-off (env writer, JSON payload, `--setup/--payload` flags, post-run seeding command) and outlined validation & cleanup requirements.
 - Logged design decisions resolving earlier open questions (SQLite-only driver, no log downloads, lock/session handling) and updated next steps for implementation/test phases.
+
+### 2025-11-03 (Session 3)
+- Started implementation: added installer environment/storage/admin forms with POST endpoints, session-backed persistence via `SetupConfiguration`, diagnostics refresh API, and summary view rendering of live selections.
+- Implemented the environment writer + installer action step (`write_env`), added session-backed wizard tests, and ensured `.env.local` merging is covered by unit tests.
+- Added persistent setup logging (`var/log/setup/*.ndjson`), JSON payload builder/cleanup, seeded admin command, and contextual handler diagnostics tests.
+- Introduced help-content loader + JSON catalogue with inline/tooltip cards rendered across installer steps.
+- Polished installer UX: wider/delayed tooltips mapped to form labels (including password confirmation), ensured button components honour submit types, and extended functional coverage to guard the new hints.
+- Added Stimulus-powered “Generate secret” control to the environment step so operators can mint secure APP_SECRET values in-browser, including tests and feedback messaging.
+
+### 2025-11-04
+- Localisation pass: wired JS/UI strings through the translator, added Accept-Language/user-profile locale resolution, and covered locale provider/subscriber behaviour with tests.
+- Introduced deterministic translation keys (`installer.*`, `ui.*`, `demo.*`) with refreshed English catalog and seeded German entries for the environment step to prove locale fallback behaviour.
+- Added debug-only locale switcher (footer dropdown) plus translator decorator for key-echo mode to simplify QA across languages.
+- Converted installer environment/storage/admin templates and related form types to deterministic translation keys, expanded `messages.{en,de}.yaml`, and introduced validator catalogues for shared password/display-name constraints.
+- Added the debug footer locale switcher backend (`App\\Controller\\Debug\\LocaleController`) and translator decorator tests, wiring the controller as a public service and covering key-mode behaviour in `tests/Translation/DebugTranslatorTest.php` and `tests/Controller/Debug/LocaleControllerTest.php`.
+- Updated installer functional tests to rely on supported locale/timezone choices, added coverage for the debug locale endpoint, and verified the full PHPUnit suite passes cleanly.
+- Refreshed `docs/dev/classmap.md` with the new controller/service and logged outstanding localization follow-ups in the TODO section for continued translation work.
+- Localized table timestamps via translation-driven date/time format keys and updated Twig templates to consume them consistently.
+- Implemented the translation catalogue manager to cascade theme/module/system translations with cached merges, extended `LocaleProvider` to scan module/theme directories, and added focused unit coverage.
+
+### 2025-11-04 (Session 2)
+- Guarded shared flash partials and layouts against missing app/session context, reusing the computed flashbag for installer-specific errors to eliminate streamed-session warnings.
+- Standardised admin/security form types on deterministic translation keys (API keys, project memberships, profiles, password reset flows) and expanded the English/German catalogues, including role label fallbacks.
+- Added the `twig/intl-extra` dependency, removed manual extension wiring, and regenerated autoloads so date formatting helpers register consistently across environments.
+- Updated functional tests: invitation flow now targets the form directly, installer tests reload session state via cookie-backed helper, and the full suite passes under the new translation setup.
+- Logged follow-up work for role label localisation in the TODO tracker and confirmed composer/phpunit workflows remain green.
+- Converted security login/password pages, the admin security audit log, and demo tip partials to deterministic translation keys; added matching EN/DE catalogue entries and audit action labels.
+- Localised built-in role names through the translator, simplified installer/admin field labels, and refreshed the internationalisation guide with guidance for module-supplied role translations.
+- Harmonised phrasing in English and German catalogues (shorter labels, clearer help text) and introduced shared keys for “not applicable” values; PHPUnit suite remains green.
+
+#### Follow-up
+- Let `SetupConfigurator`/`SystemSettings` consume the installer session payload before `bin/init` and reload default project metadata afterward.
+- Add end-to-end coverage for the installer (forms → action → `bin/init`) and document the manual verification steps in user/dev manuals.
+- Introduce field-aware tooltip binding (Stimulus/Twig helper) so contextual help attaches directly to each field without manual duplication.

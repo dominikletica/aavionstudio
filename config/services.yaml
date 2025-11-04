@@ -62,6 +62,17 @@ services:
 
     App\Security\Capability\CapabilitySynchronizer: ~
 
+    App\Translation\CatalogueManager:
+        arguments:
+            $translator: '@App\Translation\DebugTranslator.inner'
+
+    App\Translation\DebugTranslator:
+        decorates: translator
+        arguments:
+            - '@App\Translation\DebugTranslator.inner'
+            - '@request_stack'
+            - '@App\Translation\CatalogueManager'
+
     Doctrine\Migrations\DependencyFactory: '@doctrine.migrations.dependency_factory'
 
     App\Security\Password\PasswordResetTokenManager: ~
@@ -73,6 +84,10 @@ services:
     App\Controller\Installer\InstallerController:
         autowire: true
         autoconfigure: true
+        public: true
+
+    App\Controller\Debug\LocaleController:
+        tags: ['controller.service_arguments']
         public: true
 
     app.security.remember_me_token_provider:

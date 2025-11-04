@@ -6,6 +6,7 @@ namespace App\Tests\Controller\Security;
 
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class PasswordResetControllerTest extends WebTestCase
 {
@@ -79,7 +80,9 @@ final class PasswordResetControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/password/forgot');
         self::assertResponseIsSuccessful();
 
-        $client->submitForm('Send reset link', [
+        $translator = static::getContainer()->get(TranslatorInterface::class);
+
+        $client->submitForm($translator->trans('security.password.request.actions.submit'), [
             'password_reset_request[email]' => 'reset@example.com',
         ]);
 
@@ -100,7 +103,9 @@ final class PasswordResetControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/password/reset/'.$selector.'?token='.$verifier);
         self::assertResponseIsSuccessful();
 
-        $client->submitForm('Update password', [
+        $translator = static::getContainer()->get(TranslatorInterface::class);
+
+        $client->submitForm($translator->trans('security.password.reset.actions.submit'), [
             'password_reset[plainPassword][first]' => 'newSecret123',
             'password_reset[plainPassword][second]' => 'newSecret123',
         ]);

@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 final class SystemAssetsController extends AbstractController
@@ -28,6 +29,7 @@ final class SystemAssetsController extends AbstractController
         private readonly ThemeRegistry $themeRegistry,
         private readonly ModuleStateRepository $moduleStateRepository,
         private readonly ThemeStateRepository $themeStateRepository,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -50,7 +52,7 @@ final class SystemAssetsController extends AbstractController
     {
         $token = (string) $request->request->get('_token');
         if (!$this->isCsrfTokenValid('admin_assets_rebuild', $token)) {
-            $this->addFlash('error', 'Invalid CSRF token. Please try again.');
+            $this->addFlash('error', $this->translator->trans('flash.common.invalid_csrf_retry'));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
@@ -61,13 +63,19 @@ final class SystemAssetsController extends AbstractController
         if ($mode === 'sync') {
             try {
                 $executed = $this->scheduler->runNow($force);
-                $this->addFlash($executed ? 'success' : 'info', $executed ? 'Asset pipeline rebuilt successfully.' : 'Assets already up to date; nothing to rebuild.');
+                $this->addFlash(
+                    $executed ? 'success' : 'info',
+                    $this->translator->trans($executed ? 'flash.assets.rebuild.success' : 'flash.assets.rebuild.up_to_date')
+                );
             } catch (\Throwable $exception) {
-                $this->addFlash('error', sprintf('Asset rebuild failed: %s', $exception->getMessage()));
+                $this->addFlash('error', $this->translator->trans('flash.assets.rebuild.failed', ['%error%' => $exception->getMessage()]));
             }
         } else {
             $queued = $this->scheduler->schedule($force);
-            $this->addFlash($queued ? 'success' : 'info', $queued ? 'Queued asset rebuild job.' : 'Assets already up to date; no rebuild queued.');
+            $this->addFlash(
+                $queued ? 'success' : 'info',
+                $this->translator->trans($queued ? 'flash.assets.rebuild.queued' : 'flash.assets.rebuild.queued_skip')
+            );
         }
 
         return $this->redirectToRoute('admin_assets_overview');
@@ -78,21 +86,21 @@ final class SystemAssetsController extends AbstractController
     {
         $token = (string) $request->request->get('_token');
         if (!$this->isCsrfTokenValid('module_state_'.$slug, $token)) {
-            $this->addFlash('error', 'Invalid CSRF token.');
+            $this->addFlash('error', $this->translator->trans('flash.common.invalid_csrf'));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
 
         $manifest = $this->moduleRegistry->find($slug);
         if ($manifest === null) {
-            $this->addFlash('error', sprintf('Module "%s" not found.', $slug));
+            $this->addFlash('error', $this->translator->trans('flash.assets.module.not_found', ['%slug%' => $slug]));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
 
         $metadata = $manifest->metadata;
         if (!empty($metadata['locked'])) {
-            $this->addFlash('info', sprintf('Module "%s" is locked and cannot be modified.', $manifest->name));
+            $this->addFlash('info', $this->translator->trans('flash.assets.module.locked', ['%name%' => $manifest->name]));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
@@ -105,7 +113,7 @@ final class SystemAssetsController extends AbstractController
         };
 
         if ($targetState === null) {
-            $this->addFlash('error', 'Unknown module action.');
+            $this->addFlash('error', $this->translator->trans('flash.assets.module.unknown_action'));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
@@ -113,7 +121,13 @@ final class SystemAssetsController extends AbstractController
         $this->moduleStateRepository->setEnabled($slug, $targetState);
         $this->scheduler->schedule(true);
 
-        $this->addFlash('success', sprintf('Module "%s" %s.', $manifest->name, $targetState ? 'enabled' : 'disabled'));
+        $this->addFlash(
+            'success',
+            $this->translator->trans(
+                $targetState ? 'flash.assets.module.enabled' : 'flash.assets.module.disabled',
+                ['%name%' => $manifest->name]
+            )
+        );
 
         return $this->redirectToRoute('admin_assets_overview');
     }
@@ -123,21 +137,21 @@ final class SystemAssetsController extends AbstractController
     {
         $token = (string) $request->request->get('_token');
         if (!$this->isCsrfTokenValid('theme_state_'.$slug, $token)) {
-            $this->addFlash('error', 'Invalid CSRF token.');
+            $this->addFlash('error', $this->translator->trans('flash.common.invalid_csrf'));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
 
         $manifest = $this->themeRegistry->find($slug);
         if ($manifest === null) {
-            $this->addFlash('error', sprintf('Theme "%s" not found.', $slug));
+            $this->addFlash('error', $this->translator->trans('flash.assets.theme.not_found', ['%slug%' => $slug]));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
 
         $metadata = $manifest->metadata;
         if (!empty($metadata['locked'])) {
-            $this->addFlash('info', sprintf('Theme "%s" is locked and cannot be disabled.', $manifest->name));
+            $this->addFlash('info', $this->translator->trans('flash.assets.theme.locked_disable', ['%name%' => $manifest->name]));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
@@ -150,7 +164,7 @@ final class SystemAssetsController extends AbstractController
         };
 
         if ($targetState === null) {
-            $this->addFlash('error', 'Unknown theme action.');
+            $this->addFlash('error', $this->translator->trans('flash.assets.theme.unknown_action'));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
@@ -163,7 +177,13 @@ final class SystemAssetsController extends AbstractController
 
         $this->scheduler->schedule(true);
 
-        $this->addFlash('success', sprintf('Theme "%s" %s.', $manifest->name, $targetState ? 'enabled' : 'disabled'));
+        $this->addFlash(
+            'success',
+            $this->translator->trans(
+                $targetState ? 'flash.assets.theme.enabled' : 'flash.assets.theme.disabled',
+                ['%name%' => $manifest->name]
+            )
+        );
 
         return $this->redirectToRoute('admin_assets_overview');
     }
@@ -173,20 +193,20 @@ final class SystemAssetsController extends AbstractController
     {
         $token = (string) $request->request->get('_token');
         if (!$this->isCsrfTokenValid('theme_activate_'.$slug, $token)) {
-            $this->addFlash('error', 'Invalid CSRF token.');
+            $this->addFlash('error', $this->translator->trans('flash.common.invalid_csrf'));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
 
         $manifest = $this->themeRegistry->find($slug);
         if ($manifest === null) {
-            $this->addFlash('error', sprintf('Theme "%s" not found.', $slug));
+            $this->addFlash('error', $this->translator->trans('flash.assets.theme.not_found', ['%slug%' => $slug]));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
 
         if (!empty($manifest->metadata['locked'])) {
-            $this->addFlash('info', sprintf('Theme "%s" is locked and always available.', $manifest->name));
+            $this->addFlash('info', $this->translator->trans('flash.assets.theme.locked_always', ['%name%' => $manifest->name]));
 
             return $this->redirectToRoute('admin_assets_overview');
         }
@@ -198,7 +218,7 @@ final class SystemAssetsController extends AbstractController
         $this->themeStateRepository->activate($slug);
         $this->scheduler->schedule(true);
 
-        $this->addFlash('success', sprintf('Theme "%s" is now active.', $manifest->name));
+        $this->addFlash('success', $this->translator->trans('flash.assets.theme.activated', ['%name%' => $manifest->name]));
 
         return $this->redirectToRoute('admin_assets_overview');
     }

@@ -13,12 +13,14 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class InvitationAcceptController extends AbstractController
 {
     public function __construct(
         private readonly UserInvitationManager $invitationManager,
         private readonly UserCreator $userCreator,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -28,7 +30,7 @@ final class InvitationAcceptController extends AbstractController
         $invitation = $this->invitationManager->findPendingByToken($token);
 
         if ($invitation === null) {
-            $this->addFlash('error', 'Invitation is invalid or has expired.');
+            $this->addFlash('error', $this->translator->trans('flash.invitation.invalid'));
 
             return $this->redirectToRoute('app_login');
         }
@@ -52,18 +54,18 @@ final class InvitationAcceptController extends AbstractController
                         createdBy: $invitation->invitedBy !== '' ? $invitation->invitedBy : null
                     );
                 } catch (UniqueConstraintViolationException $exception) {
-                    $form->addError(new FormError('An account with this email already exists.'));
+                    $form->addError(new FormError($this->translator->trans('validation.invitation.email_exists')));
                     goto render;
                 }
 
                 $this->invitationManager->accept($token);
 
-                $this->addFlash('success', 'Account created. You can now sign in.');
+                $this->addFlash('success', $this->translator->trans('flash.invitation.account_created'));
 
                 return $this->redirectToRoute('app_login');
             }
 
-            $form->addError(new FormError('Please fix the highlighted errors.'));
+            $form->addError(new FormError($this->translator->trans('validation.invitation.fix_errors')));
         }
 
         render:

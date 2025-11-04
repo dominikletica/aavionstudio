@@ -21,6 +21,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class PasswordResetController extends AbstractController
 {
@@ -32,6 +33,7 @@ final class PasswordResetController extends AbstractController
         private readonly MailerInterface $mailer,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -53,7 +55,7 @@ final class PasswordResetController extends AbstractController
                 ], UrlGeneratorInterface::ABSOLUTE_URL);
 
                 $message = (new Email())
-                    ->subject('Reset your aavion Studio password')
+                    ->subject($this->translator->trans('email.password_reset.subject'))
                     ->to($user['email'])
                     ->text($this->renderView('emails/password_reset.txt.twig', [
                         'reset_url' => $resetUrl,
@@ -68,7 +70,7 @@ final class PasswordResetController extends AbstractController
                 ], actorId: null, subjectId: $user['id']);
             }
 
-            $this->addFlash('success', 'If an account exists for this email, a reset link has been sent.');
+            $this->addFlash('success', $this->translator->trans('flash.password_reset.link_sent'));
 
             return $this->redirectToRoute('app_login');
         }
@@ -84,7 +86,7 @@ final class PasswordResetController extends AbstractController
         $verifier = (string) $request->query->get('token', '');
 
         if ($verifier === '') {
-            $this->addFlash('error', 'The reset link is invalid or has expired.');
+            $this->addFlash('error', $this->translator->trans('flash.password_reset.invalid_link'));
 
             return $this->redirectToRoute('app_password_forgot');
         }
@@ -92,7 +94,7 @@ final class PasswordResetController extends AbstractController
         $token = $this->tokenManager->validate($selector, $verifier);
 
         if ($token === null || $token->isExpired() || $token->isConsumed()) {
-            $this->addFlash('error', 'The reset link is invalid or has expired.');
+            $this->addFlash('error', $this->translator->trans('flash.password_reset.invalid_link'));
 
             return $this->redirectToRoute('app_password_forgot');
         }
@@ -106,7 +108,7 @@ final class PasswordResetController extends AbstractController
             $userRow = $this->userRepository->findById($token->userId);
 
             if ($userRow === null) {
-                $this->addFlash('error', 'Unable to reset password for this account.');
+                $this->addFlash('error', $this->translator->trans('flash.password_reset.unable'));
 
                 return $this->redirectToRoute('app_password_forgot');
             }
@@ -120,13 +122,13 @@ final class PasswordResetController extends AbstractController
                 'user_id' => $token->userId,
             ], actorId: $token->userId, subjectId: $token->userId);
 
-            $this->addFlash('success', 'Password updated. You can now sign in.');
+            $this->addFlash('success', $this->translator->trans('flash.password_reset.updated'));
 
             return $this->redirectToRoute('app_login');
         }
 
         if ($form->isSubmitted() && !$form->isValid()) {
-            $form->addError(new FormError('Please correct the highlighted errors.'));
+            $form->addError(new FormError($this->translator->trans('validation.password_reset.fix_errors')));
         }
 
         return $this->render('pages/security/password/reset.html.twig', [

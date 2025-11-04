@@ -1,5 +1,5 @@
 {% extends 'layouts/entity.html.twig' %}
-{% set entity_title = status_code ? status_code ~ ' ' ~ (status_text|default('Error'|trans)) : status_text|default('Error'|trans) %}
+{% set entity_title = status_code ? status_code ~ ' ' ~ (status_text|default('error.generic.title'|trans)) : status_text|default('error.generic.title'|trans) %}
 
 {% block content %}
     {% block error_intro %}
@@ -7,18 +7,18 @@
             <h1 class="text-heading text-3xl">{{ status_code }}</h1>
             <p class="text-text-muted text-lg">{{ status_text }}</p>
         </div>
-        <p class="text-text">{{ 'We hit a snag while processing your request. Please try again or contact support if the issue persists.'|trans }}</p>
+        <p class="text-text">{{ 'error.generic.snag'|trans }}</p>
     {% endblock %}
 
     {% if debug and exception_message %}
         <section class="surface-muted rounded-md p-6 text-left layout-stack">
-            <h2 class="text-heading text-xl">{{ 'Debug details'|trans }}</h2>
+            <h2 class="text-heading text-xl">{{ 'error.generic.debug_details'|trans }}</h2>
             <p class="text-sm text-text"><strong>{{ exception_message }}</strong></p>
             {% if stack is not empty %}
                 <ol class="text-xs font-mono space-y-2">
                     {% for frame in stack %}
                         <li>
-                            {{ loop.index }}. {{ frame.file|default('n/a'|trans) }}:{{ frame.line|default('n/a'|trans) }}
+                            {{ loop.index }}. {{ frame.file|default('error.generic.not_applicable'|trans) }}:{{ frame.line|default('error.generic.not_applicable'|trans) }}
                             {% if frame.function is defined %}
                                 — {{ frame.class|default('') ~ (frame.class is defined and frame.class ? '::' : '') }}{{ frame.function }}()
                             {% endif %}

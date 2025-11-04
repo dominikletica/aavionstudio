@@ -7,10 +7,11 @@ cd "$ROOT_DIR"
 
 usage() {
   cat <<USAGE
-Usage: $(basename "$0") <environment>
+Usage: $(basename "$0") [environment] [--setup] [--payload=/path/to/runtime.json]
 
 Supported environments: dev, test, prod
 If omitted, the environment defaults to "dev".
+When `--setup` is provided, the script seeds installer payload data (expects `--payload`).
 USAGE
 }
 
@@ -42,9 +43,39 @@ if [[ -f "$MANIFEST_PATH" ]]; then
   ' "$MANIFEST_PATH")
 fi
 
-if [[ $# -gt 0 ]]; then
-  TARGET_ENV="$1"
-else
+TARGET_ENV=""
+SETUP_MODE=0
+PAYLOAD_PATH=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --setup)
+      SETUP_MODE=1
+      shift
+      ;;
+    --payload=*)
+      PAYLOAD_PATH="${1#--payload=}"
+      shift
+      ;;
+    dev|test|prod)
+      if [[ -z "$TARGET_ENV" ]]; then
+        TARGET_ENV="$1"
+        shift
+      else
+        echo "[init] Unknown argument: $1" >&2
+        usage >&2
+        exit 1
+      fi
+      ;;
+    *)
+      echo "[init] Unknown argument: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$TARGET_ENV" ]]; then
   if [[ -n "$MANIFEST_ENV" ]]; then
     TARGET_ENV="$MANIFEST_ENV"
   else
@@ -149,5 +180,18 @@ if [ ! -f var/system.brain ]; then
 fi
 run_console "Running Database Migrations" doctrine:migrations:migrate --allow-no-migration
 run_console "Ensuring Messenger transports exist" messenger:setup-transports
+
+if [[ "$SETUP_MODE" -eq 1 ]]; then
+  if [[ -n "$PAYLOAD_PATH" && ! -f "$PAYLOAD_PATH" ]]; then
+    echo "[error] Payload file not found: $PAYLOAD_PATH" >&2
+    exit 1
+  fi
+
+  if [[ -n "$PAYLOAD_PATH" ]]; then
+    run_console "Seeding installer payload" app:setup:seed --payload="${PAYLOAD_PATH}"
+  else
+    run_console "Seeding installer payload" app:setup:seed
+  fi
+fi
 
 echo "[init] Initialization complete for ${MANIFEST_PRODUCT:-aavion Studio} (Version: ${MANIFEST_VERSION:-unknown}-${MANIFEST_CHANNEL:-unknown})"

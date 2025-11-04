@@ -110,6 +110,13 @@ final class ThemeManifest
         return is_dir($path) ? $path : null;
     }
 
+    public function translationsPath(): ?string
+    {
+        $path = $this->resolve('translations');
+
+        return is_dir($path) ? $path : null;
+    }
+
     /**
      * @param array<string, mixed> $metadata
      */

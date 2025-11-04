@@ -1,0 +1,20 @@
+installer:
+  admin:
+    form:
+      password_mismatch: 'Die Passwörter müssen übereinstimmen.'
+      password_require_length: 'Das Passwort muss mindestens {{ limit }} Zeichen lang sein.'
+      password_require_number: 'Das Passwort muss mindestens eine Zahl enthalten.'
+      password_require_mixed_case: 'Das Passwort muss Groß- und Kleinbuchstaben enthalten.'
+      password_require_special: 'Das Passwort muss mindestens ein Sonderzeichen enthalten.'
+
+security:
+  invitation:
+    form:
+      display_name:
+        not_blank: 'Bitte gib einen Anzeigenamen an.'
+        min_length: 'Der Anzeigename muss mindestens {{ limit }} Zeichen lang sein.'
+        max_length: 'Der Anzeigename darf höchstens {{ limit }} Zeichen lang sein.'
+      password:
+        not_blank: 'Bitte gib ein Passwort ein.'
+        min_length: 'Das Passwort muss mindestens {{ limit }} Zeichen lang sein.'
+      password_mismatch: 'Die Passwörter müssen übereinstimmen.'

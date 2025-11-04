@@ -1,14 +1,14 @@
 {% extends 'layouts/admin.html.twig' %}
 
-{% set admin_title = 'Admin: Edit user'|trans %}
+{% set admin_title = 'admin.users.edit.page_title'|trans %}
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
-        title: 'Edit user'|trans,
-        subtitle: 'Update profile, credentials, and project access.'|trans,
+        title: 'admin.users.edit.heading.title'|trans,
+        subtitle: 'admin.users.edit.heading.subtitle'|trans,
         actions: [
             {
-                label: 'Back to users'|trans,
+                label: 'admin.users.edit.heading.back'|trans,
                 tag: 'a',
                 url: path('admin_users_index'),
                 icon: 'arrow-left'
@@ -21,16 +21,16 @@
             <div class="layout-stack layout-stack--tight">
                 <dl class="grid gap-2 text-sm text-text-muted">
                     <div class="flex items-center justify-between gap-3">
-                        <dt>{{ 'Email'|trans }}</dt>
+                        <dt>{{ 'admin.users.edit.profile.email'|trans }}</dt>
                         <dd class="font-medium text-text">{{ user.email }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-3">
-                        <dt>{{ 'Created'|trans }}</dt>
-                        <dd>{{ user.created_at ? user.created_at|date('Y-m-d H:i') : '—' }}</dd>
+                        <dt>{{ 'admin.users.edit.profile.created'|trans }}</dt>
+                        <dd>{{ user.created_at ? user.created_at|format_datetime(pattern='region.datetime.short'|trans) : '—' }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-3">
-                        <dt>{{ 'Last updated'|trans }}</dt>
-                        <dd>{{ user.updated_at ? user.updated_at|date('Y-m-d H:i') : '—' }}</dd>
+                        <dt>{{ 'admin.users.edit.profile.updated'|trans }}</dt>
+                        <dd>{{ user.updated_at ? user.updated_at|format_datetime(pattern='region.datetime.short'|trans) : '—' }}</dd>
                     </div>
                 </dl>
 
@@ -48,7 +48,7 @@
                     {{ form_row(form.status) }}
                     {{ form_row(form.roles) }}
                     {{ include('partials/components/button.html.twig', {
-                        label: 'Save changes'|trans,
+                        label: 'admin.users.edit.profile.save'|trans,
                         type: 'submit',
                         icon: 'device-floppy'
                     }, with_context = false) }}
@@ -59,9 +59,9 @@
         {% set password_footer %}
             <form method="post" action="{{ path('admin_users_password_reset', { id: user.id }) }}" class="layout-stack--tight">
                 <input type="hidden" name="_token" value="{{ csrf_token('admin_user_password_reset_' ~ user.id) }}">
-                <p class="text-sm text-text-muted">{{ 'Send a one-time password reset email to this user.'|trans }}</p>
+                <p class="text-sm text-text-muted">{{ 'admin.users.edit.password.description'|trans }}</p>
                 {{ include('partials/components/button.html.twig', {
-                    label: 'Send password reset email'|trans,
+                    label: 'admin.users.edit.password.send'|trans,
                     type: 'submit',
                     variant: 'secondary',
                     icon: 'mail'
@@ -70,8 +70,8 @@
         {% endset %}
 
         {% include 'partials/components/card.html.twig' with {
-            eyebrow: 'Profile'|trans,
-            title: 'User details'|trans,
+            eyebrow: 'admin.users.edit.profile.eyebrow'|trans,
+            title: 'admin.users.edit.profile.title'|trans,
             body: profile_body,
             footer: password_footer
         } only %}
@@ -82,7 +82,7 @@
                 {{ form_row(apiKeyForm.expires_at) }}
                 {{ form_row(apiKeyForm.scopes) }}
                 {{ include('partials/components/button.html.twig', {
-                    label: 'Create API key'|trans,
+                    label: 'admin.users.edit.api.create'|trans,
                     type: 'submit',
                     icon: 'key'
                 }, with_context = false) }}
@@ -95,30 +95,30 @@
                 {% for key in apiKeys %}
                     {% set status_badge %}
                         {% if key.revokedAt %}
-                            <span class="badge badge--danger">{{ 'revoked'|trans }}</span>
+                            <span class="badge badge--danger">{{ 'admin.users.edit.api.status.revoked'|trans }}</span>
                         {% elseif key.expiresAt and key.expiresAt < date() %}
-                            <span class="badge badge--warning">{{ 'expired'|trans }}</span>
+                            <span class="badge badge--warning">{{ 'admin.users.edit.api.status.expired'|trans }}</span>
                         {% elseif key.isActive %}
-                            <span class="badge badge--success">{{ 'active'|trans }}</span>
+                            <span class="badge badge--success">{{ 'admin.users.edit.api.status.active'|trans }}</span>
                         {% else %}
-                            <span class="badge">{{ 'inactive'|trans }}</span>
+                            <span class="badge">{{ 'admin.users.edit.api.status.inactive'|trans }}</span>
                         {% endif %}
                     {% endset %}
                     {% if key.revokedAt is null %}
                         {% set revoke_button %}
                             <form method="post" action="{{ path('admin_users_api_keys_revoke', { userId: user.id, apiKeyId: key.id }) }}" class="inline-flex">
                                 <input type="hidden" name="_token" value="{{ csrf_token('revoke_api_key_' ~ key.id) }}">
-                                <button class="btn btn-secondary btn--sm" type="submit">{{ 'Revoke'|trans }}</button>
+                                <button class="btn btn-secondary btn--sm" type="submit">{{ 'admin.users.edit.api.actions.revoke'|trans }}</button>
                             </form>
                         {% endset %}
                     {% else %}
                         {% set revoke_button %}
-                            <small class="text-text-muted whitespace-nowrap">{{ key.revokedAt|date('Y-m-d H:i') }}</small>
+                            <small class="text-text-muted whitespace-nowrap">{{ 'admin.users.edit.api.actions.revoked_on'|trans({ '%date%': key.revokedAt|format_datetime(pattern='region.datetime.short'|trans) }) }}</small>
                         {% endset %}
                     {% endif %}
                     {% set api_rows = api_rows|merge([{
                         label: key.label,
-                        created: key.createdAt|date('Y-m-d H:i'),
+                        created: key.createdAt|format_datetime(pattern='region.datetime.short'|trans),
                         status: status_badge,
                         actions: revoke_button
                     }]) %}
@@ -126,42 +126,42 @@
 
                 {{ include('partials/components/table.html.twig', {
                     columns: [
-                        { label: 'Label'|trans, key: 'label', class: 'font-medium' },
-                        { label: 'Created'|trans, key: 'created', class: 'text-sm text-text-muted whitespace-nowrap' },
-                        { label: 'Status'|trans, key: 'status', template: 'partials/components/table/value_raw.html.twig' },
-                        { label: 'Actions'|trans, key: 'actions', template: 'partials/components/table/value_raw.html.twig', class: 'text-right whitespace-nowrap' }
+                        { label: 'admin.users.edit.api.table.columns.label'|trans, key: 'label', class: 'font-medium' },
+                        { label: 'admin.users.edit.api.table.columns.created'|trans, key: 'created', class: 'text-sm text-text-muted whitespace-nowrap' },
+                        { label: 'admin.users.edit.api.table.columns.status'|trans, key: 'status', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'admin.users.edit.api.table.columns.actions'|trans, key: 'actions', template: 'partials/components/table/value_raw.html.twig', class: 'text-right whitespace-nowrap' }
                     ],
                     rows: api_rows,
                     compact: true
                 }, with_context = false) }}
             {% else %}
                 {{ include('partials/components/empty_state.html.twig', {
-                    title: 'No API keys yet'|trans,
-                    description: 'Create an API key to integrate with external services.'|trans
+                    title: 'admin.users.edit.api.empty.title'|trans,
+                    description: 'admin.users.edit.api.empty.description'|trans
                 }, with_context = false) }}
             {% endif %}
         {% endset %}
 
         {% include 'partials/components/card.html.twig' with {
-            eyebrow: 'Integrations'|trans,
-            title: 'API keys'|trans,
-            subtitle: 'Secrets are shown once—store them securely.'|trans,
+            eyebrow: 'admin.users.edit.api.eyebrow'|trans,
+            title: 'admin.users.edit.api.title'|trans,
+            subtitle: 'admin.users.edit.api.subtitle'|trans,
             body: api_key_form,
             footer: api_key_table
         } only %}
 
         {% set project_body %}
             {% if projects is empty %}
-                <p class="text-sm text-text-muted">{{ 'No projects available yet.'|trans }}</p>
+                <p class="text-sm text-text-muted">{{ 'admin.users.edit.projects.empty'|trans }}</p>
             {% else %}
                 {{ form_start(projectMembershipForm, { attr: { class: 'layout-stack layout-stack--tight' } }) }}
                     <div class="overflow-x-auto">
                         <table class="table table--compact">
                             <thead>
                                 <tr>
-                                    <th>{{ 'Project'|trans }}</th>
-                                    <th>{{ 'Role'|trans }}</th>
-                                    <th>{{ 'Extra capabilities'|trans }}</th>
+                                    <th>{{ 'admin.users.edit.projects.columns.project'|trans }}</th>
+                                    <th>{{ 'admin.users.edit.projects.columns.role'|trans }}</th>
+                                    <th>{{ 'admin.users.edit.projects.columns.capabilities'|trans }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -173,7 +173,7 @@
                                             {% set project = item %}
                                         {% endif %}
                                     {% endfor %}
-                                    {% set projectName = project is not null ? project.name : 'Unknown project' %}
+                                    {% set projectName = project is not null ? project.name : 'admin.users.edit.projects.unknown'|trans %}
                                     {% set projectSlug = project is not null ? project.slug : projectId %}
                                     <tr>
                                         <td class="align-top">
@@ -195,7 +195,7 @@
                     </div>
                     <div class="flex justify-end">
                         {{ include('partials/components/button.html.twig', {
-                            label: 'Save project access'|trans,
+                            label: 'admin.users.edit.projects.save'|trans,
                             type: 'submit',
                             icon: 'device-floppy'
                         }, with_context = false) }}
@@ -205,9 +205,9 @@
         {% endset %}
 
         {% include 'partials/components/card.html.twig' with {
-            eyebrow: 'Projects'|trans,
-            title: 'Project access'|trans,
-            subtitle: 'Override roles or add project-specific capabilities.'|trans,
+            eyebrow: 'admin.users.edit.projects.eyebrow'|trans,
+            title: 'admin.users.edit.projects.title'|trans,
+            subtitle: 'admin.users.edit.projects.subtitle'|trans,
             body: project_body
         } only %}
     </div>

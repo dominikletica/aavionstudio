@@ -1,8 +1,16 @@
-<div data-action-overlay class="action-overlay hidden fixed inset-0 z-50">
+<div
+    data-action-overlay
+    data-trans-no-steps="{{ 'ui.action_overlay.no_steps'|trans }}"
+    data-trans-missing-token="{{ 'ui.action_overlay.missing_token'|trans }}"
+    data-trans-error-label="{{ 'ui.action_overlay.error_label'|trans }}"
+    data-trans-unknown-error="{{ 'ui.action_overlay.unknown_error'|trans }}"
+    data-trans-network-error="{{ 'ui.action_overlay.network_error'|trans }}"
+    class="action-overlay hidden fixed inset-0 z-50"
+>
     <div class="absolute inset-0 bg-black/60"></div>
     <div class="relative mx-auto mt-16 max-w-3xl rounded-lg bg-surface p-6 shadow-lg layout-stack layout-stack--loose">
         <div class="flex items-center justify-between gap-4">
-            <h2 class="text-heading text-xl">{{ 'Execution Progress'|trans }}</h2>
+            <h2 class="text-heading text-xl">{{ 'ui.action_overlay.title'|trans }}</h2>
         </div>
         <div class="relative">
             <pre data-action-log class="h-72 overflow-auto rounded-md bg-transparent p-4 text-sm font-mono shadow-inner whitespace-pre-wrap"></pre>
@@ -12,12 +20,12 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 017-7.938V1a10 10 0 00-9 9h2z"></path>
                     </svg>
-                    <p class="font-medium text-text-muted">{{ 'Processing…'|trans }}</p>
+                    <p class="font-medium text-text-muted">{{ 'ui.action_overlay.processing'|trans }}</p>
                 </div>
             </div>
         </div>
         <div class="flex justify-end">
-            <button type="button" data-action-complete class="btn hidden">{{ 'Close'|trans }}</button>
+            <button type="button" data-action-complete class="btn hidden">{{ 'ui.close'|trans }}</button>
         </div>
     </div>
 </div>
@@ -57,7 +65,7 @@
     };
 
     const appendLog = (message, isError = false) => {
-        const prefix = isError ? '[ERROR] ' : '';
+        const prefix = isError ? `[${translations.errorLabel}] ` : '';
         logElement.textContent += prefix + message + '\n';
         logElement.scrollTop = logElement.scrollHeight;
     };
@@ -75,16 +83,24 @@
         }
     };
 
+    const translations = {
+        noSteps: overlay.dataset.transNoSteps ?? '{{ "ui.action_overlay.no_steps"|trans|e('js') }}',
+        missingToken: overlay.dataset.transMissingToken ?? '{{ "ui.action_overlay.missing_token"|trans|e('js') }}',
+        errorLabel: overlay.dataset.transErrorLabel ?? '{{ "ui.action_overlay.error_label"|trans|e('js') }}',
+        unknownError: overlay.dataset.transUnknownError ?? '{{ "ui.action_overlay.unknown_error"|trans|e('js') }}',
+        networkError: overlay.dataset.transNetworkError ?? '{{ "ui.action_overlay.network_error"|trans|e('js') }}',
+    };
+
     const runAction = async (trigger) => {
         const steps = trigger.dataset.actionSteps ? JSON.parse(trigger.dataset.actionSteps) : [];
         const context = trigger.dataset.actionContext ?? 'generic';
         if (!Array.isArray(steps) || steps.length === 0) {
-            console.error('No valid steps provided.');
+            console.error(translations.noSteps);
             return;
         }
 
         if (!actionToken) {
-            console.error('Missing installer session token. Refresh the page to continue.');
+            console.error(translations.missingToken);
             return;
         }
 
@@ -113,7 +129,7 @@
             });
 
             if (!response.ok || !response.body) {
-                appendLog(`Error: ${response.status} ${response.statusText}`, true);
+                appendLog(`${translations.errorLabel}: ${response.status} ${response.statusText}`, true);
                 handleCompletion('error');
                 return;
             }
@@ -146,7 +162,7 @@
                                 appendLog(message);
                                 break;
                             case 'error':
-                                appendLog(message || 'Unknown error', true);
+                                appendLog(message || translations.unknownError, true);
                                 resultStatus = 'error';
                                 break;
                             case 'done':
@@ -165,7 +181,8 @@
 
             handleCompletion(resultStatus);
         } catch (error) {
-            appendLog(`Netzwerkfehler: ${error instanceof Error ? error.message : String(error)}`, true);
+            const details = error instanceof Error ? error.message : String(error);
+            appendLog(`${translations.networkError}: ${details}`, true);
             handleCompletion('error');
         }
     };

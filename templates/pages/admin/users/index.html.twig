@@ -1,14 +1,14 @@
 {% extends 'layouts/admin.html.twig' %}
 
-{% set admin_title = 'Admin: Users'|trans %}
+{% set admin_title = 'admin.users.page_title'|trans %}
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
-        title: 'User management'|trans,
-        subtitle: 'Search, filter, and manage user accounts.'|trans,
+        title: 'admin.users.heading.title'|trans,
+        subtitle: 'admin.users.heading.subtitle'|trans,
         actions: [
             {
-                label: 'Manage invitations'|trans,
+                label: 'admin.users.heading.manage_invitations'|trans,
                 tag: 'a',
                 url: path('admin_user_invitations'),
                 icon: 'mail',
@@ -23,37 +23,37 @@
                     {% include 'partials/forms/fields/input.html.twig' with {
                         id: 'admin-users-filter-q',
                         name: 'q',
-                        label: 'Search'|trans,
+                        label: 'admin.users.filters.search.label'|trans,
                         value: query,
-                        placeholder: 'Email or name'|trans,
+                        placeholder: 'admin.users.filters.search.placeholder'|trans,
                         autocomplete: 'off'
                     } only %}
 
                     {% set statuses = [
-                        { value: '', label: 'All statuses'|trans },
-                        { value: 'active', label: 'Active'|trans },
-                        { value: 'pending', label: 'Pending'|trans },
-                        { value: 'disabled', label: 'Disabled'|trans },
-                        { value: 'archived', label: 'Archived'|trans }
+                        { value: '', label: 'admin.users.filters.status.all'|trans },
+                        { value: 'active', label: 'admin.users.status.active'|trans },
+                        { value: 'pending', label: 'admin.users.status.pending'|trans },
+                        { value: 'disabled', label: 'admin.users.status.disabled'|trans },
+                        { value: 'archived', label: 'admin.users.status.archived'|trans }
                     ] %}
 
                     {% include 'partials/forms/fields/select.html.twig' with {
                         id: 'admin-users-filter-status',
                         name: 'status',
-                        label: 'Status'|trans,
+                        label: 'admin.users.filters.status.label'|trans,
                         value: status,
                         options: statuses
                     } only %}
                 </div>
                 <div class="flex justify-end gap-3">
                     {{ include('partials/components/button.html.twig', {
-                        label: 'Clear filters'|trans,
+                        label: 'admin.users.filters.actions.clear'|trans,
                         variant: 'ghost',
                         tag: 'a',
                         url: path('admin_users_index')
                     }, with_context = false) }}
                     {{ include('partials/components/button.html.twig', {
-                        label: 'Apply filters'|trans,
+                        label: 'admin.users.filters.actions.apply'|trans,
                         type: 'submit',
                         icon: 'filter'
                     }, with_context = false) }}
@@ -62,20 +62,20 @@
         {% endset %}
 
         {% include 'partials/components/card.html.twig' with {
-            title: 'Filters'|trans,
+            title: 'admin.users.filters.card_title'|trans,
             body: filter_form
         } only %}
 
         {% if users is empty %}
             {% include 'partials/components/card.html.twig' with {
                 variant: 'muted',
-                title: 'No users found'|trans,
+                title: 'admin.users.empty.card_title'|trans,
                 body: include('partials/components/empty_state.html.twig', {
-                    title: 'No users match your filters'|trans,
-                    description: 'Adjust search terms or invite a new administrator.'|trans,
+                    title: 'admin.users.empty.title'|trans,
+                    description: 'admin.users.empty.description'|trans,
                     actions: [
                         {
-                            label: 'Invite administrator'|trans,
+                            label: 'admin.users.empty.action'|trans,
                             tag: 'a',
                             url: path('admin_user_invitations'),
                             icon: 'mail'
@@ -87,7 +87,7 @@
             {% set user_rows = [] %}
             {% for user in users %}
                 {% set status_badge %}
-                    <span class="badge badge--info">{{ user.status|trans }}</span>
+                    <span class="badge badge--info">{{ ('admin.users.status.' ~ user.status)|trans }}</span>
                 {% endset %}
                 {% set roles_markup %}
                     {% if user.roles is empty %}
@@ -99,14 +99,14 @@
                     {% endif %}
                 {% endset %}
                 {% set actions_markup = include('partials/components/button.html.twig', {
-                    label: 'Edit'|trans,
+                    label: 'admin.users.table.actions.edit'|trans,
                     tag: 'a',
                     size: 'sm',
                     variant: 'ghost',
                     icon: 'edit',
                     url: path('admin_users_edit', { id: user.id })
                 }, with_context = false) %}
-                {% set last_login = user.last_login_at ? user.last_login_at|date('Y-m-d H:i') : '—' %}
+                {% set last_login = user.last_login_at ? user.last_login_at|format_datetime(pattern='region.datetime.short'|trans) : '—' %}
                 {% set user_rows = user_rows|merge([{
                     email: user.email,
                     name: user.display_name,
@@ -118,16 +118,16 @@
             {% endfor %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Results'|trans,
-                title: 'Users'|trans,
+                eyebrow: 'admin.users.table.eyebrow'|trans,
+                title: 'admin.users.table.title'|trans,
                 body: include('partials/components/table.html.twig', {
                     columns: [
-                        { label: 'Email'|trans, key: 'email', class: 'font-medium' },
-                        { label: 'Name'|trans, key: 'name' },
-                        { label: 'Status'|trans, key: 'status', template: 'partials/components/table/value_raw.html.twig' },
-                        { label: 'Roles'|trans, key: 'roles', template: 'partials/components/table/value_raw.html.twig' },
-                        { label: 'Last login'|trans, key: 'last_login', class: 'whitespace-nowrap text-sm text-text-muted' },
-                        { label: 'Actions'|trans, key: 'actions', template: 'partials/components/table/value_raw.html.twig', class: 'text-right whitespace-nowrap' }
+                        { label: 'admin.users.table.columns.email'|trans, key: 'email', class: 'font-medium' },
+                        { label: 'admin.users.table.columns.name'|trans, key: 'name' },
+                        { label: 'admin.users.table.columns.status'|trans, key: 'status', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'admin.users.table.columns.roles'|trans, key: 'roles', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'admin.users.table.columns.last_login'|trans, key: 'last_login', class: 'whitespace-nowrap text-sm text-text-muted' },
+                        { label: 'admin.users.table.columns.actions'|trans, key: 'actions', template: 'partials/components/table/value_raw.html.twig', class: 'text-right whitespace-nowrap' }
                     ],
                     rows: user_rows,
                     compact: true

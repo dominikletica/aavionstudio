@@ -15,6 +15,7 @@ Welcome! This manual will guide administrators, editors, and integrators through
 - **Quick Installation** – Using the browser installer vs. manual configuration.
   - Visit `/setup` after uploading the release archive; follow the on-screen steps for diagnostics, environment, storage, admin, and summary.
   - The diagnostics panel highlights missing PHP extensions and writable directory issues with remediation hints.
+- **Languages & Locale Detection** – The UI ships with English and German catalogues. Logged-in users follow their profile locale; otherwise the browser language is respected with a fallback to English. Administrator debug mode exposes a footer switcher for testing translations.
 - **Access & Login** – Sign in at `/login` with the administrator created during setup; accounts can be disabled or flagged for activation by other admins.
 - **Password Reset** – If credentials are forgotten, use the “Forgot password?” link on the login page; reset links expire after one hour for security.
 - **Post-Install Checklist** – Create first admin, configure email, set up backups, enable modules.

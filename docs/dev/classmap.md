@@ -12,10 +12,15 @@
 | `App\Doctrine\Middleware\AttachUserDatabaseMiddleware` | `src/Doctrine/Middleware/AttachUserDatabaseMiddleware.php` | Attaches `user.brain` to primary SQLite connection via DBAL middleware and configures pragmas | Sets `PRAGMA busy_timeout`/`foreign_keys` and ensures secondary DB file exists |
 | `App\Doctrine\Health\SqliteHealthChecker` | `src/Doctrine/Health/SqliteHealthChecker.php` | Reports connection status for system + user SQLite stores | Used in tests/diagnostics to confirm attachment and busy timeout |
 | `App\Installer\DefaultSystemSettings` | `src/Installer/DefaultSystemSettings.php` | Loads shared default settings from `config/app/system_settings.php` | Consumed by migrations/installer to seed baseline values |
-| `App\Setup\SetupConfiguration` | `src/Setup/SetupConfiguration.php` | Stores installer form choices in the session and exposes merged defaults | Read by the configurator when persisting settings |
+| `App\Setup\SetupConfiguration` | `src/Setup/SetupConfiguration.php` | Stores installer form choices (environment, storage, admin) in the session and exposes merged defaults | Read by the configurator/environment writer during setup |
 | `App\Setup\SetupConfigurator` | `src/Setup/SetupConfigurator.php` | Persists system settings and project seeds after `bin/init` runs | Called by the installer action executor |
+| `App\Setup\SetupEnvironmentWriter` | `src/Setup/SetupEnvironmentWriter.php` | Merges installer overrides into `.env.local` with fallback to existing keys | Invoked by the setup action executor before `bin/init` |
+| `App\Setup\SetupHelpLoader` | `src/Setup/SetupHelpLoader.php` | Loads contextual help entries from `docs/setup/help.<locale>.json`, merges locale fallbacks, and preserves `target` metadata for field-level tooltips | Used by installer controller/templates |
+| `App\Setup\SetupPayloadBuilder` | `src/Setup/SetupPayloadBuilder.php` | Serialises wizard state into `var/setup/runtime.json` for `bin/init --payload` | Cleaned up once setup locks |
 | `App\Settings\SystemSettings` | `src/Settings/SystemSettings.php` | Lazy loads settings from `app_system_setting` with fallback to defaults | Shared by error resolver, profile registry, etc. |
 | `App\Security\User\UserProfileFieldRegistry` | `src/Security/User/UserProfileFieldRegistry.php` | Supplies configurable profile field metadata & normalisation helpers | Injected into the admin user form and manager |
+| `App\Translation\DebugTranslator` | `src/Translation/DebugTranslator.php` | Decorates the Symfony translator to surface key-only output in debug mode and respect footer overrides | Decorates `translator`; covered by `tests/Translation/DebugTranslatorTest.php` |
+| `App\Translation\CatalogueManager` | `src/Translation/CatalogueManager.php` | Merges translations from active theme, enabled modules, base theme, and system catalogues with caching | Consumed by `DebugTranslator`; covered by `tests/Translation/CatalogueManagerTest.php` |
 | `App\Installer\DefaultProjects` | `src/Installer/DefaultProjects.php` | Provides default project seeds from `config/app/projects.php` | Initial migration inserts `default` project via this helper |
 | `App\Installer\Action\ActionExecutor` | `src/Installer/Action/ActionExecutor.php` | Executes installer/updater action chains (zip extraction, console/init calls, lock creation) with streamed output | Used by `/setup/action` controller |
 | `App\Bootstrap\RootEntryPoint` | `src/Bootstrap/RootEntryPoint.php` | Normalises requests that hit the root fallback (`index.php`) and forwards them to `public/index.php` | Sets compatibility flags for installer rewrite diagnostics |
@@ -78,6 +83,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `app_password_forgot` | `src/Controller/Security/PasswordResetController.php` | Password reset request | Core |
 | `app_password_reset` | `src/Controller/Security/PasswordResetController.php` | Password reset confirmation | Core |
 | `app_invitation_accept` | `src/Controller/Security/InvitationAcceptController.php` | Handles invitation acceptance redirect | Core; covered by `tests/Controller/Security/InvitationAcceptControllerTest.php` |
+| `app_debug_locale` | `src/Controller/Debug/LocaleController.php` | Debug-only endpoint toggling locale overrides and key display for the footer switcher | Core (debug); covered by `tests/Controller/Debug/LocaleControllerTest.php` |
 | `admin_users_index` | `src/Controller/Admin/UserController.php` | Lists users for admin management | Core |
 | `admin_users_edit` | `src/Controller/Admin/UserController.php` | Edits user profile/roles | Core |
 | `admin_users_api_keys_revoke` | `src/Controller/Admin/UserController.php` | Revokes an API key for a user | Core |
@@ -104,6 +110,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `app:api-key:issue` | `src/Command/IssueApiKeyCommand.php` | Issue API key for a user and print the secret | `ApiKeyManager`, `AppUserRepository` |
 | `app:assets:sync` | `src/Command/SyncDiscoveredAssetsCommand.php` | Clears the cache, respawns itself, then mirrors `modules/*/assets` and `themes/*/assets` into the core `assets/` tree so builds/tests see new manifests on the first run | `ModuleRegistry`, `ThemeRegistry`, `%kernel.project_dir%`, `Filesystem`, `Symfony\Component\Process\Process` |
 | `app:assets:rebuild` | `src/Command/RebuildAssetsCommand.php` | Runs or queues the full asset pipeline rebuild; supports `--force` and `--async` | `AssetRebuildScheduler` |
+| `app:setup:seed` | `src/Command/SetupSeedCommand.php` | Reads installer payload JSON and seeds the first administrator post `bin/init --setup` | `UserCreator`, DBAL connection, Filesystem |
 | ... |  |  |  |
 
 ---

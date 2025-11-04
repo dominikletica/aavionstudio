@@ -1,11 +1,11 @@
 {% extends 'layouts/admin.html.twig' %}
 
-{% set admin_title = 'Admin: User Invitations'|trans %}
+{% set admin_title = 'admin.invitations.page_title'|trans %}
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
-        title: 'User invitations'|trans,
-        subtitle: 'Invite administrators and manage pending tokens.'|trans
+        title: 'admin.invitations.heading.title'|trans,
+        subtitle: 'admin.invitations.heading.subtitle'|trans
     } only %}
 
     <div class="grid gap-6 md:grid-cols-2">
@@ -13,7 +13,7 @@
             {{ form_start(createForm, { attr: { class: 'layout-stack layout-stack--tight' } }) }}
                 {{ form_row(createForm.email) }}
                 {{ include('partials/components/button.html.twig', {
-                    label: 'Send invitation'|trans,
+                    label: 'admin.invitations.form.submit'|trans,
                     type: 'submit',
                     icon: 'mail'
                 }, with_context = false) }}
@@ -21,9 +21,9 @@
         {% endset %}
 
         {% include 'partials/components/card.html.twig' with {
-            eyebrow: 'New invitation'|trans,
-            title: 'Create invitation'|trans,
-            subtitle: 'Send an email invitation to a new administrator.'|trans,
+            eyebrow: 'admin.invitations.create.eyebrow'|trans,
+            title: 'admin.invitations.create.title'|trans,
+            subtitle: 'admin.invitations.create.subtitle'|trans,
             body: create_body,
             attributes: { id: 'create-invitation' }
         } only %}
@@ -31,13 +31,13 @@
         {% if invitations is empty %}
             {% include 'partials/components/card.html.twig' with {
                 variant: 'muted',
-                title: 'Pending invitations'|trans,
+                title: 'admin.invitations.empty.card_title'|trans,
                 body: include('partials/components/empty_state.html.twig', {
-                    title: 'No invitations yet'|trans,
-                    description: 'Invite your first administrator to collaborate on the workspace.'|trans,
+                    title: 'admin.invitations.empty.title'|trans,
+                    description: 'admin.invitations.empty.description'|trans,
                     actions: [
                         {
-                            label: 'Send invitation'|trans,
+                            label: 'admin.invitations.form.submit'|trans,
                             icon: 'mail',
                             tag: 'a',
                             url: '#create-invitation'
@@ -49,40 +49,40 @@
             {% set invitation_rows = [] %}
             {% for invitation in invitations %}
                 {% set status_badge %}
-                    <span class="badge badge--info">{{ invitation.status|trans }}</span>
+                    <span class="badge badge--info">{{ ('admin.invitations.status.' ~ invitation.status)|trans }}</span>
                 {% endset %}
                 {% if invitation.status == 'pending' %}
                     {% set cancel_button %}
                         <form method="post" action="{{ path('admin_user_invitations_cancel', { id: invitation.id }) }}" class="inline-flex justify-end">
                             <input type="hidden" name="_token" value="{{ csrf_token('cancel_invite_' ~ invitation.id) }}">
-                            <button class="btn btn-secondary btn--sm" type="submit">{{ 'Cancel'|trans }}</button>
+                            <button class="btn btn-secondary btn--sm" type="submit">{{ 'admin.invitations.actions.cancel'|trans }}</button>
                         </form>
                     {% endset %}
                 {% else %}
                     {% set cancel_button %}
-                        <span class="text-xs text-text-muted uppercase tracking-wide">{{ 'Completed'|trans }}</span>
+                        <span class="text-xs text-text-muted uppercase tracking-wide">{{ 'admin.invitations.status.completed'|trans }}</span>
                     {% endset %}
                 {% endif %}
                 {% set invitation_rows = invitation_rows|merge([{
                     email: invitation.email,
                     status: status_badge,
-                    created: invitation.createdAt|date('Y-m-d H:i'),
-                    expires: invitation.expiresAt|date('Y-m-d H:i'),
+                    created: invitation.createdAt|format_datetime(pattern='region.datetime.short'|trans),
+                    expires: invitation.expiresAt|format_datetime(pattern='region.datetime.short'|trans),
                     actions: cancel_button
                 }]) %}
             {% endfor %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Queue'|trans,
-                title: 'Pending invitations'|trans,
-                subtitle: 'Invitations expire automatically after the configured window.'|trans,
+                eyebrow: 'admin.invitations.list.eyebrow'|trans,
+                title: 'admin.invitations.list.title'|trans,
+                subtitle: 'admin.invitations.list.subtitle'|trans,
                 body: include('partials/components/table.html.twig', {
                     columns: [
-                        { label: 'Email'|trans, key: 'email', class: 'font-medium' },
-                        { label: 'Status'|trans, key: 'status', template: 'partials/components/table/value_raw.html.twig' },
-                        { label: 'Created'|trans, key: 'created', class: 'whitespace-nowrap text-sm text-text-muted' },
-                        { label: 'Expires'|trans, key: 'expires', class: 'whitespace-nowrap text-sm text-text-muted' },
-                        { label: 'Actions'|trans, key: 'actions', template: 'partials/components/table/value_raw.html.twig', class: 'text-right' }
+                        { label: 'admin.invitations.table.columns.email'|trans, key: 'email', class: 'font-medium' },
+                        { label: 'admin.invitations.table.columns.status'|trans, key: 'status', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'admin.invitations.table.columns.created'|trans, key: 'created', class: 'whitespace-nowrap text-sm text-text-muted' },
+                        { label: 'admin.invitations.table.columns.expires'|trans, key: 'expires', class: 'whitespace-nowrap text-sm text-text-muted' },
+                        { label: 'admin.invitations.table.columns.actions'|trans, key: 'actions', template: 'partials/components/table/value_raw.html.twig', class: 'text-right' }
                     ],
                     rows: invitation_rows,
                     compact: true
