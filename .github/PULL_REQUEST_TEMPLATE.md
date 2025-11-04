@@ -1,12 +1,9 @@
 ## Summary
-- [ ] Describe the change and why it matters
-- [ ] List affected modules/features
+[DESCRIPTION/SUMMARY]
 
 ## Testing
-- [ ] `composer install`
-- [ ] `php bin/phpunit`
-- [ ] `php bin/console tailwind:build`
-- [ ] `php bin/console asset-map:compile`
+- [ ] `bin/init` (obligatory)
+- [ ] `bin/phpunit`: [RESULT]
 - [ ] Other (describe):
 
 ## Documentation
@@ -15,7 +12,10 @@
 - [ ] Logged updates in `docs/codex/WORKLOG.md`
 - [ ] Added screenshots/UI notes if applicable
 
-## Additional Notes
+## Additional Checks
 - [ ] Security/privacy considerations
 - [ ] Follow-up tasks captured in WORKLOG
 - [ ] Linked issues / discussions
+- [ ] Updated / aligned translations
+
+## Review Notes
