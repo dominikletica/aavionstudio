@@ -23,9 +23,18 @@ final class SetupConfigurator
 
     public function apply(): void
     {
-        $settings = $this->configuration->getSystemSettings();
-        $projects = $this->configuration->getProjects();
+        $this->applyFromData(
+            $this->configuration->getSystemSettings(),
+            $this->configuration->getProjects()
+        );
+    }
 
+    /**
+     * @param array<string, mixed>              $settings
+     * @param list<array<string, mixed>>        $projects
+     */
+    public function applyFromData(array $settings, array $projects): void
+    {
         $settings['core.installer.completed'] = false;
 
         $this->connection->transactional(function (Connection $connection) use ($settings, $projects): void {

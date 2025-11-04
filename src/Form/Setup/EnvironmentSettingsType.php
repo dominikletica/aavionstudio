@@ -28,16 +28,23 @@ final class EnvironmentSettingsType extends AbstractType
                     'installer.environment.form.environment_choices.production' => 'prod',
                 ],
                 'placeholder' => false,
+                'attr' => [
+                    'data-help-key' => 'environment.environment',
+                ],
             ])
             ->add('debug', CheckboxType::class, [
                 'label' => 'installer.environment.form.debug',
                 'required' => false,
+                'attr' => [
+                    'data-help-key' => 'environment.debug',
+                ],
             ])
             ->add('secret', TextType::class, [
                 'label' => 'installer.environment.form.secret',
                 'required' => false,
                 'attr' => [
                     'autocomplete' => 'off',
+                    'data-help-key' => 'environment.secret',
                 ],
             ])
             ->add('instance_name', TextType::class, [
@@ -45,16 +52,25 @@ final class EnvironmentSettingsType extends AbstractType
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
+                'attr' => [
+                    'data-help-key' => 'environment.instance_name',
+                ],
             ])
             ->add('tagline', TextType::class, [
                 'label' => 'installer.environment.form.tagline',
                 'required' => false,
+                'attr' => [
+                    'data-help-key' => 'environment.tagline',
+                ],
             ])
             ->add('support_email', EmailType::class, [
                 'label' => 'installer.environment.form.support_email',
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\Email(),
+                ],
+                'attr' => [
+                    'data-help-key' => 'environment.support_email',
                 ],
             ])
             ->add('base_url', UrlType::class, [
@@ -64,6 +80,9 @@ final class EnvironmentSettingsType extends AbstractType
                     new Url(requireTld: false),
                 ],
                 'default_protocol' => null,
+                'attr' => [
+                    'data-help-key' => 'environment.base_url',
+                ],
             ])
             ->add('locale', ChoiceType::class, [
                 'label' => 'installer.environment.form.locale',
@@ -73,6 +92,9 @@ final class EnvironmentSettingsType extends AbstractType
                 'choices' => $this->normalizeChoices($options['locale_choices']),
                 'placeholder' => 'installer.environment.form.locale_placeholder',
                 'choice_translation_domain' => false,
+                'attr' => [
+                    'data-help-key' => 'environment.locale',
+                ],
             ])
             ->add('timezone', ChoiceType::class, [
                 'label' => 'installer.environment.form.timezone',
@@ -82,14 +104,23 @@ final class EnvironmentSettingsType extends AbstractType
                 'choices' => $this->normalizeChoices($options['timezone_choices']),
                 'placeholder' => 'installer.environment.form.timezone_placeholder',
                 'choice_translation_domain' => false,
+                'attr' => [
+                    'data-help-key' => 'environment.timezone',
+                ],
             ])
             ->add('user_registration', CheckboxType::class, [
                 'label' => 'installer.environment.form.user_registration',
                 'required' => false,
+                'attr' => [
+                    'data-help-key' => 'environment.user_registration',
+                ],
             ])
             ->add('maintenance_mode', CheckboxType::class, [
                 'label' => 'installer.environment.form.maintenance_mode',
                 'required' => false,
+                'attr' => [
+                    'data-help-key' => 'environment.maintenance_mode',
+                ],
             ]);
     }
 

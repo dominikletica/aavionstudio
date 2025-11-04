@@ -27,6 +27,7 @@ final class SetupPayloadBuilder
             'storage' => $this->configuration->getStorageConfig(),
             'admin' => $this->configuration->getAdminAccount(),
             'settings' => $this->configuration->getSystemSettings(),
+            'projects' => $this->configuration->getProjects(),
         ];
 
         $payloadDir = $this->projectDir.'/var/setup';

@@ -98,9 +98,9 @@
 - [x] Correct button component defaults so installer forms submit properly without passing explicit `type` parameters hook-ups.
 - [x] Tighten wizard navigation gating (disable future steps, redirect invalid `step` query selections) and add accessibility metadata (`aria-disabled`).
 - [x] Expand installer functional coverage (tooltip rendering, summary action badges, step gating) and add unit tests for `SetupConfiguration` boolean helpers + `SetupHelpLoader` target propagation.
-- [ ] Update `SetupConfigurator` + `SystemSettings` reload flow to consume session data safely prior to `bin/init`, including default project metadata handling.
-- [ ] Add unit/integration/functional coverage for the full installer pipeline (forms, env writer, action executor, bin/init seeding) and document manual verification steps in developer/user manuals.
-- [ ] Introduce field-aware tooltip binding (Stimulus helper or Twig extensions) so targeted help entries decorate the precise form controls without manual badge duplication.
+- [x] Update `SetupConfigurator` + `SystemSettings` reload flow to consume session data safely prior to `bin/init`, including default project metadata handling.
+- [x] Add unit/integration/functional coverage for the full installer pipeline (forms, env writer, action executor, bin/init seeding) and document manual verification steps in developer/user manuals.
+- [x] Introduce field-aware tooltip binding (Stimulus helper or Twig extensions) so targeted help entries decorate the precise form controls without manual badge duplication.
 
 ### Feat: Frontend Delivery & Rendering (P0 | L)
 - [ ] Implement catch-all frontend controller backed by snapshots and schema templates
@@ -378,7 +378,7 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Localised built-in role names through the translator, simplified installer/admin field labels, and refreshed the internationalisation guide with guidance for module-supplied role translations.
 - Harmonised phrasing in English and German catalogues (shorter labels, clearer help text) and introduced shared keys for “not applicable” values; PHPUnit suite remains green.
 
-#### Follow-up
-- Let `SetupConfigurator`/`SystemSettings` consume the installer session payload before `bin/init` and reload default project metadata afterward.
-- Add end-to-end coverage for the installer (forms → action → `bin/init`) and document the manual verification steps in user/dev manuals.
-- Introduce field-aware tooltip binding (Stimulus/Twig helper) so contextual help attaches directly to each field without manual duplication.
+### 2025-11-04 (Session 3)
+- Added `InstallerPipelineTest` covering the full action pipeline (env write → payload → configure → lock) and seeded the test session/configuration so system settings persist without running `bin/init`.
+- Documented manual verification steps in `docs/dev/MANUAL.md` (new subsection under onboarding) and marked the installer coverage TODO as complete.
+- Tests: `php bin/phpunit`, `php bin/phpunit --filter InstallerPipelineTest`.

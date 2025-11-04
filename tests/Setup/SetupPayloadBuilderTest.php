@@ -60,6 +60,8 @@ final class SetupPayloadBuilderTest extends TestCase
         self::assertSame('prod', $json['environment']['APP_ENV']);
         self::assertSame('var/storage', $json['storage']['root']);
         self::assertSame('admin@example.com', $json['admin']['email']);
+        self::assertArrayHasKey('projects', $json);
+        self::assertIsArray($json['projects']);
     }
 
     public function testCleanupRemovesPayload(): void

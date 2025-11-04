@@ -27,7 +27,9 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
    - For root fallback testing, set `APP_FORCE_ROOT_ENTRY=1` and hit `index.php`.
    - The setup diagnostics flag compatibility mode when requests arrive via the root loader—fix docroot/rewrite configuration to clear the warning before going live.
    - Apache/IIS fallback files (`.htaccess`, `web.config`) ship with the repository, but production installs should point the web server directly at `public/`.
-   - Access the setup wizard at `http://localhost:8000/setup` to iterate through diagnostics and seed configuration. Each step now renders Symfony forms (environment, storage, administrator) that persist selections in the session before `bin/init` runs—handy for exercising the installer without touching `.env.local` manually. The environment writer merges your overrides into `.env.local` atomically right before the init script executes; `bin/init --setup --payload=var/setup/runtime.json` is then invoked automatically to seed the first administrator via `app:setup:seed`.
+- Access the setup wizard at `http://localhost:8000/setup` to iterate through diagnostics and seed configuration. Each step now renders Symfony forms (environment, storage, administrator) that persist selections in the session before `bin/init` runs—handy for exercising the installer without touching `.env.local` manually. The environment writer merges your overrides into `.env.local` atomically right before the init script executes; `bin/init --setup --payload=var/setup/runtime.json` is then invoked automatically to seed the first administrator via `app:setup:seed`.
+  - **Manual verification:** After tweaking installer behaviour, run `php bin/phpunit --filter InstallerPipelineTest` to execute the end-to-end pipeline. The test covers env writing, payload generation, configuration persistence, and lock creation.
+  - **Manual checklist:** From a clean checkout, walk through `/setup`, submit each form, and confirm `.env.local`, `var/setup/runtime.json`, and the generated lock file line up with the form inputs before opening a PR.
 
 ---
 
