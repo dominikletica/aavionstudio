@@ -1,5 +1,5 @@
 <?php
-require dirname(__DIR__, 2).'/vendor/autoload.php';
+require dirname(__DIR__).'/vendor/autoload.php';
 
 use Symfony\Component\Yaml\Yaml;
 
@@ -18,7 +18,7 @@ function flatten(array $data, string $prefix = ''): array
     return $flat;
 }
 
-$root = dirname(__DIR__, 2);
+$root = dirname(__DIR__);
 $en = Yaml::parseFile($root.'/translations/messages.en.yaml');
 $de = Yaml::parseFile($root.'/translations/messages.de.yaml');
 
