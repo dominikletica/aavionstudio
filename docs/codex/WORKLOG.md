@@ -6,10 +6,24 @@
 ## TODO
 
 ### Feat: Admin Studio UI (P0 | L)
-- [ ] Scaffold layout (sidebar, header, notifications) with Tailwind components
-- [ ] Wire navigation builder consuming module manifests + capability checks
-- [ ] Implement search palette and contextual help drawer
-- [ ] Add Cypress/Stimulus integration tests (or Symfony Panther) for core navigation UX
+- [ ] Update `base.html.twig` to accept `html_classes` and append the `admin` class; refactor `layouts/default.html.twig` / `layouts/admin.html.twig` to share the shell.
+- [ ] Keep header/footer shared by default; rely on the `admin` class + data injections for admin-specific tweaks.
+- [ ] Extend `assets/styles/base/{layout,navigation,utilities}.css` and `theme.css` tokens to cover dashboard grid, sidebar stacking, palette transitions, toast animations.
+- [ ] Restructure Twig partials (`partials/components/`, `partials/ui/`, `partials/admin/`) for reusable atoms vs. admin-only composites.
+- [ ] Implement manifest-driven navigation builder with capability filters, caching, and header/sidebar integration.
+- [ ] Surface workspace sidebar panels via `sidebar_top` / `sidebar_bottom` blocks (quick actions, module cards).
+- [ ] Scaffold `/admin` dashboard controller + Twig template with cards for snapshot status, draft throughput, activity timeline, quick links, and system health.
+- [ ] Seed `var/mock/dashboard-placeholder.json` and wire the controller to use placeholders until live telemetry lands.
+- [ ] Add ApexCharts visualisation to the dashboard and render a capability-aware quick-action bar (cache rebuild, asset rebuild, commit draft) + tooltips.
+- [ ] Implement Stimulus command palette (⌘K/CTRL+K + `/`) with route, recent entity, and system action providers backed by a JSON endpoint.
+- [ ] Build animated toast/notification system extending `partials/alerts/alerts.html.twig`.
+- [ ] Extend help provider auto-discovery so active modules/themes contribute `help.json` entries; enforce `data-help-key` hooks in the admin UI.
+- [ ] Introduce shared modal/drawer partials with Stimulus controllers covering focus trapping and ARIA roles.
+- [ ] Aggregate snapshot, draft, audit-log, and asset-rebuild metrics for the dashboard service; ensure Messenger queue state surfaces in UI.
+- [ ] Guarantee accessibility & localisation (keyboard nav, ARIA, translations, debug locale toggle) across new admin components.
+- [ ] Add functional coverage for `/admin` dashboard rendering, navigation visibility per capability, and command palette endpoint.
+- [ ] Add Stimulus/Turbo integration tests for command palette flows, help drawer, toast lifecycle (Panther or equivalent).
+- [ ] Update docs (`docs/dev/classmap.md`, `docs/dev/MANUAL.md`, forthcoming user admin guide) and record progress in this worklog.
 
 ### Feat: Schema & Template System (P0 | L)
 - [ ] Implement schema/template persistence with versioning
@@ -338,3 +352,4 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 
 ### 2025-11-04 (Session 6)
 - Kickoff: Cleared completed Todo-sections from worklog for better readability.
+- Outlined [concept for roadmap step 4](./notes/feat-admin-studio.md) and expanded corresponding todo section to mirror open tasks.
