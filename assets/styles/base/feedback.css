@@ -78,16 +78,26 @@
         @apply relative inline-flex cursor-help text-inherit;
     }
 
+    .tooltip::after,
+    .tooltip::before {
+        transition-property: opacity, transform;
+        transition-duration: var(--transition-base);
+        transition-timing-function: ease;
+        transition-delay: 0s;
+    }
+
     .tooltip::after {
         content: attr(data-tooltip);
         position: absolute;
         inset-inline-start: 50%;
         bottom: calc(100% + 0.5rem);
         translate: -50% 0.25rem;
-        max-width: 18rem;
+        max-width: 26rem;
+        min-width: 12rem;
+        width: max-content;
         background-color: var(--color-tooltip-surface);
         color: var(--color-tooltip-foreground);
-        @apply pointer-events-none rounded-sm px-3 py-2 text-xs font-medium opacity-0 shadow-sm transition duration-150;
+        @apply pointer-events-none rounded-md px-4 py-3 text-sm font-medium leading-relaxed opacity-0 shadow-md whitespace-normal break-words text-left;
     }
 
     .tooltip::before {
@@ -100,13 +110,13 @@
         border-style: solid;
         border-color: var(--color-tooltip-surface) transparent transparent transparent;
         opacity: 0;
-        transition: opacity var(--transition-fast), translate var(--transition-fast);
     }
 
     .tooltip:is(:hover, :focus-visible)::after,
     .tooltip:is(:hover, :focus-visible)::before {
         opacity: 1;
         translate: -50% 0;
+        transition-delay: 0.5s;
     }
 
     .toast {

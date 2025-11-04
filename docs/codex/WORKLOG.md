@@ -84,6 +84,8 @@
 - [x] Wire new help-content JSON loader and replace inline doc links in installer templates.
 - [x] Harden `/setup/action` streaming response by starting/saving the session before flushing NDJSON output (prevents "headers already sent" errors reported on step 2).
 - [x] Split help JSON entries into inline panels vs. targeted tooltips; update installer templates/macros to attach tooltips to environment/storage/admin fields and to surface summary actions as hoverable badges.
+- [x] Polish tooltip UX (0.5s hover delay, wider responsive container, label-level wiring for password confirmation) to keep wizard copy readable without layout jitter.
+- [x] Correct button component defaults so installer forms submit properly without passing explicit `type` parameters hook-ups.
 - [x] Tighten wizard navigation gating (disable future steps, redirect invalid `step` query selections) and add accessibility metadata (`aria-disabled`).
 - [x] Expand installer functional coverage (tooltip rendering, summary action badges, step gating) and add unit tests for `SetupConfiguration` boolean helpers + `SetupHelpLoader` target propagation.
 - [ ] Update `SetupConfigurator` + `SystemSettings` reload flow to consume session data safely prior to `bin/init`, including default project metadata handling.
@@ -342,3 +344,4 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Implemented the environment writer + installer action step (`write_env`), added session-backed wizard tests, and ensured `.env.local` merging is covered by unit tests.
 - Added persistent setup logging (`var/log/setup/*.ndjson`), JSON payload builder/cleanup, seeded admin command, and contextual handler diagnostics tests.
 - Introduced help-content loader + JSON catalogue with inline/tooltip cards rendered across installer steps.
+- Polished installer UX: wider/delayed tooltips mapped to form labels (including password confirmation), ensured button components honour submit types, and extended functional coverage to guard the new hints.
