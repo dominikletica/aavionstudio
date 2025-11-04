@@ -136,7 +136,8 @@ final class InstallerController extends AbstractController
     #[Route('/setup/admin', name: 'app_installer_admin_save', methods: ['POST'])]
     public function saveAdmin(Request $request): Response
     {
-        $form = $this->createAdminForm();
+        $helpTooltips = $this->mapHelpTooltips($this->helpLoader->load($request->getLocale()));
+        $form = $this->createAdminForm($helpTooltips);
         $this->processForm($form, $request);
 
         if (! $form->isSubmitted() || ! $form->isValid()) {
@@ -227,9 +228,9 @@ final class InstallerController extends AbstractController
             $template = 'pages/installer/diagnostics.html.twig';
         }
 
-        $forms = $this->buildFormViews($formOverrides);
         $helpEntries = $this->helpLoader->load($request->getLocale());
         $helpTooltips = $this->mapHelpTooltips($helpEntries);
+        $forms = $this->buildFormViews($formOverrides, $helpTooltips);
         $availableSteps ??= $this->computeAvailableSteps();
 
         return $this->render($template, array_merge([
@@ -686,14 +687,15 @@ final class InstallerController extends AbstractController
 
     /**
      * @param array<string, FormInterface> $overrides
+     * @param array<string, array<string, mixed>> $tooltips
      *
      * @return array<string, mixed>
      */
-    private function buildFormViews(array $overrides = []): array
+    private function buildFormViews(array $overrides = [], array $tooltips = []): array
     {
         $environmentForm = $overrides['environment_form'] ?? $this->createEnvironmentForm();
         $storageForm = $overrides['storage_form'] ?? $this->createStorageForm();
-        $adminForm = $overrides['admin_form'] ?? $this->createAdminForm();
+        $adminForm = $overrides['admin_form'] ?? $this->createAdminForm($tooltips);
 
         return [
             'environment_form' => $environmentForm->createView(),
@@ -743,7 +745,7 @@ final class InstallerController extends AbstractController
         ]);
     }
 
-    private function createAdminForm(): FormInterface
+    private function createAdminForm(array $tooltips = []): FormInterface
     {
         $settings = $this->setupConfiguration->getSystemSettings();
         $policy = [];
@@ -757,6 +759,7 @@ final class InstallerController extends AbstractController
             'password_policy' => $policy,
             'locale_choices' => $this->collectLocaleChoices(),
             'timezone_choices' => $this->collectTimezoneChoices(),
+            'tooltips' => $tooltips,
         ]);
     }
 

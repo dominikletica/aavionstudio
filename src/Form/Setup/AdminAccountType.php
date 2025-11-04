@@ -21,8 +21,11 @@ final class AdminAccountType extends AbstractType
     {
         /** @var array<string, mixed> $passwordPolicy */
         $passwordPolicy = $options['password_policy'];
+        /** @var array<string, array<string, mixed>> $tooltips */
+        $tooltips = $options['tooltips'];
         $localeChoices = $this->normalizeChoices($options['locale_choices']);
         $timezoneChoices = $this->normalizeChoices($options['timezone_choices']);
+        $passwordLabelAttr = $this->buildTooltipLabelAttr($tooltips['admin.password'] ?? null, true);
 
         $builder
             ->add('email', EmailType::class, [
@@ -47,12 +50,14 @@ final class AdminAccountType extends AbstractType
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],
+                    'label_attr' => $passwordLabelAttr,
                 ],
                 'second_options' => [
                     'label' => 'Confirm password',
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],
+                    'label_attr' => $passwordLabelAttr,
                 ],
                 'constraints' => [
                     new Assert\NotBlank(),
@@ -100,10 +105,45 @@ final class AdminAccountType extends AbstractType
             'password_policy' => [],
             'locale_choices' => [],
             'timezone_choices' => [],
+            'tooltips' => [],
         ]);
         $resolver->setAllowedTypes('password_policy', ['array']);
         $resolver->setAllowedTypes('locale_choices', ['array']);
         $resolver->setAllowedTypes('timezone_choices', ['array']);
+        $resolver->setAllowedTypes('tooltips', ['array']);
+    }
+
+    /**
+     * @param array<string, mixed>|null $tooltip
+     *
+     * @return array<string, string>
+     */
+    private function buildTooltipLabelAttr(?array $tooltip, bool $required = false): array
+    {
+        $attributes = [];
+
+        if ($required) {
+            $attributes['class'] = 'required';
+        }
+
+        if (!\is_array($tooltip)) {
+            return $attributes;
+        }
+
+        $rawBody = (string) ($tooltip['body'] ?? '');
+        $body = trim(preg_replace('/\s+/', ' ', strip_tags($rawBody)) ?? '');
+        if ($body === '') {
+            return $attributes;
+        }
+
+        $existingClass = $attributes['class'] ?? '';
+        $attributes['class'] = trim($existingClass.' tooltip');
+        $attributes['data-tooltip'] = $body;
+
+        $title = trim((string) ($tooltip['title'] ?? 'Tip'));
+        $attributes['aria-label'] = $title === '' ? $body : sprintf('%s: %s', $title, $body);
+
+        return $attributes;
     }
 
     /**

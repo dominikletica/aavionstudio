@@ -225,13 +225,19 @@ final class InstallerControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/setup?step=environment');
 
+        $this->assertSelectorExists('label.tooltip[for="environment_settings_environment"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="environment_settings_debug"][data-tooltip]');
         $this->assertSelectorExists('label.tooltip[for="environment_settings_secret"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="environment_settings_timezone"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="environment_settings_user_registration"][data-tooltip]');
 
         $this->completeEnvironmentStep($client);
         $this->completeStorageStep($client);
 
         $client->request('GET', '/setup?step=admin');
-        $this->assertSelectorExists('span.tooltip[data-tooltip]:contains("Password policy")');
+        $this->assertSelectorExists('label.tooltip[for="admin_account_email"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="admin_account_password_first"][data-tooltip]');
+        $this->assertSelectorExists('label.tooltip[for="admin_account_require_mfa"][data-tooltip]');
     }
 
     public function testSummaryFinalizeButtonHasTooltip(): void

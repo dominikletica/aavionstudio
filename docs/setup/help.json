@@ -8,9 +8,79 @@
   {
     "section": "setup.environment",
     "type": "tooltip",
+    "title": "Tagline",
+    "body": "Optional subtitle displayed in themes and emails. Leave blank if you prefer a minimal header.",
+    "target": "environment.tagline"
+  },
+  {
+    "section": "setup.environment",
+    "type": "tooltip",
+    "title": "Deployment environment",
+    "body": "Pick <code>prod</code> when preparing a real instance so Doctrine and cache behave optimally. <code>dev</code> keeps verbose logging for local workstations.",
+    "target": "environment.environment"
+  },
+  {
+    "section": "setup.environment",
+    "type": "tooltip",
+    "title": "Default timezone",
+    "body": "Tasks, publishing windows, and cron-style jobs use this timezone unless overridden per project.",
+    "target": "environment.timezone"
+  },
+  {
+    "section": "setup.environment",
+    "type": "tooltip",
     "title": "Generate a strong secret",
     "body": "If you leave the secret empty the installer will generate one automatically. Copy it to your password manager so you can rotate it later via <code>bin/init</code>.",
     "target": "environment.secret"
+  },
+  {
+    "section": "setup.environment",
+    "type": "tooltip",
+    "title": "Debug mode",
+    "body": "Leaving debug enabled in production reveals stack traces and slows down responses. Toggle it off outside staging or development boxes.",
+    "target": "environment.debug"
+  },
+  {
+    "section": "setup.environment",
+    "type": "tooltip",
+    "title": "Default URL",
+    "body": "Point this to the canonical HTTPS origin so generated links in emails and CLI commands stay consistent.",
+    "target": "environment.base_url"
+  },
+  {
+    "section": "setup.environment",
+    "type": "tooltip",
+    "title": "Instance name",
+    "body": "The name appears on the admin shell and emails. You can change it later under system settings.",
+    "target": "environment.instance_name"
+  },
+  {
+    "section": "setup.environment",
+    "type": "tooltip",
+    "title": "Support email",
+    "body": "Used for password reset and help desk notifications. Make sure the mailbox is monitored before inviting users.",
+    "target": "environment.support_email"
+  },
+  {
+    "section": "setup.environment",
+    "type": "tooltip",
+    "title": "Locale and timezone",
+    "body": "Locale drives translations and formatting defaults, timezone becomes the baseline for scheduling and publication windows.",
+    "target": "environment.locale"
+  },
+  {
+    "section": "setup.environment",
+    "type": "tooltip",
+    "title": "Self-registration",
+    "body": "Enable only if you plan to gate access with invitations or moderation; otherwise keep new account creation restricted to administrators.",
+    "target": "environment.user_registration"
+  },
+  {
+    "section": "setup.environment",
+    "type": "tooltip",
+    "title": "Maintenance mode",
+    "body": "When enabled, visitors see a friendly maintenance page while admins continue working behind the scenes.",
+    "target": "environment.maintenance_mode"
   },
   {
     "section": "setup.storage",
@@ -34,9 +104,58 @@
   {
     "section": "setup.admin",
     "type": "tooltip",
+    "title": "Primary administrator email",
+    "body": "Use a shared team inbox or on-call email so multiple people can access the first admin account if needed.",
+    "target": "admin.email"
+  },
+  {
+    "section": "setup.admin",
+    "type": "tooltip",
+    "title": "Display name",
+    "body": "Choose a friendly label—this shows up in activity feeds and notification emails.",
+    "target": "admin.display_name"
+  },
+  {
+    "section": "setup.admin",
+    "type": "tooltip",
     "title": "Password policy",
     "body": "The installer enforces the policy defined in <code>core.users.password_policy</code>. Use a passphrase that includes numbers, mixed case, and special characters for best results.",
     "target": "admin.password"
+  },
+  {
+    "section": "setup.admin",
+    "type": "tooltip",
+    "title": "Preferred locale",
+    "body": "The admin UI will default to this locale once the user signs in; they can change it later in their profile.",
+    "target": "admin.locale"
+  },
+  {
+    "section": "setup.admin",
+    "type": "tooltip",
+    "title": "Preferred timezone",
+    "body": "The timezone drives scheduling widgets and dashboard timestamps for this user.",
+    "target": "admin.timezone"
+  },
+  {
+    "section": "setup.admin",
+    "type": "tooltip",
+    "title": "Require MFA",
+    "body": "Enforce multi-factor setup during the first login to harden the account immediately.",
+    "target": "admin.require_mfa"
+  },
+  {
+    "section": "setup.admin",
+    "type": "tooltip",
+    "title": "Recovery contacts",
+    "body": "Recovery email and phone are optional but help regain access if MFA devices are lost—store them carefully.",
+    "target": "admin.recovery_email"
+  },
+  {
+    "section": "setup.admin",
+    "type": "tooltip",
+    "title": "Recovery phone",
+    "body": "Use an SMS-capable number that the security team controls; avoid personal numbers for shared administrator accounts.",
+    "target": "admin.recovery_phone"
   },
   {
     "section": "setup.diagnostics",

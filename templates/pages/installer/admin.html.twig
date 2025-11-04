@@ -12,7 +12,11 @@
             {{ form_start(admin_form, { attr: { class: 'layout-stack layout-stack--tight' } }) }}
                 {% set admin_tooltip_badges = [] %}
                 {% for entry in help['setup.admin']|default([]) %}
-                    {% if entry.type|default('') == 'tooltip' and entry.body is defined and entry.body is not same as('') %}
+                    {% if entry.type|default('') == 'tooltip'
+                        and entry.body is defined
+                        and entry.body is not same as('')
+                        and (entry.target is not defined or entry.target is same as(''))
+                    %}
                         {% set admin_tooltip_badges = admin_tooltip_badges|merge([entry]) %}
                     {% endif %}
                 {% endfor %}
