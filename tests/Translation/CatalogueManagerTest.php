@@ -157,4 +157,50 @@ final class CatalogueManagerTest extends TestCase
         self::assertSame('Fallback EN', $translator->trans('fallbackOnly', [], 'messages', 'de'));
         self::assertSame('disabled', $translator->trans('disabled', [], 'messages', 'de'));
     }
+
+    public function testLocaleReloadsWhenResourcesChange(): void
+    {
+        $moduleDir = $this->workspace.'/modules/sample-module';
+        $this->filesystem->mkdir($moduleDir.'/translations');
+
+        $translationPath = $moduleDir.'/translations/messages.en.yaml';
+        $this->filesystem->dumpFile($translationPath, "bar: 'Module Bar'\n");
+
+        $moduleManifest = ModuleManifest::fromArray([
+            'slug' => 'sample-module',
+            'name' => 'Sample Module',
+            'description' => 'Test module',
+            'priority' => 10,
+        ], $moduleDir);
+
+        $moduleRegistry = new ModuleRegistry([
+            $moduleManifest->toArray(),
+        ]);
+
+        $themeRegistry = new ThemeRegistry([]);
+        $localeProvider = new LocaleProvider($this->workspace, $moduleRegistry, $themeRegistry);
+
+        $translator = new Translator('en');
+        $translator->setFallbackLocales(['en']);
+
+        $manager = new CatalogueManager(
+            $translator,
+            $moduleRegistry,
+            $themeRegistry,
+            $localeProvider,
+            $this->workspace,
+            new ArrayAdapter(),
+        );
+
+        $manager->ensureLocale('en');
+        self::assertSame('Module Bar', $translator->trans('bar', [], 'messages', 'en'));
+
+        // Update the translation on disk and ensure the fingerprint changes.
+        $this->filesystem->dumpFile($translationPath, "bar: 'Module Bar v2'\n");
+        touch($translationPath, time() + 1);
+        clearstatcache(true, $translationPath);
+
+        $manager->ensureLocale('en');
+        self::assertSame('Module Bar v2', $translator->trans('bar', [], 'messages', 'en'));
+    }
 }
