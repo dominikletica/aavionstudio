@@ -704,6 +704,11 @@ final class InstallerController extends AbstractController
         $settings = $this->setupConfiguration->getSystemSettings();
         $env = $this->setupConfiguration->getEnvironmentOverrides();
 
+        $baseUrl = (string) ($settings['core.url'] ?? '');
+        if ($baseUrl === '' && isset($_ENV['DEFAULT_URI']) && is_string($_ENV['DEFAULT_URI'])) {
+            $baseUrl = (string) $_ENV['DEFAULT_URI'];
+        }
+
         return [
             'environment' => $env['APP_ENV'] ?? 'dev',
             'debug' => ($env['APP_DEBUG'] ?? '1') !== '0',
@@ -711,7 +716,7 @@ final class InstallerController extends AbstractController
             'instance_name' => (string) ($settings['core.instance_name'] ?? ''),
             'tagline' => (string) ($settings['core.tagline'] ?? ''),
             'support_email' => (string) ($settings['core.support_email'] ?? ''),
-            'base_url' => (string) ($settings['core.url'] ?? ''),
+            'base_url' => $baseUrl,
             'locale' => (string) ($settings['core.locale'] ?? 'en'),
             'timezone' => (string) ($settings['core.timezone'] ?? 'UTC'),
             'user_registration' => (bool) ($settings['core.user_registration'] ?? false),

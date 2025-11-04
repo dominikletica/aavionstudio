@@ -11,106 +11,230 @@ use Symfony\Component\Filesystem\Filesystem;
 
 final class SetupEnvironmentWriter
 {
-    private const ENV_FILE = '/.env';
-    private const ENV_LOCAL_FILE = '/.env.local';
+    /**
+     * @var string[]
+     */
+    private const KNOWN_ENV_KEYS = [
+        'APP_ENV',
+        'APP_DEBUG',
+        'APP_SECRET',
+        'APP_PRODUCT_NAME',
+        'APP_VERSION',
+        'APP_CHANNEL',
+        'APP_RELEASE_DATE',
+        'APP_STORAGE_ROOT',
+        'DATABASE_URL',
+        'MESSENGER_TRANSPORT_DSN',
+        'MAILER_DSN',
+        'LOCK_DSN',
+        'SQLITE_BUSY_TIMEOUT_MS',
+        'DEFAULT_URI',
+    ];
 
     public function __construct(
+        private readonly Filesystem $filesystem,
+        #[Autowire('%app.setup.env_base_path%')]
+        private readonly string $baseEnvPath,
+        #[Autowire('%app.setup.env_local_path%')]
+        private readonly string $localEnvPath,
         #[Autowire('%kernel.project_dir%')]
         private readonly string $projectDir,
-        private readonly Filesystem $filesystem,
     ) {
     }
 
     /**
-     * @param array<string, string> $environmentOverrides
-     * @param array<string, mixed>  $storageConfig
+     * @param array<string,string> $environmentOverrides
+     * @param array<string,mixed>  $storageConfig
      */
     public function write(array $environmentOverrides, array $storageConfig): void
     {
-        $resolved = $this->mergeEnvironment($environmentOverrides);
+        $baseEnv = $this->loadEnvFile($this->baseEnvPath);
+        $localEnv = $this->loadEnvFile($this->localEnvPath);
 
-        $storageRoot = \is_string($storageConfig['root'] ?? null) ? trim((string) $storageConfig['root']) : '';
-        if ($storageRoot !== '') {
-            $resolved['APP_STORAGE_ROOT'] = $storageRoot;
+        $merged = $this->mergeEnvironment($environmentOverrides, $baseEnv, $localEnv);
+
+        $storageRoot = $this->resolveStorageRoot($storageConfig, $merged['APP_STORAGE_ROOT'] ?? null);
+        if ($storageRoot !== null) {
+            $merged['APP_STORAGE_ROOT'] = $storageRoot;
+            $merged['DATABASE_URL'] = $this->buildDatabaseUrl($storageRoot, $merged['DATABASE_URL'] ?? null);
+            $this->ensureStorageDirectories($storageRoot);
         }
 
-        $resolved = $this->normalizeEntries($resolved);
-        $this->writeEnvLocal($resolved);
+        foreach (['MESSENGER_TRANSPORT_DSN', 'MAILER_DSN', 'LOCK_DSN'] as $key) {
+            if (!isset($merged[$key]) && isset($baseEnv[$key])) {
+                $merged[$key] = $baseEnv[$key];
+            }
+        }
+
+        $entries = $this->filterEntries($merged, $localEnv);
+
+        $this->writeEnvLocal($entries);
     }
 
     /**
-     * @param array<string, string> $overrides
+     * @param array<string,string> $overrides
+     * @param array<string,string> $base
+     * @param array<string,string> $local
      *
-     * @return array<string, string>
+     * @return array<string,string>
      */
-    private function mergeEnvironment(array $overrides): array
+    private function mergeEnvironment(array $overrides, array $base, array $local): array
     {
-        $base = $this->loadEnvFile(self::ENV_FILE);
-        $local = $this->loadEnvFile(self::ENV_LOCAL_FILE);
         $merged = array_merge($base, $local);
 
-        foreach ($overrides as $key => $value) {
-            if (!\is_string($key) || $key === '') {
-                continue;
-            }
+        $appEnv = $overrides['APP_ENV'] ?? ($merged['APP_ENV'] ?? 'dev');
+        $merged['APP_ENV'] = $appEnv;
 
-            if ($value === '') {
-                continue;
-            }
-
-            $merged[$key] = $value;
+        if (array_key_exists('APP_DEBUG', $overrides)) {
+            $merged['APP_DEBUG'] = ((bool) $overrides['APP_DEBUG']) ? '1' : '0';
+        } elseif (!isset($merged['APP_DEBUG'])) {
+            $merged['APP_DEBUG'] = $appEnv === 'prod' ? '0' : '1';
         }
 
-        if (!isset($merged['APP_ENV'])) {
-            $merged['APP_ENV'] = 'dev';
-        }
-
-        if (!isset($merged['APP_DEBUG'])) {
-            $merged['APP_DEBUG'] = $merged['APP_ENV'] === 'prod' ? '0' : '1';
+        if (isset($overrides['APP_SECRET']) && trim((string) $overrides['APP_SECRET']) !== '') {
+            $merged['APP_SECRET'] = trim((string) $overrides['APP_SECRET']);
         }
 
         return $merged;
     }
 
     /**
-     * @param array<string, string> $entries
-     *
-     * @return array<string, string>
+     * @param array<string,mixed> $storageConfig
      */
-    private function normalizeEntries(array $entries): array
+    private function resolveStorageRoot(array $storageConfig, ?string $current): string
     {
-        $normalized = [];
+        $root = $storageConfig['root'] ?? null;
 
-        foreach ($entries as $key => $value) {
-            if (!\is_string($key) || $key === '') {
+        if (\is_string($root) && trim($root) !== '') {
+            return $this->normalizeStorageRoot($root);
+        }
+
+        if (\is_string($current) && trim($current) !== '') {
+            return $this->normalizeStorageRoot($current);
+        }
+
+        return SetupConfiguration::DEFAULT_STORAGE_ROOT;
+    }
+
+    private function normalizeStorageRoot(string $root): string
+    {
+        $root = trim($root);
+
+        if ($root === '') {
+            return SetupConfiguration::DEFAULT_STORAGE_ROOT;
+        }
+
+        if ($this->isAbsolutePath($root)) {
+            return rtrim(str_replace('\\', '/', $root), '/');
+        }
+
+        return trim(str_replace('\\', '/', $root), '/');
+    }
+
+    private function buildDatabaseUrl(string $storageRoot, ?string $existing): string
+    {
+        if ($storageRoot === '') {
+            return $existing ?? 'sqlite:///%kernel.project_dir%/var/system.brain';
+        }
+
+        if ($this->isAbsolutePath($storageRoot)) {
+            $absolute = rtrim(str_replace('\\', '/', $storageRoot), '/');
+            $dbPath = $absolute.'/databases/system.brain';
+
+            return 'sqlite://'.(str_starts_with($dbPath, '/') ? '' : '/').$dbPath;
+        }
+
+        $trimmed = trim($storageRoot, '/');
+        $segments = $trimmed === '' ? '' : $trimmed.'/';
+
+        return sprintf('sqlite:///%s', '%kernel.project_dir%/'.$segments.'databases/system.brain');
+    }
+
+    private function ensureStorageDirectories(string $storageRoot): void
+    {
+        $absolute = $this->resolveAbsoluteStorageRoot($storageRoot);
+        $absolute = rtrim($absolute, DIRECTORY_SEPARATOR);
+
+        $paths = [
+            $absolute,
+            $absolute.DIRECTORY_SEPARATOR.'databases',
+            $absolute.DIRECTORY_SEPARATOR.'uploads',
+            $absolute.DIRECTORY_SEPARATOR.'snapshots',
+            $absolute.DIRECTORY_SEPARATOR.'backups',
+        ];
+
+        $this->filesystem->mkdir($paths, 0775);
+    }
+
+    private function resolveAbsoluteStorageRoot(string $storageRoot): string
+    {
+        if ($this->isAbsolutePath($storageRoot)) {
+            return str_replace('/', DIRECTORY_SEPARATOR, $storageRoot);
+        }
+
+        $normalized = trim($storageRoot, '/');
+        if ($normalized === '') {
+            $normalized = SetupConfiguration::DEFAULT_STORAGE_ROOT;
+        }
+
+        return $this->projectDir.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $normalized);
+    }
+
+    private function isAbsolutePath(string $path): bool
+    {
+        if ($path === '') {
+            return false;
+        }
+
+        if ($path[0] === '/' || $path[0] === '\\') {
+            return true;
+        }
+
+        return (bool) preg_match('#^[a-zA-Z]:[\\\\/]#', $path);
+    }
+
+    /**
+     * @param array<string,string> $merged
+     * @param array<string,string> $local
+     *
+     * @return array<string,string>
+     */
+    private function filterEntries(array $merged, array $local): array
+    {
+        $keys = array_merge(self::KNOWN_ENV_KEYS, array_keys($local));
+        $keys = array_unique($keys);
+
+        $filtered = [];
+        foreach ($keys as $key) {
+            if (!isset($merged[$key])) {
                 continue;
             }
 
-            $normalized[$key] = $this->stringifyValue($value);
+            $filtered[$key] = $merged[$key];
         }
 
-        return $normalized;
+        ksort($filtered);
+
+        return array_map($this->stringifyValue(...), $filtered);
     }
 
     private function writeEnvLocal(array $entries): void
     {
-        $path = $this->projectDir.self::ENV_LOCAL_FILE;
-        $tmpPath = $path.'.tmp';
+        $tmpPath = $this->localEnvPath.'.tmp';
 
         $contents = $this->dumpEnv($entries);
 
         $this->filesystem->dumpFile($tmpPath, $contents);
         $this->filesystem->chmod($tmpPath, 0640);
-        $this->filesystem->rename($tmpPath, $path, true);
+        $this->filesystem->rename($tmpPath, $this->localEnvPath, true);
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string,string>
      */
-    private function loadEnvFile(string $relativePath): array
+    private function loadEnvFile(string $path): array
     {
-        $path = $this->projectDir.$relativePath;
-        if (!is_file($path)) {
+        if ($path === '' || !is_file($path)) {
             return [];
         }
 
@@ -124,7 +248,7 @@ final class SetupEnvironmentWriter
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string,string>
      */
     private function fallbackParse(string $raw): array
     {
@@ -169,13 +293,14 @@ final class SetupEnvironmentWriter
     }
 
     /**
-     * @param array<string, string> $entries
+     * @param array<string,string> $entries
      */
     private function dumpEnv(array $entries): string
     {
         ksort($entries);
 
         $lines = [];
+
         foreach ($entries as $key => $value) {
             $lines[] = sprintf('%s=%s', $key, $this->formatValue($value));
         }

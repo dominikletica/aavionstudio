@@ -21,7 +21,7 @@ final class SetupConfiguration
     private const KEY_ENVIRONMENT_OVERRIDES = 'environment_overrides';
     private const KEY_STORAGE = 'storage';
     private const KEY_ADMIN = 'admin';
-    private const DEFAULT_STORAGE_ROOT = 'var/storage';
+    public const DEFAULT_STORAGE_ROOT = 'var/storage';
     /** @var array<string, mixed>|null */
     private ?array $snapshot = null;
     private bool $snapshotActive = false;
@@ -328,6 +328,9 @@ final class SetupConfiguration
         if ($session !== null) {
             $session->remove(self::SESSION_KEY);
         }
+
+        $this->snapshot = null;
+        $this->snapshotActive = false;
     }
 
     private function getSessionValue(string $key): mixed

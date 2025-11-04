@@ -18,6 +18,8 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 final class InstallerPipelineTest extends KernelTestCase
 {
     private string $projectDir;
+    private string $envLocalPath;
+    private string $payloadPath;
     private Filesystem $filesystem;
 
     protected static function getKernelClass(): string
@@ -33,6 +35,12 @@ final class InstallerPipelineTest extends KernelTestCase
         $this->projectDir = self::getContainer()->getParameter('kernel.project_dir');
         \assert(\is_string($this->projectDir));
         $this->filesystem = new Filesystem();
+        $envLocalPath = self::getContainer()->getParameter('app.setup.env_local_path');
+        \assert(\is_string($envLocalPath));
+        $this->envLocalPath = $envLocalPath;
+        $payloadPath = self::getContainer()->getParameter('app.setup.payload_path');
+        \assert(\is_string($payloadPath));
+        $this->payloadPath = $payloadPath;
 
         /** @var RequestStack $requestStack */
         $requestStack = self::getContainer()->get(RequestStack::class);
@@ -75,16 +83,10 @@ final class InstallerPipelineTest extends KernelTestCase
             ],
         ]);
 
-        $payloadDir = $this->projectDir.'/var/setup';
+        $payloadDir = \dirname($this->payloadPath);
         $this->filesystem->mkdir($payloadDir);
-        $payloadPath = $payloadDir.'/runtime.json';
 
-        $this->filesystem->dumpFile($payloadPath, json_encode([
-            'environment' => [
-                'APP_ENV' => 'test',
-                'APP_DEBUG' => '1',
-                'APP_SECRET' => 'integration-secret',
-            ],
+        $this->filesystem->dumpFile($this->payloadPath, json_encode([
             'storage' => [
                 'root' => 'var/integration-storage',
             ],
@@ -128,12 +130,12 @@ final class InstallerPipelineTest extends KernelTestCase
     protected function tearDown(): void
     {
         $this->filesystem->remove([
-            $this->projectDir.'/var/setup/runtime.json',
-            $this->projectDir.'/var/setup',
+            $this->payloadPath,
+            \dirname($this->payloadPath),
             $this->projectDir.'/var/log/setup',
             $this->projectDir.'/var/integration-storage',
         ]);
-        $this->filesystem->remove($this->projectDir.'/.env.local');
+        $this->filesystem->remove($this->envLocalPath);
         /** @var SetupState $setupState */
         $setupState = self::getContainer()->get(SetupState::class);
         $this->filesystem->remove($setupState->lockFilePath());
@@ -164,10 +166,12 @@ final class InstallerPipelineTest extends KernelTestCase
             }
         );
 
-        $envFile = $this->projectDir.'/.env.local';
-        self::assertFileExists($envFile);
-        $envContents = (string) file_get_contents($envFile);
+        self::assertFileExists($this->envLocalPath);
+        $envContents = (string) file_get_contents($this->envLocalPath);
         self::assertStringContainsString('APP_ENV=test', $envContents);
+        self::assertStringContainsString('APP_SECRET=integration-secret', $envContents);
+        self::assertStringContainsString('APP_STORAGE_ROOT=var/integration-storage', $envContents);
+        self::assertStringContainsString('DATABASE_URL=sqlite:///%kernel.project_dir%/var/integration-storage/databases/system.brain', $envContents);
 
         /** @var Connection $connection */
         $connection = self::getContainer()->get(Connection::class);

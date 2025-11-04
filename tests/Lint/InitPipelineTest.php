@@ -29,14 +29,14 @@ final class InitPipelineTest extends TestCase
         $this->runConsoleCommand(['messenger:setup-transports', '--no-interaction'], 'Messenger transports setup');
 
         self::assertDirectoryExists($this->projectDir.'/public/assets', 'Compiled assets directory missing.');
-        self::assertFileExists($this->projectDir.'/var/system.brain', 'SQLite database not created.');
+        self::assertFileExists($this->projectDir.'/var/test/system.brain', 'SQLite database not created.');
     }
 
     private function resetProjectState(): void
     {
         $this->clearDirectory($this->projectDir.'/public/assets', true);
 
-        foreach (glob($this->projectDir.'/var/*.brain*') as $databaseFile) {
+        foreach (glob($this->projectDir.'/var/test/*.brain*') ?: [] as $databaseFile) {
             if (is_file($databaseFile)) {
                 @unlink($databaseFile);
             }
@@ -44,6 +44,7 @@ final class InitPipelineTest extends TestCase
 
         $this->clearDirectory($this->projectDir.'/var/cache');
         $this->clearDirectory($this->projectDir.'/var/log');
+        $this->clearDirectory($this->projectDir.'/var/test', false);
     }
 
     private function clearDirectory(string $path, bool $removeRoot = false): void
@@ -90,18 +91,14 @@ final class InitPipelineTest extends TestCase
      */
     private function runConsoleCommand(array $arguments, string $label): void
     {
-        $command = array_merge(
-            ['php', 'bin/console'],
-            $arguments,
-            ['--env=dev', '--no-debug', '--quiet'],
-        );
+        $command = array_merge(['php', 'bin/console'], $arguments, ['--env=test', '--no-debug', '--quiet']);
 
         $process = new Process(
             $command,
             $this->projectDir,
             [
-                'APP_ENV' => 'dev',
-                'APP_DEBUG' => '1',
+                'APP_ENV' => 'test',
+                'APP_DEBUG' => '0',
             ],
         );
         $process->setTimeout(self::PROCESS_TIMEOUT);

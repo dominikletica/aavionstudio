@@ -390,3 +390,12 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Extended `SetupConfiguration` with `freeze()`/snapshot support so action steps can read wizard data without touching the persisted session payload, and added a lightweight NDJSON error logger for streamed failures.
 - Updated developer documentation (manual + class map) to describe the session strategy and new configuration hooks.
 - Tests: `php bin/phpunit`, `php bin/phpunit tests/Controller/Installer/ActionControllerTest.php`.
+- Rewired the env writer/bin.init pipeline so `.env.local` only stores immutable runtime variables (APP_ENV/APP_DEBUG/APP_SECRET, DATABASE_URL, DSNs, storage root, release metadata) while the payload now carries only storage/admin/system-setting/project data for `app:setup:seed`; computed SQLite locations from the chosen storage root and ensured required directories are created.
+- Added a router context subscriber so CLI URL generation prefers the stored system setting (`core.url`) and falls back to `DEFAULT_URI` when unset.
+- Hardened test isolation: installer pipeline tests and lint helpers now operate exclusively on `var/test` artefacts, preventing accidental deletion of the real `.env.local` during the suite.
+- Tests: `php bin/phpunit`.
+
+#### Side-Notes (2025-11-04)
+- We need to make sure, that help.json gets moved out of docs/ since releases do not include docs/.
+- We need to adjust the migrations: app_projects, app_project_user, app_schema & app_templates belong into user space. Consumers have to be edited accordingly.
+- Additionally we'll need app_presets (system.brain, to manage export presets) and app_schema_versions (user.brain to manage different versions of a schema, so that editing a schema doesn't automatically invalidate existing entities). -- Note: Schema is referenced by entity_type to determine, what fields the payload should include and how they are rendered. Also a Schema links to a template (database stored TWIG, not a template path!) that can override the default template an entity payload using this schema is rendered in frontend ({% block payload %}) - our entity renderer should fill this block either with a default logic, or with the provided template if exists. We'll need to specify a base-template that extends templates/layouts/entity.html.twig to use this block.

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Setup;
 
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Filesystem\Filesystem;
 
 final class SetupPayloadBuilder
 {
     public function __construct(
         private readonly SetupConfiguration $configuration,
-        #[Autowire('%kernel.project_dir%')]
-        private readonly string $projectDir,
         private readonly Filesystem $filesystem,
+        #[Autowire('%app.setup.payload_path%')]
+        private readonly string $payloadPath,
     ) {
     }
 
@@ -23,29 +23,27 @@ final class SetupPayloadBuilder
     public function build(): string
     {
         $payload = [
-            'environment' => $this->configuration->getEnvironmentOverrides(),
             'storage' => $this->configuration->getStorageConfig(),
             'admin' => $this->configuration->getAdminAccount(),
             'settings' => $this->configuration->getSystemSettings(),
             'projects' => $this->configuration->getProjects(),
         ];
 
-        $payloadDir = $this->projectDir.'/var/setup';
+        $payloadDir = \dirname($this->payloadPath);
         $this->filesystem->mkdir($payloadDir);
 
-        $path = $payloadDir.'/runtime.json';
         $encoded = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
-        $this->filesystem->dumpFile($path, $encoded);
-        $this->filesystem->chmod($path, 0600);
+        $this->filesystem->dumpFile($this->payloadPath, $encoded);
+        $this->filesystem->chmod($this->payloadPath, 0600);
 
-        return $path;
+        return $this->payloadPath;
     }
 
     public function cleanup(): void
     {
-        $path = $this->projectDir.'/var/setup/runtime.json';
-        if ($this->filesystem->exists($path)) {
-            $this->filesystem->remove($path);
+        if ($this->filesystem->exists($this->payloadPath)) {
+            $this->filesystem->remove($this->payloadPath);
         }
     }
 }
+

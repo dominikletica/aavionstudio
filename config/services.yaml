@@ -13,6 +13,9 @@ parameters:
     app.default_project_slug: 'default'
     app.installer_action_mode_default: 'stream_keep_session'
     app.installer_action_mode: '%env(default:app.installer_action_mode_default:INSTALLER_ACTION_MODE)%'
+    app.setup.env_base_path: '%kernel.project_dir%/.env'
+    app.setup.env_local_path: '%kernel.project_dir%/.env.local'
+    app.setup.payload_path: '%kernel.project_dir%/var/setup/runtime.json'
 
 services:
     # default configuration for services in *this* file

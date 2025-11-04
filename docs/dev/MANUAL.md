@@ -31,6 +31,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
   - **Manual verification:** After tweaking installer behaviour, run `php bin/phpunit --filter InstallerPipelineTest` to execute the end-to-end pipeline. The test covers env writing, payload generation, configuration persistence, and lock creation.
   - **Manual checklist:** From a clean checkout, walk through `/setup`, submit each form, and confirm `.env.local`, `var/setup/runtime.json`, and the generated lock file line up with the form inputs before opening a PR.
   - **Action streaming modes:** The `/setup/action` endpoint supports streaming (default) and buffered execution. Toggle via `INSTALLER_ACTION_MODE` using `stream_keep_session` to snapshot wizard data, replace the HTTP session with an in-memory store, and stream NDJSON logs without triggering header writes, or `buffered` to execute the pipeline synchronously and return the full event log as JSON. Switch to buffered mode if middleware still depends on the live session while the action runs.
+  - **Installer outputs:** `.env.local` contains only immutable runtime variables (`APP_ENV`, `APP_DEBUG`, `APP_SECRET`, `DATABASE_URL`, transport DSNs, storage root, release metadata). All configurable settings (instance name, base URL, etc.) are persisted to the database via `app:setup:seed`; the payload JSON only carries storage, administrator, system-settings, and project data used by the seeding command.
 
 ---
 

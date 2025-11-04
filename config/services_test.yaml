@@ -1,5 +1,6 @@
 parameters:
-    app.database_url: 'sqlite:///%kernel.project_dir%/var/test/system.brain'
     app.system_database_path: '%kernel.project_dir%/var/test/system.brain'
     app.user_database_path: '%kernel.project_dir%/var/test/user.brain'
     app.setup_lock_path: '%kernel.project_dir%/var/test/.setup.lock'
+    app.setup.env_local_path: '%kernel.project_dir%/var/test/.env.local'
+    app.setup.payload_path: '%kernel.project_dir%/var/test/setup/runtime.json'

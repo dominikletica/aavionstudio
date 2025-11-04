@@ -93,7 +93,6 @@ final class SetupSeedCommandTest extends KernelTestCase
         $projects = require $this->projectDir.'/config/app/projects.php';
 
         $payload = [
-            'environment' => ['APP_ENV' => 'test', 'APP_DEBUG' => '1'],
             'storage' => ['root' => 'var/storage'],
             'admin' => [
                 'email' => 'admin@example.com',
