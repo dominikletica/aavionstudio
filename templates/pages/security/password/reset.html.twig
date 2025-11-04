@@ -1,22 +1,22 @@
 {% extends 'layouts/security.html.twig' %}
 
-{% set security_title = 'Set a new password'|trans %}
+{% set security_title = 'security.password.reset.page_title'|trans %}
 
 {% block content %}
     <header class="layout-stack--tight">
-        <h1 class="text-heading text-2xl">{{ 'Choose a new password'|trans }}</h1>
-        <p class="text-text-muted">{{ 'Enter and confirm your new password to secure your account.'|trans }}</p>
+        <h1 class="text-heading text-2xl">{{ 'security.password.reset.heading'|trans }}</h1>
+        <p class="text-text-muted">{{ 'security.password.reset.subtitle'|trans }}</p>
     </header>
 
     {{ form_start(resetForm, { attr: { class: 'layout-stack' } }) }}
         {{ form_row(resetForm.plainPassword.first) }}
         {{ form_row(resetForm.plainPassword.second) }}
         {% include 'partials/forms/buttons/primary.html.twig' with {
-            label: 'Update password'|trans
+            label: 'security.password.reset.actions.submit'|trans
         } %}
     {{ form_end(resetForm) }}
 
     <p class="text-sm text-text-muted">
-        <a class="text-primary hover:text-primary-darker" href="{{ path('app_login') }}">{{ 'Back to sign in'|trans }}</a>
+        <a class="text-primary hover:text-primary-darker" href="{{ path('app_login') }}">{{ 'security.password.shared.back_to_login'|trans }}</a>
     </p>
 {% endblock %}

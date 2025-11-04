@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsController]
 final class InstallerController extends AbstractController
@@ -40,6 +41,7 @@ final class InstallerController extends AbstractController
         private readonly SetupConfiguration $setupConfiguration,
         private readonly SetupHelpLoader $helpLoader,
         private readonly LocaleProvider $localeProvider,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -63,7 +65,7 @@ final class InstallerController extends AbstractController
     public function diagnostics(): JsonResponse
     {
         if ($this->setupState->isCompleted()) {
-            return $this->json(['error' => 'Setup already completed.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['error' => $this->translator->trans('installer.errors.already_completed')], Response::HTTP_BAD_REQUEST);
         }
 
         return $this->json([
@@ -99,7 +101,7 @@ final class InstallerController extends AbstractController
             ]);
         }
 
-        $this->addFlash('success', 'Environment settings saved.');
+        $this->addFlash('success', $this->translator->trans('flash.installer.environment_saved'));
 
         return $this->redirectToRoute('app_installer', ['step' => 'environment']);
     }
@@ -130,7 +132,7 @@ final class InstallerController extends AbstractController
             ]);
         }
 
-        $this->addFlash('success', 'Storage settings saved.');
+        $this->addFlash('success', $this->translator->trans('flash.installer.storage_saved'));
 
         return $this->redirectToRoute('app_installer', ['step' => 'storage']);
     }
@@ -172,7 +174,7 @@ final class InstallerController extends AbstractController
             ]);
         }
 
-        $this->addFlash('success', 'Administrator details saved.');
+        $this->addFlash('success', $this->translator->trans('flash.installer.admin_saved'));
 
         return $this->redirectToRoute('app_installer', ['step' => 'admin']);
     }
@@ -429,32 +431,32 @@ final class InstallerController extends AbstractController
         $requirements = [
             'ext-intl' => [
                 'label' => 'intl',
-                'hint' => 'Install/enable the Intl extension (`php-intl`) to provide locale, date, and number formatting.',
+                'hint_key' => 'installer.diagnostics.extensions.hints.intl',
                 'required' => true,
             ],
             'ext-sqlite3' => [
                 'label' => 'sqlite3',
-                'hint' => 'Enable the SQLite3 extension to power the system and user data stores.',
+                'hint_key' => 'installer.diagnostics.extensions.hints.sqlite',
                 'required' => true,
             ],
             'ext-fileinfo' => [
                 'label' => 'fileinfo',
-                'hint' => 'Enable the Fileinfo extension for media uploads and MIME detection.',
+                'hint_key' => 'installer.diagnostics.extensions.hints.fileinfo',
                 'required' => true,
             ],
             'ext-json' => [
                 'label' => 'json',
-                'hint' => 'Enable the JSON extension. Most PHP distributions ship it by default.',
+                'hint_key' => 'installer.diagnostics.extensions.hints.json',
                 'required' => true,
             ],
             'ext-mbstring' => [
                 'label' => 'mbstring',
-                'hint' => 'Enable mbstring for multibyte string handling (content editing & localisation).',
+                'hint_key' => 'installer.diagnostics.extensions.hints.mbstring',
                 'required' => true,
             ],
             'ext-ctype' => [
                 'label' => 'ctype',
-                'hint' => 'Enable the ctype extension for validation helpers.',
+                'hint_key' => 'installer.diagnostics.extensions.hints.ctype',
                 'required' => true,
             ],
         ];
@@ -470,7 +472,7 @@ final class InstallerController extends AbstractController
                 'label' => $meta['label'],
                 'available' => $available,
                 'required' => (bool) $meta['required'],
-                'hint' => $meta['hint'],
+                'hint' => $this->translator->trans($meta['hint_key']),
             ];
         }
 
@@ -484,39 +486,39 @@ final class InstallerController extends AbstractController
     {
         $paths = [
             'var_root' => [
-                'label' => 'var/ directory',
+                'label_key' => 'installer.diagnostics.filesystem.labels.var_root',
                 'path' => $projectDir.'/var',
-                'hint' => 'Ensure the web user can write to var/ for cache, logs, and databases.',
+                'hint_key' => 'installer.diagnostics.filesystem.hints.var_root',
             ],
             'var_cache' => [
-                'label' => 'var/cache',
+                'label_key' => 'installer.diagnostics.filesystem.labels.var_cache',
                 'path' => $projectDir.'/var/cache',
-                'hint' => 'Symfony stores runtime cache here; make sure it exists and is writable.',
+                'hint_key' => 'installer.diagnostics.filesystem.hints.var_cache',
             ],
             'var_log' => [
-                'label' => 'var/log',
+                'label_key' => 'installer.diagnostics.filesystem.labels.var_log',
                 'path' => $projectDir.'/var/log',
-                'hint' => 'Application logs are written here; grant write access.',
+                'hint_key' => 'installer.diagnostics.filesystem.hints.var_log',
             ],
             'var_snapshots' => [
-                'label' => 'var/snapshots',
+                'label_key' => 'installer.diagnostics.filesystem.labels.var_snapshots',
                 'path' => $projectDir.'/var/snapshots',
-                'hint' => 'Published site snapshots live here; create the directory if missing.',
+                'hint_key' => 'installer.diagnostics.filesystem.hints.var_snapshots',
             ],
             'var_uploads' => [
-                'label' => 'var/uploads',
+                'label_key' => 'installer.diagnostics.filesystem.labels.var_uploads',
                 'path' => $projectDir.'/var/uploads',
-                'hint' => 'Uploads and temporary media storage; ensure the directory exists and is writable.',
+                'hint_key' => 'installer.diagnostics.filesystem.hints.var_uploads',
             ],
             'var_themes' => [
-                'label' => 'var/themes',
+                'label_key' => 'installer.diagnostics.filesystem.labels.var_themes',
                 'path' => $projectDir.'/var/themes',
-                'hint' => 'Theme bundles unpack here; create and grant write permissions.',
+                'hint_key' => 'installer.diagnostics.filesystem.hints.var_themes',
             ],
             'public_assets' => [
-                'label' => 'public/assets',
+                'label_key' => 'installer.diagnostics.filesystem.labels.public_assets',
                 'path' => $projectDir.'/public/assets',
-                'hint' => 'AssetMapper builds JS/CSS here; make sure deploy user can write.',
+                'hint_key' => 'installer.diagnostics.filesystem.hints.public_assets',
             ],
         ];
 
@@ -530,12 +532,12 @@ final class InstallerController extends AbstractController
 
             $reports[] = [
                 'code' => $code,
-                'label' => $details['label'],
+                'label' => $this->translator->trans($details['label_key']),
                 'path' => $path,
                 'exists' => $exists,
                 'writable' => $writable,
                 'parent_writable' => $parentWritable,
-                'hint' => $details['hint'],
+                'hint' => $this->translator->trans($details['hint_key']),
             ];
         }
 
@@ -552,7 +554,7 @@ final class InstallerController extends AbstractController
         return [
             [
                 'type' => 'log',
-                'message' => 'Start setup routine...',
+                'message' => $this->translator->trans('installer.action.log.start'),
             ],
             [
                 'type' => 'write_env',
@@ -572,7 +574,7 @@ final class InstallerController extends AbstractController
             ],
             [
                 'type' => 'log',
-                'message' => 'Setup completed successfully.',
+                'message' => $this->translator->trans('installer.action.log.completed'),
             ],
         ];
     }

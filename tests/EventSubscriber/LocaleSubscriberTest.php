@@ -6,10 +6,14 @@ namespace App\Tests\EventSubscriber;
 
 use App\EventSubscriber\LocaleSubscriber;
 use App\Internationalization\LocaleProvider;
+use App\Module\ModuleRegistry;
+use App\Theme\ThemeRegistry;
 use App\Settings\SystemSettings;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -44,7 +48,7 @@ final class LocaleSubscriberTest extends TestCase
 
         $provider = $this->createProvider(['de']);
 
-        $subscriber = new LocaleSubscriber($security, $provider, $this->createSystemSettings());
+        $subscriber = new LocaleSubscriber($security, $provider, $this->createSystemSettings(), true);
 
         $request = Request::create('/');
         $event = $this->createRequestEvent($request);
@@ -61,7 +65,7 @@ final class LocaleSubscriberTest extends TestCase
 
         $provider = $this->createProvider(['fr']);
 
-        $subscriber = new LocaleSubscriber($security, $provider, $this->createSystemSettings());
+        $subscriber = new LocaleSubscriber($security, $provider, $this->createSystemSettings(), true);
 
         $request = Request::create('/', 'GET', [], [], [], ['HTTP_ACCEPT_LANGUAGE' => 'fr,en;q=0.8']);
         $event = $this->createRequestEvent($request);
@@ -77,7 +81,7 @@ final class LocaleSubscriberTest extends TestCase
 
         $provider = $this->createProvider(['de']);
 
-        $subscriber = new LocaleSubscriber($security, $provider, $this->createSystemSettings('de'));
+        $subscriber = new LocaleSubscriber($security, $provider, $this->createSystemSettings('de'), true);
 
         $request = Request::create('/', 'GET', [], [], [], ['HTTP_ACCEPT_LANGUAGE' => 'es']);
         $event = $this->createRequestEvent($request);
@@ -93,13 +97,36 @@ final class LocaleSubscriberTest extends TestCase
 
         $provider = $this->createProvider([]);
 
-        $subscriber = new LocaleSubscriber($security, $provider, $this->createSystemSettings('it'));
+        $subscriber = new LocaleSubscriber($security, $provider, $this->createSystemSettings('it'), true);
 
         $request = Request::create('/');
         $event = $this->createRequestEvent($request);
         $subscriber->onKernelRequest($event);
 
         self::assertSame('en', $request->getLocale());
+    }
+
+    public function testDebugOverridesTakePrecedence(): void
+    {
+        $security = $this->createMock(Security::class);
+        $security->method('getUser')->willReturn(null);
+
+        $provider = $this->createProvider(['de', 'en']);
+
+        $subscriber = new LocaleSubscriber($security, $provider, $this->createSystemSettings(), true);
+
+        $request = Request::create('/');
+        $session = new Session(new MockArraySessionStorage());
+        $session->set('_app.translation_override', 'de');
+        $session->set('_app.translation_debug_keys', true);
+        $request->setSession($session);
+
+        $event = $this->createRequestEvent($request);
+        $subscriber->onKernelRequest($event);
+
+        self::assertSame('de', $request->getLocale());
+        self::assertTrue($request->attributes->get('_translation_debug_keys'));
+        self::assertSame('keys', $request->attributes->get('_debug_locale_mode'));
     }
 
     private function createProvider(array $locales): LocaleProvider
@@ -113,7 +140,11 @@ final class LocaleSubscriberTest extends TestCase
 
         $this->tempDirs[] = $projectDir;
 
-        return new LocaleProvider($projectDir);
+        return new LocaleProvider(
+            $projectDir,
+            new ModuleRegistry([]),
+            new ThemeRegistry([]),
+        );
     }
 
     private function createRequestEvent(Request $request): RequestEvent

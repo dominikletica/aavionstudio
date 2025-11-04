@@ -21,44 +21,44 @@ final class EnvironmentSettingsType extends AbstractType
     {
         $builder
             ->add('environment', ChoiceType::class, [
-                'label' => 'Environment',
+                'label' => 'installer.environment.form.environment',
                 'choices' => [
-                    'Development' => 'dev',
-                    'Testing' => 'test',
-                    'Production' => 'prod',
+                    'installer.environment.form.environment_choices.development' => 'dev',
+                    'installer.environment.form.environment_choices.testing' => 'test',
+                    'installer.environment.form.environment_choices.production' => 'prod',
                 ],
                 'placeholder' => false,
             ])
             ->add('debug', CheckboxType::class, [
-                'label' => 'Enable debug mode',
+                'label' => 'installer.environment.form.debug',
                 'required' => false,
             ])
             ->add('secret', TextType::class, [
-                'label' => 'Application secret (optional)',
+                'label' => 'installer.environment.form.secret',
                 'required' => false,
                 'attr' => [
                     'autocomplete' => 'off',
                 ],
             ])
             ->add('instance_name', TextType::class, [
-                'label' => 'Instance name',
+                'label' => 'installer.environment.form.instance_name',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
             ])
             ->add('tagline', TextType::class, [
-                'label' => 'Tagline',
+                'label' => 'installer.environment.form.tagline',
                 'required' => false,
             ])
             ->add('support_email', EmailType::class, [
-                'label' => 'Support email',
+                'label' => 'installer.environment.form.support_email',
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\Email(),
                 ],
             ])
             ->add('base_url', UrlType::class, [
-                'label' => 'Base URL',
+                'label' => 'installer.environment.form.base_url',
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Url(requireTld: false),
@@ -66,29 +66,29 @@ final class EnvironmentSettingsType extends AbstractType
                 'default_protocol' => null,
             ])
             ->add('locale', ChoiceType::class, [
-                'label' => 'Default locale',
+                'label' => 'installer.environment.form.locale',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
                 'choices' => $this->normalizeChoices($options['locale_choices']),
-                'placeholder' => 'Select locale',
+                'placeholder' => 'installer.environment.form.locale_placeholder',
                 'choice_translation_domain' => false,
             ])
             ->add('timezone', ChoiceType::class, [
-                'label' => 'Default timezone',
+                'label' => 'installer.environment.form.timezone',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
                 'choices' => $this->normalizeChoices($options['timezone_choices']),
-                'placeholder' => 'Select timezone',
+                'placeholder' => 'installer.environment.form.timezone_placeholder',
                 'choice_translation_domain' => false,
             ])
             ->add('user_registration', CheckboxType::class, [
-                'label' => 'Allow user self-registration',
+                'label' => 'installer.environment.form.user_registration',
                 'required' => false,
             ])
             ->add('maintenance_mode', CheckboxType::class, [
-                'label' => 'Enable maintenance mode',
+                'label' => 'installer.environment.form.maintenance_mode',
                 'required' => false,
             ]);
     }

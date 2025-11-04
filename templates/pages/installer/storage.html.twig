@@ -3,20 +3,20 @@
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
-        title: 'Storage configuration'|trans,
-        subtitle: 'Pick the writable location for databases, uploads, snapshots, and backups. Additional backends will plug into this root later on.'|trans
+        title: 'installer.storage.heading.title'|trans,
+        subtitle: 'installer.storage.heading.subtitle'|trans
     } only %}
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div class="surface rounded-md border border-border p-6 layout-stack layout-stack--loose">
             {{ form_start(storage_form, { attr: { class: 'layout-stack layout-stack--tight' } }) }}
                 <p class="text-sm text-text-muted">
-                    {{ 'Ensure the selected directory is writable by PHP. The installer will provision <code>databases</code>, <code>uploads</code>, <code>snapshots</code>, and <code>backups</code> subfolders automatically.'|trans|raw }}
+                    {{ 'installer.storage.instructions'|trans|raw }}
                 </p>
                 {{ ui.form_row_with_tooltip(storage_form.root, help_tooltips['storage.root'] ?? null) }}
                 <div class="flex justify-end">
                     {{ include('partials/components/button.html.twig', {
-                        label: 'Save storage settings'|trans,
+                        label: 'installer.storage.actions.save'|trans,
                         attributes: { type: 'submit', class: 'btn btn-primary' }
                     }) }}
                 </div>
@@ -28,28 +28,28 @@
                 name: 'add-files',
                 variant: 'lg',
                 attributes: { class: 'w-full max-w-md' },
-                alt: 'Storage illustration'|trans
+                alt: 'installer.storage.illustration_alt'|trans
             } only %}
 
             {% set preparation_body %}
                 <ol class="list-decimal space-y-3 pl-5 text-sm leading-relaxed text-text-muted">
-                    <li>{{ 'Ensure the server user can read/write <code>var/</code> and has space for media + snapshots.'|trans|raw }}</li>
-                    <li>{{ 'Provision object storage buckets and credentials if you plan to offload media from day one.'|trans }}</li>
-                    <li>{{ 'Decide on encryption-at-rest requirements; the wizard will offer client-side and provider-managed options.'|trans }}</li>
-                    <li>{{ 'Document data residency expectations so projects know where uploads will live.'|trans }}</li>
+                    <li>{{ 'installer.storage.prep.item1'|trans|raw }}</li>
+                    <li>{{ 'installer.storage.prep.item2'|trans }}</li>
+                    <li>{{ 'installer.storage.prep.item3'|trans }}</li>
+                    <li>{{ 'installer.storage.prep.item4'|trans }}</li>
                 </ol>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Get ready',
-                title: 'Steps you can already take',
+                eyebrow: 'installer.storage.prep.eyebrow'|trans,
+                title: 'installer.storage.prep.title'|trans,
                 body: preparation_body
             } only %}
 
             {% include 'partials/components/card.html.twig' with {
                 variant: 'muted',
-                title: 'Roadmap'|trans,
-                body: '<p class="text-sm text-text-muted">' ~ 'Remote adapters (S3, Azure, MinIO), retention policies, and CDN hooks land in upcoming milestones.'|trans ~ '</p>'
+                title: 'ui.roadmap'|trans,
+                body: '<p class="text-sm text-text-muted">' ~ 'installer.storage.roadmap.body'|trans ~ '</p>'
             } only %}
 
             {% include 'partials/components/help_entries.html.twig' with {

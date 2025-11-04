@@ -21,7 +21,7 @@
             {% set merged_label_attr = merged_label_attr|merge({
                 class: ((merged_label_attr.class|default('') ~ ' tooltip')|trim),
                 'data-tooltip': tooltip_text,
-                'aria-label': (tooltip.title|default('Tip') ~ ': ' ~ tooltip_text)|trim
+                'aria-label': (tooltip.title|default('ui.tip'|trans) ~ ': ' ~ tooltip_text)|trim
             }) %}
             {% set config = config|merge({ label_attr: merged_label_attr }) %}
         {% endif %}

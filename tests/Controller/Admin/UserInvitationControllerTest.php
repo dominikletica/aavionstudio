@@ -9,6 +9,7 @@ use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class UserInvitationControllerTest extends WebTestCase
 {
@@ -94,16 +95,18 @@ final class UserInvitationControllerTest extends WebTestCase
         $this->loginAsAdmin();
         $this->client->request('GET', '/admin/users/invitations');
         self::assertResponseIsSuccessful();
-        self::assertStringContainsString('User Invitations', $this->client->getResponse()->getContent());
+        $translator = static::getContainer()->get(TranslatorInterface::class);
+        self::assertStringContainsString($translator->trans('admin.invitations.heading.title'), $this->client->getResponse()->getContent());
     }
 
     public function testCreateInvitationStoresAndSendsEmail(): void
     {
         $this->loginAsAdmin();
-        $this->client->request('GET', '/admin/users/invitations');
-        $this->client->submitForm('Send invitation', [
+        $crawler = $this->client->request('GET', '/admin/users/invitations');
+        $form = $crawler->filter('form[name="invitation_create"]')->form([
             'invitation_create[email]' => 'newuser@example.com',
         ]);
+        $this->client->submit($form);
 
         self::assertResponseRedirects('/admin/users/invitations');
         $this->client->followRedirect();

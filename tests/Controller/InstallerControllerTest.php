@@ -10,6 +10,8 @@ use App\Setup\SetupState;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionFactoryInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 final class InstallerControllerTest extends WebTestCase
@@ -274,7 +276,7 @@ final class InstallerControllerTest extends WebTestCase
         $form['environment_settings[tagline]'] = 'Create boldly';
         $form['environment_settings[support_email]'] = 'support@example.com';
         $form['environment_settings[locale]'] = 'en';
-        $form['environment_settings[timezone]'] = 'Europe/London';
+        $form['environment_settings[timezone]'] = 'UTC';
         $form['environment_settings[user_registration]']->tick();
         $form['environment_settings[maintenance_mode]']->untick();
 
@@ -282,9 +284,7 @@ final class InstallerControllerTest extends WebTestCase
         $this->assertResponseRedirects('/setup?step=environment');
         $client->followRedirect();
 
-        $session = $client->getRequest()?->getSession();
-        self::assertNotNull($session);
-        $data = $session->get('_app.setup.configuration');
+        $data = $this->getInstallerSession($client)->get('_app.setup.configuration');
         self::assertIsArray($data);
 
         $overrides = $data['environment_overrides'] ?? [];
@@ -313,9 +313,7 @@ final class InstallerControllerTest extends WebTestCase
         $this->assertResponseRedirects('/setup?step=storage');
         $client->followRedirect();
 
-        $session = $client->getRequest()?->getSession();
-        self::assertNotNull($session);
-        $data = $session->get('_app.setup.configuration');
+        $data = $this->getInstallerSession($client)->get('_app.setup.configuration');
         self::assertIsArray($data);
 
         self::assertSame('/mnt/data', $data['storage']['root'] ?? null);
@@ -350,9 +348,7 @@ final class InstallerControllerTest extends WebTestCase
         $this->assertResponseRedirects('/setup?step=admin');
         $client->followRedirect();
 
-        $session = $client->getRequest()?->getSession();
-        self::assertNotNull($session);
-        $data = $session->get('_app.setup.configuration');
+        $data = $this->getInstallerSession($client)->get('_app.setup.configuration');
         self::assertIsArray($data);
         $admin = $data['admin'] ?? [];
 
@@ -386,11 +382,7 @@ final class InstallerControllerTest extends WebTestCase
     private function issueSetupToken(KernelBrowser $client): string
     {
         $client->request('GET', '/setup');
-        $request = $client->getRequest();
-        self::assertNotNull($request);
-
-        $session = $request->getSession();
-        self::assertNotNull($session);
+        $session = $this->getInstallerSession($client);
 
         $token = $session->get(SetupAccessToken::SESSION_KEY);
         self::assertIsString($token);
@@ -445,5 +437,22 @@ final class InstallerControllerTest extends WebTestCase
         $client->submit($form);
         $this->assertResponseRedirects('/setup?step=admin');
         $client->followRedirect();
+    }
+
+    private function getInstallerSession(KernelBrowser $client): SessionInterface
+    {
+        /** @var SessionFactoryInterface $sessionFactory */
+        $sessionFactory = self::getContainer()->get('session.factory');
+        $session = $sessionFactory->createSession();
+
+        $cookie = $client->getCookieJar()->get($session->getName());
+        self::assertNotNull($cookie, 'Expected installer session cookie to be set.');
+
+        $session->setId($cookie->getValue());
+        if (!$session->isStarted()) {
+            $session->start();
+        }
+
+        return $session;
     }
 }

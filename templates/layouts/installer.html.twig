@@ -1,15 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title 'aavion Studio Setup Wizard' %}
+{% block title %}{{ 'installer.layout.page_title'|trans }}{% endblock %}
 
 {% block main %}
     <main class="min-h-screen bg-surface">
         <div class="max-w-4xl mx-auto py-12 layout-stack">
             <header class="layout-stack--tight text-center">
-                <h1 class="text-heading text-3xl">aavion Studio • Setup Wizard</h1>
-                <p class="text-text-muted">This guided flow prepares the core platform. Styling is minimal so themes can extend it later.</p>
+                <h1 class="text-heading text-3xl">{{ 'installer.layout.heading'|trans }}</h1>
+                <p class="text-text-muted">{{ 'installer.layout.description'|trans }}</p>
             </header>
-            <nav aria-label="Wizard Steps" class="surface shadow-sm p-4 rounded-md">
+            <nav aria-label="{{ 'installer.layout.steps_aria'|trans }}" class="surface shadow-sm p-4 rounded-md">
                 <ol class="flex flex-wrap items-center justify-center gap-4">
                     {% set step_pointer = 0 %}
                     {% for step in steps %}
@@ -17,20 +17,22 @@
                         <li>
                             {% if enabled %}
                                 <a class="btn {{ step == current_step ? 'btn-primary' : 'btn-secondary' }}" href="{{ path('app_installer', { step: step }) }}">
-                                    {{ step|title }}
+                                    {{ ('installer.steps.' ~ step)|trans }}
                                 </a>
                             {% else %}
                                 <span class="btn btn-secondary opacity-60 cursor-not-allowed" aria-disabled="true">
-                                    {{ step|title }}
+                                    {{ ('installer.steps.' ~ step)|trans }}
                                 </span>
                             {% endif %}
                         </li>
                     {% endfor %}
                 </ol>
             </nav>
-            {% for message in app.flashes('setup_error') %}
+            {% set setup_flashbag = flash_messages|default({}) %}
+            {% set setup_errors = setup_flashbag['setup_error']|default([]) %}
+            {% for message in setup_errors %}
                 <div class="alert alert--danger">
-                    <div class="alert__title">Setup failed</div>
+                    <div class="alert__title">{{ 'installer.layout.error_title'|trans }}</div>
                     <p class="alert__body">{{ message }}</p>
                 </div>
             {% endfor %}

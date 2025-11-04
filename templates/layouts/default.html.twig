@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ page_title is defined and page_title ? page_title : (site_title is defined and site_title ? site_title : 'aavion Studio'|trans) }}
+    {{ page_title is defined and page_title ? page_title : (site_title is defined and site_title ? site_title : 'app.name'|trans) }}
 {% endblock %}
 
 {% set sidebar_capture %}

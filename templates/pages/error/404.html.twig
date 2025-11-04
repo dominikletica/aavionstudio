@@ -2,8 +2,8 @@
 
 {% block error_intro %}
     <div class="layout-stack--tight">
-        <h1 class="text-heading text-3xl">{{ 'Page not found'|trans }}</h1>
-        <p class="text-text-muted text-lg">{{ 'The resource you requested could not be located.'|trans }}</p>
+        <h1 class="text-heading text-3xl">{{ 'error.404.title'|trans }}</h1>
+        <p class="text-text-muted text-lg">{{ 'error.404.subtitle'|trans }}</p>
     </div>
-    <p class="text-text">{{ 'Check the address, go back, or reach out to your administrator if you need assistance.'|trans }}</p>
+    <p class="text-text">{{ 'error.404.help'|trans }}</p>
 {% endblock %}

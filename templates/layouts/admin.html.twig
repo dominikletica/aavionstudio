@@ -1,11 +1,11 @@
 {% extends 'layouts/default.html.twig' %}
 
 {% block title %}
-    {{ admin_title is defined and admin_title ? admin_title ~ ' · ' : '' }}{{ site_title is defined and site_title ? site_title : 'aavion Studio'|trans }}
+    {{ admin_title is defined and admin_title ? admin_title ~ ' · ' : '' }}{{ site_title is defined and site_title ? site_title : 'app.name'|trans }}
 {% endblock %}
 
 {% block header %}
-    {% set header_title = admin_header_title|default('Admin'|trans) %}
+    {% set header_title = admin_header_title|default('admin.layout.title'|trans) %}
     {% set header_image = admin_header_image|default(header_image|default(null)) %}
     {{ parent() }}
 {% endblock %}

@@ -1,0 +1,766 @@
+app:
+  name: 'aavion Studio'
+
+ui:
+  tip: 'Hinweis'
+  close: 'Schließen'
+  roadmap: 'Roadmap'
+  preview: 'Vorschau'
+  code: 'Code'
+  buttons:
+    default: 'Button'
+  actions:
+    submit: 'Absenden'
+  boolean:
+    yes: 'Ja'
+    no: 'Nein'
+  state:
+    enabled: 'Aktiv'
+    disabled: 'Deaktiviert'
+  not_applicable: 'k. A.'
+  action_overlay:
+    title: 'Ausführungsfortschritt'
+    processing: 'Wird verarbeitet …'
+    no_steps: 'Keine Schritte definiert.'
+    missing_token: 'Sitzungstoken fehlt. Bitte die Seite neu laden.'
+    error_label: 'Fehler'
+    unknown_error: 'Unbekannter Fehler'
+    network_error: 'Netzwerkfehler'
+
+region:
+  date:
+    short: 'd.m.Y'
+    long: 'd. F Y'
+  datetime:
+    short: 'd.m.Y H:i'
+    long: 'd. F Y H:i'
+    precise: 'd.m.Y H:i:s'
+  time:
+    short: 'H:i'
+    long: 'H:i:s'
+
+flash:
+  common:
+    invalid_csrf: 'Ungültiges CSRF-Token.'
+    invalid_csrf_retry: 'Ungültiges CSRF-Token. Bitte versuche es erneut.'
+  assets:
+    rebuild:
+      success: 'Asset-Pipeline erfolgreich neu aufgebaut.'
+      up_to_date: 'Assets sind bereits aktuell; es gibt nichts neu aufzubauen.'
+      failed: 'Asset-Neuaufbau fehlgeschlagen: %error%'
+      queued: 'Asset-Neuaufbau als Hintergrundjob eingeplant.'
+      queued_skip: 'Assets sind bereits aktuell; kein Neuaufbau eingeplant.'
+    module:
+      not_found: 'Modul "%slug%" wurde nicht gefunden.'
+      locked: 'Modul "%name%" ist gesperrt und kann nicht geändert werden.'
+      unknown_action: 'Unbekannte Modulaktion.'
+      enabled: 'Modul "%name%" aktiviert.'
+      disabled: 'Modul "%name%" deaktiviert.'
+    theme:
+      not_found: 'Theme "%slug%" wurde nicht gefunden.'
+      locked_disable: 'Theme "%name%" ist gesperrt und kann nicht deaktiviert werden.'
+      locked_always: 'Theme "%name%" ist gesperrt und immer verfügbar.'
+      unknown_action: 'Unbekannte Theme-Aktion.'
+      enabled: 'Theme "%name%" aktiviert.'
+      disabled: 'Theme "%name%" deaktiviert.'
+      activated: 'Theme "%name%" ist jetzt aktiv.'
+  invitations:
+    sent: 'Einladung an %email% gesendet.'
+    cancelled: 'Einladung abgebrochen.'
+  invitation:
+    invalid: 'Die Einladung ist ungültig oder abgelaufen.'
+    account_created: 'Konto erstellt. Du kannst dich jetzt anmelden.'
+  password_reset:
+    link_sent: 'Falls ein Konto zu dieser E-Mail existiert, wurde ein Zurücksetz-Link gesendet.'
+    invalid_link: 'Der Link zum Zurücksetzen ist ungültig oder abgelaufen.'
+    unable: 'Das Passwort für dieses Konto kann nicht zurückgesetzt werden.'
+    updated: 'Passwort aktualisiert. Du kannst dich jetzt anmelden.'
+  installer:
+    environment_saved: 'Umgebungseinstellungen gespeichert.'
+    storage_saved: 'Speichereinstellungen gespeichert.'
+    admin_saved: 'Administratorendaten gespeichert.'
+  users:
+    updated: 'Benutzer aktualisiert.'
+    not_found: 'Benutzer wurde nicht gefunden.'
+    projects:
+      updated: 'Projektzuweisungen aktualisiert.'
+    api:
+      created: 'API-Schlüssel "%label%" erstellt. Geheimnis: %secret% (jetzt kopieren).'
+      invalid_csrf: 'Ungültiges CSRF-Token für das Widerrufen des API-Schlüssels.'
+      not_found: 'API-Schlüssel wurde nicht gefunden.'
+      revoked: 'API-Schlüssel "%label%" widerrufen.'
+    password:
+      invalid_csrf: 'Ungültiges CSRF-Token für das Zurücksetzen des Passworts.'
+      sent: 'Passwort-Reset-E-Mail an %email% gesendet.'
+
+email:
+  invitation:
+    subject: 'Du wurdest zu aavion Studio eingeladen'
+  password_reset:
+    subject: 'Setze dein aavion Studio Passwort zurück'
+
+error:
+  generic:
+    title: 'Fehler'
+    snag: 'Bei der Verarbeitung ist ein Problem aufgetreten. Bitte versuche es erneut oder kontaktiere den Support, falls das Problem bestehen bleibt.'
+    debug_details: 'Fehlerdetails'
+    not_applicable: 'k. A.'
+  404:
+    title: 'Seite nicht gefunden'
+    subtitle: 'Die angeforderte Ressource konnte nicht gefunden werden.'
+    help: 'Prüfe die Adresse, gehe zurück oder bitte dein Admin-Team um Hilfe.'
+
+installer:
+  layout:
+    page_title: 'aavion Studio Setup-Assistent'
+    heading: 'aavion Studio • Setup-Assistent'
+    description: 'Dieser geführte Ablauf bereitet die Plattform vor. Das Layout bleibt bewusst schlicht, damit Themes später darauf aufbauen können.'
+    steps_aria: 'Assistent-Schritte'
+    error_title: 'Setup fehlgeschlagen'
+  steps:
+    diagnostics: 'Diagnose'
+    environment: 'Umgebung'
+    storage: 'Speicher'
+    admin: 'Administrator:in'
+    summary: 'Zusammenfassung'
+  errors:
+    already_completed: 'Das Setup wurde bereits abgeschlossen.'
+    invalid_token: 'Für Installer-Aktionen ist ein gültiges Sitzungstoken erforderlich.'
+    invalid_action_format: 'Ungültiges Aktionsformat.'
+  action:
+    log:
+      start: 'Setup-Routine starten …'
+      completed: 'Setup erfolgreich abgeschlossen.'
+  environment:
+    heading:
+      title: 'Umgebungsstandards'
+      subtitle: 'Prüfe die Werte, die in <code>.env.local</code> und die Systemeinstellungen übernommen werden. Der Assistent validiert alles, bevor <code>bin/init</code> ausgeführt wird.'
+    form:
+      environment: 'Umgebung'
+      environment_choices:
+        development: 'Entwicklung'
+        testing: 'Test'
+        production: 'Produktiv'
+      debug: 'Debug-Modus aktivieren'
+      secret: 'App-Secret (optional)'
+      instance_name: 'Instanzname'
+      tagline: 'Slogan'
+      support_email: 'Support-E-Mail'
+      base_url: 'Basis-URL'
+      locale: 'Standardsprache'
+      locale_placeholder: 'Sprache wählen'
+      timezone: 'Standardzeitzone'
+      timezone_placeholder: 'Zeitzone wählen'
+      user_registration: 'Selbstregistrierung erlauben'
+      maintenance_mode: 'Wartungsmodus aktivieren'
+    actions:
+      save: 'Umgebung speichern'
+    illustration_alt: 'Konfigurationsillustration'
+    secret:
+      generate: 'Geheimnis erzeugen'
+      generated: 'Geheimnis erzeugt'
+    overrides:
+      eyebrow: 'Konfiguration'
+      title: 'Empfohlene Overrides'
+      app_env: 'Setze <code>prod</code> für Produktivsysteme; behalte <code>dev</code> auf Staging-Instanzen.'
+      app_debug: 'Deaktiviere den Debug-Modus außerhalb vertrauenswürdiger Umgebungen, um ausführliche Fehlermeldungen zu vermeiden.'
+      app_secret: 'Erzeuge einen eindeutigen zufälligen Wert; verwende Geheimnisse nicht mehrfach.'
+      default_uri: 'Passe die kanonische Basis-URL (inklusive HTTPS) an, damit CLI-Linkgeneratoren korrekt arbeiten.'
+      mailer_dsn: 'Hinterlege deinen SMTP- oder Transaktionsdienst, bevor du Benutzer einlädst.'
+    readiness:
+      eyebrow: 'Bereitstellungs-Checkliste'
+      title: 'Vor dem Livegang'
+      copy_env: 'Kopiere die erzeugte <code>.env.local</code> auf das Zielsystem oder in deinen Secrets-Manager.'
+      opcache: 'Aktiviere Opcache, konfiguriere PHP-FPM und setze den Webserver auf <code>public/</code>.'
+      asset_rebuild: 'Plane den Befehl `php bin/console app:assets:rebuild --force` für Theme- oder Modulupdates ein.'
+      backups: 'Sichere <code>var/system.brain</code> und <code>var/user.brain</code> regelmäßig; Remote-Ziele folgen im nächsten Schritt.'
+    tip: 'Feinjustierung ist später im Adminbereich möglich; Geheimnisse gehören nicht in die Versionskontrolle.'
+  storage:
+    heading:
+      title: 'Speicherkonfiguration'
+      subtitle: 'Wähle das beschreibbare Verzeichnis für Datenbanken, Uploads, Snapshots und Backups. Weitere Backends können später an dieses Root angebunden werden.'
+    instructions: 'Stelle sicher, dass PHP auf das Verzeichnis schreiben kann. Der Assistent legt die Unterordner <code>databases</code>, <code>uploads</code>, <code>snapshots</code> und <code>backups</code> automatisch an.'
+    form:
+      root: 'Speicherpfad'
+      root_placeholder: 'var/storage'
+    actions:
+      save: 'Speicherpfad speichern'
+    illustration_alt: 'Illustration zur Speicherkonfiguration'
+    prep:
+      eyebrow: 'Vorbereitung'
+      title: 'Schritte, die du jetzt schon erledigen kannst'
+      item1: 'Stelle sicher, dass der Servernutzer Lese- und Schreibrechte für <code>var/</code> hat und genug Platz für Medien sowie Snapshots vorhanden ist.'
+      item2: 'Richte Objekt-Storage-Buckets und Zugangsdaten ein, falls du Medien von Anfang an auslagern willst.'
+      item3: 'Lege Anforderungen für Verschlüsselung im Ruhezustand fest; der Assistent bietet später client- oder providerverwaltete Optionen.'
+      item4: 'Dokumentiere Anforderungen zur Datenresidenz, damit Projekte wissen, wo Uploads gespeichert werden.'
+    roadmap:
+      body: 'Remote-Adapter (S3, Azure, MinIO), Aufbewahrungsrichtlinien und CDN-Anbindungen folgen in kommenden Meilensteinen.'
+  admin:
+    heading:
+      title: 'Administratorenkonto'
+      subtitle: 'Lege die erste Administratorin bzw. den ersten Administrator an, setze Sprache und Wiederherstellungskontakte. Das Passwort wird nach Abschluss des Assistenten sicher gespeichert.'
+    form:
+      email: 'E-Mail-Adresse'
+      display_name: 'Anzeigename'
+      password: 'Passwort'
+      password_confirmation: 'Passwort bestätigen'
+      password_mismatch: 'Die Passwörter müssen übereinstimmen.'
+      password_require_length: 'Das Passwort muss mindestens {{ limit }} Zeichen lang sein.'
+      password_require_number: 'Das Passwort muss mindestens eine Zahl enthalten.'
+      password_require_mixed_case: 'Das Passwort muss Groß- und Kleinbuchstaben enthalten.'
+      password_require_special: 'Das Passwort muss mindestens ein Sonderzeichen enthalten.'
+      locale: 'Bevorzugte Sprache'
+      locale_placeholder: 'Sprache auswählen'
+      timezone: 'Bevorzugte Zeitzone'
+      timezone_placeholder: 'Zeitzone auswählen'
+      require_mfa: 'MFA beim ersten Login erzwingen'
+      recovery_email: 'Wiederherstellungs-E-Mail (optional)'
+      recovery_phone: 'Wiederherstellungs-Telefon (optional)'
+    actions:
+      save: 'Administrator speichern'
+    illustration_alt: 'Illustration zur Administrator-Einladung'
+    requirements:
+      eyebrow: 'Best Practice'
+      title: 'Sicherer Onboarding-Leitfaden'
+      item1: 'Lege nach dem Start mindestens zwei Admins an, um Sperren bei der MFA-Einführung zu vermeiden.'
+      item2: 'Bewahre Wiederherstellungscodes oder Backup-Token nach der MFA-Aktivierung in einem sicheren Tresor auf.'
+      item3: 'Beschränke den SMTP-Zugang auf den Installer-Host, um Spoofing während der Einrichtung zu verhindern.'
+      item4: 'Aktiviere Audit-Benachrichtigungen, damit Änderungen an Zugangsdaten sofort gemeldet werden.'
+  summary:
+    heading:
+      title: 'Zusammenfassung'
+      subtitle: 'Überprüfe deine Eingaben, bevor der Assistent Datenbanken erstellt, Konfigurationen schreibt und den Wizard sperrt.'
+    environment:
+      eyebrow: 'Umgebung'
+      title: 'Systemstandards'
+      instance_name: 'Instanzname'
+      tagline: 'Slogan'
+      support_email: 'Support-E-Mail'
+      base_url: 'Basis-URL'
+      locale_timezone: 'Sprache / Zeitzone'
+      user_registration: 'Selbstregistrierung'
+      maintenance_mode: 'Wartungsmodus'
+    overrides:
+      eyebrow: '.env.local'
+      title: 'Environment-Overrides'
+      secret_pending: 'Wird erzeugt'
+      secret_provided: 'Vorhanden'
+    storage:
+      eyebrow: 'Speicher'
+      title: 'Beschreibbares Root'
+      description: 'Datenbanken, Uploads, Snapshots und Backups werden in diesem Verzeichnis abgelegt.'
+    admin:
+      eyebrow: 'Administrator:in'
+      title: 'Erstes Konto'
+      email: 'E-Mail'
+      display_name: 'Anzeigename'
+      locale_timezone: 'Sprache / Zeitzone'
+      require_mfa: 'MFA beim ersten Login erzwingen'
+      recovery_email: 'Wiederherstellungs-E-Mail'
+      recovery_phone: 'Wiederherstellungs-Telefon'
+      password: 'Passwort'
+      password_provided: 'Vorhanden'
+      password_pending: 'Ausstehend'
+    alerts:
+      provisioning_title: 'Bereitstellung ausstehend'
+      provisioning_body: 'Datenbanken existieren bereits, aber die Setup-Sperre fehlt. Schließe den Assistenten ab, um Migrationen auszuführen und den Zugriff zu sichern.'
+    finalize:
+      title: 'Installation abschließen'
+      description: 'Erzeuge die SQLite-Datenbanken, führe Doctrine-Migrationen aus und sperre den Assistenten.'
+      button: 'Datenbanken erstellen & Setup beenden'
+      aria_label: 'Datenbanken erstellen und Setup beenden.'
+    help:
+      title: 'Brauchst du Hilfe?'
+      body: 'Öffne die Diagnosespalte oder künftig die Befehlspalette, um direkt zu den passenden Anleitungen zu springen.'
+    illustration_alt: 'Illustration für die Zusammenfassung'
+  diagnostics:
+    heading:
+      title: 'Systemdiagnose'
+      subtitle: 'Der Assistent prüft die Servervoraussetzungen, bevor du fortfährst.'
+    summary:
+      php_version: 'PHP-Version:'
+    rewrite:
+      label: 'Rewrite-Engine:'
+      enabled: 'Aktiv'
+      compatibility: 'Kompatibilitätsmodus'
+      forced: 'erzwungen via %env%'
+      fallback_notice: 'Anfrage wurde über den Fallback bedient'
+      alert:
+        title: 'Aktiviere URL-Rewrites'
+        description: 'Setze den Webserver auf das Verzeichnis <code>public/</code> und erlaube URL-Rewrites, damit keine sensiblen Dateien freigegeben werden.'
+        screen_reader: 'Konfiguriere den Webserver auf das Verzeichnis public und aktiviere URL-Rewrites, um sensible Dateien zu schützen.'
+      forced_title: 'Kompatibilitätsmodus aktiv'
+      forced_description: 'Der Kompatibilitätsmodus ist bewusst aktiviert; deaktiviere <code>APP_FORCE_ROOT_ENTRY</code> nach dem Testen.'
+      effective_route: 'Wirksame Route'
+      original_uri: 'Ursprüngliche Anfrage-URI'
+      effective_uri: 'Wirksame Anfrage-URI'
+      card_title: 'Dokument-Root & Rewrite-Status'
+      card_subtitle: 'Stelle sicher, dass Anfragen über den öffentlichen Front-Controller laufen.'
+      eyebrow: 'Routing'
+    extensions:
+      title: 'PHP-Erweiterungen'
+      subtitle: 'Alle erforderlichen Erweiterungen müssen vor dem Fortfahren verfügbar sein.'
+      column:
+        extension: 'Erweiterung'
+        status: 'Status'
+        hint: 'Hinweis'
+      hints:
+        intl: 'Aktiviere die Intl-Erweiterung (`php-intl`), um Lokalisierung, Datums- und Zahlenformatierung bereitzustellen.'
+        sqlite: 'Aktiviere die SQLite3-Erweiterung für System- und Benutzerdatenbanken.'
+        fileinfo: 'Aktiviere Fileinfo, um Mediendateien und MIME-Typen zu erkennen.'
+        json: 'Aktiviere die JSON-Erweiterung; sie ist in den meisten PHP-Distributionen standardmäßig enthalten.'
+        mbstring: 'Aktiviere mbstring für die Verarbeitung mehrbytefähiger Zeichenketten (Bearbeitung & Lokalisierung).'
+        ctype: 'Aktiviere die ctype-Erweiterung für Validierungs-Helfer.'
+    filesystem:
+      title: 'Dateisystemprüfung'
+      subtitle: 'Kontrolliere, ob wichtige Verzeichnisse existieren und für PHP beschreibbar sind.'
+      parent_writable: 'Übergeordnet beschreibbar'
+      column:
+        directory: 'Verzeichnis'
+        exists: 'Vorhanden'
+        writable: 'Beschreibbar'
+        hint: 'Hinweis'
+      labels:
+        var_root: 'Verzeichnis var/'
+        var_cache: 'var/cache'
+        var_log: 'var/log'
+        var_snapshots: 'var/snapshots'
+        var_uploads: 'var/uploads'
+        var_themes: 'var/themes'
+        public_assets: 'public/assets'
+      hints:
+        var_root: 'Stelle sicher, dass der Webbenutzer Schreibrechte auf var/ für Cache, Logs und Datenbanken hat.'
+        var_cache: 'Hier legt Symfony seinen Laufzeit-Cache ab; das Verzeichnis muss existieren und beschreibbar sein.'
+        var_log: 'Anwendungslogs werden hier geschrieben; Schreibrechte vergeben.'
+        var_snapshots: 'Veröffentlichte Snapshots liegen hier; Verzeichnis gegebenenfalls anlegen.'
+        var_uploads: 'Uploads und temporäre Medien werden hier gespeichert; Verzeichnis anlegen und beschreibbar machen.'
+        var_themes: 'Theme-Pakete werden hier entpackt; Verzeichnis anlegen und Schreibrechte vergeben.'
+        public_assets: 'AssetMapper erzeugt hier JS/CSS; stelle Schreibrechte für den Deployment-User sicher.'
+    status:
+      available: 'Verfügbar'
+      missing: 'Fehlt'
+    environment:
+      title: 'Umgebungsübersicht'
+      eyebrow: 'System'
+    illustration_alt: 'Illustration des Support-Teams'
+    sqlite:
+      title: 'SQLite-Status'
+      eyebrow: 'Datenbank'
+      primary_path: 'Pfad primär'
+      secondary_path: 'Pfad sekundär'
+      primary_exists: 'Primär vorhanden'
+      secondary_exists: 'Sekundär vorhanden'
+      secondary_attached: 'Sekundär verbunden'
+      busy_timeout: 'busy_timeout (ms)'
+    not_applicable: 'k. A.'
+
+debug:
+  locale:
+    label: 'Sprachüberschreibung'
+    apply: 'Übernehmen'
+    option:
+      auto: 'Automatisch'
+      keys: 'Übersetzungs-Keys anzeigen'
+      locale: '%locale% Sprache'
+security:
+  invitation:
+    page_title: 'Einladung abschließen'
+    heading: 'Willkommen bei %site%'
+    intro: 'Du registrierst dich als <strong class="text-text">%email%</strong>. Vergib einen Anzeigenamen und ein Passwort, um dein Konto zu aktivieren.'
+    activate: 'Konto aktivieren'
+    back_to_login: 'Zur Anmeldung'
+    form:
+      display_name: 'Anzeigename'
+      password: 'Passwort'
+      password_confirmation: 'Passwort bestätigen'
+  layout:
+    title_prefix: 'Anmeldung · '
+  login:
+    page_title: 'Anmelden'
+    heading: 'Schön, dass du wieder da bist'
+    subtitle: 'Melde dich mit deinen Admin-Zugangsdaten an.'
+    fields:
+      email:
+        label: 'E-Mail-Adresse'
+      password:
+        label: 'Passwort'
+      remember: 'Auf diesem Gerät merken'
+    actions:
+      submit: 'Anmelden'
+    help:
+      contact_admin: 'Du brauchst Zugang? Wende dich an eine Administratorin oder einen Administrator.'
+      forgot_password: 'Passwort vergessen?'
+  password:
+    shared:
+      back_to_login: 'Zur Anmeldung'
+    request:
+      page_title: 'Passwort zurücksetzen'
+      heading: 'Passwort zurücksetzen'
+      subtitle: 'Gib die E-Mail-Adresse deines Kontos ein. Falls sie existiert, erhältst du einen Link zum Zurücksetzen.'
+      fields:
+        email:
+          label: 'E-Mail-Adresse'
+      actions:
+        submit: 'Link senden'
+    reset:
+      page_title: 'Neues Passwort festlegen'
+      heading: 'Neues Passwort wählen'
+      subtitle: 'Bitte gib dein neues Passwort ein und bestätige es.'
+      fields:
+        password:
+          label: 'Neues Passwort'
+        confirm:
+          label: 'Passwort bestätigen'
+      actions:
+        submit: 'Passwort speichern'
+      errors:
+        mismatch: 'Die Passwortfelder müssen übereinstimmen.'
+  roles:
+    ROLE_ADMIN: 'Administrator'
+    ROLE_MANAGER: 'Manager'
+    ROLE_EDITOR: 'Redakteur'
+    ROLE_VIEWER: 'Betrachter'
+    ROLE_USER: 'Benutzer'
+
+validation:
+  invitations:
+    invalid_email: 'Bitte gib eine gültige E-Mail-Adresse an.'
+  invitation:
+    email_exists: 'Ein Konto mit dieser E-Mail existiert bereits.'
+    fix_errors: 'Bitte behebe die markierten Fehler.'
+  users:
+    profile_invalid: 'Bitte prüfe die markierten Felder.'
+  api_keys:
+    invalid_datetime: 'Ungültiges Datums-/Zeitformat.'
+    form_invalid: 'Bitte prüfe das API-Schlüssel-Formular.'
+  projects:
+    missing_role: 'Wähle eine Rolle für die Projektzuweisung "%project%", bevor du Berechtigungen ergänzt.'
+    assignments_invalid: 'Bitte prüfe die Projektzuweisungen.'
+  password_reset:
+    fix_errors: 'Bitte korrigiere die markierten Fehler.'
+
+api:
+  api_keys:
+    errors:
+      user_required: 'Parameter "user" ist erforderlich.'
+      fields_required: 'Die Felder "user_id" und "label" sind erforderlich.'
+      invalid_expires: 'Ungültiger Wert für expires_at: %error%'
+  key:
+    issued: 'API-Schlüssel erstellt'
+    revoked: 'API-Schlüssel widerrufen'
+auth:
+  password:
+    reset:
+      requested: 'Passwort-Reset angefordert'
+      completed: 'Passwort erfolgreich aktualisiert'
+user:
+  roles:
+    updated: 'Rollen aktualisiert'
+  profile:
+    updated: 'Profil aktualisiert'
+  created:
+    invitation: 'Administrator-Konto über Einladung angelegt'
+  invitation:
+    created: 'Einladung erstellt'
+    cancelled: 'Einladung widerrufen'
+    accepted: 'Einladung angenommen'
+admin:
+  layout:
+    title: 'Admin'
+  users:
+    page_title: 'Admin: Benutzer'
+    heading:
+      title: 'Benutzerverwaltung'
+      subtitle: 'Suchen, filtern und Benutzerkonten verwalten.'
+      manage_invitations: 'Einladungen verwalten'
+    filters:
+      card_title: 'Filter'
+      search:
+        label: 'Suche'
+        placeholder: 'E-Mail oder Name'
+      status:
+        label: 'Status'
+        all: 'Alle Status'
+      status_choices:
+        active: 'Aktiv'
+        pending: 'Ausstehend'
+        disabled: 'Deaktiviert'
+        archived: 'Archiviert'
+      actions:
+        clear: 'Filter zurücksetzen'
+        apply: 'Filter anwenden'
+    empty:
+      card_title: 'Keine Benutzer gefunden'
+      title: 'Keine Treffer für deine Filter'
+      description: 'Passe die Suchbegriffe an oder lade eine neue Administratorin bzw. einen neuen Administrator ein.'
+      action: 'Administrator einladen'
+    status:
+      active: 'Aktiv'
+      pending: 'Ausstehend'
+      disabled: 'Deaktiviert'
+      archived: 'Archiviert'
+    table:
+      eyebrow: 'Ergebnisse'
+      title: 'Benutzer'
+      columns:
+        email: 'E-Mail'
+        name: 'Name'
+        status: 'Status'
+        roles: 'Rollen'
+        last_login: 'Letzte Anmeldung'
+        actions: 'Aktionen'
+      actions:
+        edit: 'Bearbeiten'
+    edit:
+      page_title: 'Admin: Benutzer bearbeiten'
+      heading:
+        title: 'Benutzer bearbeiten'
+        subtitle: 'Aktualisiere Profil, Zugänge und Projektberechtigungen.'
+        back: 'Zurück zur Übersicht'
+      profile:
+        eyebrow: 'Profil'
+        title: 'Benutzerdetails'
+        email: 'E-Mail'
+        created: 'Angelegt'
+        updated: 'Zuletzt aktualisiert'
+        save: 'Änderungen speichern'
+        form:
+          display_name: 'Anzeigename'
+          locale: 'Sprache'
+          timezone: 'Zeitzone'
+          status: 'Kontostatus'
+          roles: 'Rollen'
+      password:
+        description: 'Versende eine einmalige E-Mail zum Zurücksetzen des Passworts.'
+        send: 'Passwort-E-Mail senden'
+      api:
+        eyebrow: 'Integrationen'
+        title: 'API-Schlüssel'
+        subtitle: 'Schlüssel werden nur einmal angezeigt – bewahre sie sicher auf.'
+        create: 'API-Schlüssel erstellen'
+        form:
+          label: 'Bezeichnung'
+          scopes: 'Berechtigungen'
+          scopes_help: 'Komma- oder leerzeichengetrennte Capability-Schlüssel (z. B. content.read content.write). Leer lassen für reinen Lesezugriff.'
+          expires_at: 'Gültig bis (optional)'
+          expires_help: 'Akzeptiert YYYY-MM-DD oder ISO-8601-Datum/Zeit.'
+        status:
+          revoked: 'Widerrufen'
+          expired: 'Abgelaufen'
+          active: 'Aktiv'
+          inactive: 'Inaktiv'
+        actions:
+          revoke: 'Widerrufen'
+          revoked_on: 'Widerrufen am %date%'
+        table:
+          columns:
+            label: 'Bezeichnung'
+            created: 'Erstellt'
+            status: 'Status'
+            actions: 'Aktionen'
+        empty:
+          title: 'Noch keine API-Schlüssel'
+          description: 'Erstelle einen API-Schlüssel, um externe Dienste anzubinden.'
+      projects:
+        empty: 'Noch keine Projekte verfügbar.'
+        columns:
+          project: 'Projekt'
+          role: 'Rolle'
+          capabilities: 'Zusätzliche Berechtigungen'
+        unknown: 'Unbekanntes Projekt'
+        save: 'Projektzugriff speichern'
+        eyebrow: 'Projekte'
+        title: 'Projektzugriff'
+        subtitle: 'Überschreibe Rollen oder ergänze projektspezifische Berechtigungen.'
+        form:
+          role: 'Projektrolle'
+          role_placeholder: 'Globale Rolle übernehmen'
+          capabilities: 'Zusätzliche Berechtigungen'
+          capabilities_help: 'Komma- oder leerzeichengetrennte Capability-Schlüssel, die nur für dieses Projekt gelten.'
+  invitations:
+    page_title: 'Admin: Benutzereinladungen'
+    heading:
+      title: 'Einladungen'
+      subtitle: 'Lade Administratorinnen und Administratoren ein und verwalte offene Tokens.'
+    form:
+      email:
+        label: 'Per E-Mail einladen'
+      submit: 'Einladung senden'
+    create:
+      eyebrow: 'Neue Einladung'
+      title: 'Einladung erstellen'
+      subtitle: 'Versende eine E-Mail-Einladung an eine:n neue:n Administrator:in.'
+    empty:
+      card_title: 'Ausstehende Einladungen'
+      title: 'Noch keine Einladungen'
+      description: 'Lade deine erste Administratorin bzw. deinen ersten Administrator zur Zusammenarbeit ein.'
+    status:
+      pending: 'Ausstehend'
+      completed: 'Abgeschlossen'
+    actions:
+      cancel: 'Abbrechen'
+    list:
+      eyebrow: 'Warteschlange'
+      title: 'Ausstehende Einladungen'
+      subtitle: 'Einladungen verfallen automatisch nach dem konfigurierten Zeitraum.'
+    table:
+      columns:
+        email: 'E-Mail'
+        status: 'Status'
+        created: 'Erstellt'
+        expires: 'Läuft ab'
+        actions: 'Aktionen'
+  security:
+    audit:
+      page_title: 'Admin: Sicherheitsprotokoll'
+      heading:
+        title: 'Sicherheitsprotokoll'
+        subtitle: 'Überwache Anmeldeversuche und Änderungen an Berechtigungen.'
+      filters:
+        card:
+          eyebrow: 'Filter'
+          title: 'Ergebnisse eingrenzen'
+        actor:
+          label: 'Akteur'
+          placeholder: 'Benutzer-ID oder E-Mail'
+        subject:
+          label: 'Ziel'
+          placeholder: 'Ziel-ID'
+        action:
+          label: 'Aktion'
+          all: 'Alle Aktionen'
+        from:
+          label: 'Von'
+        to:
+          label: 'Bis'
+        actions:
+          clear: 'Zurücksetzen'
+          apply: 'Filter anwenden'
+      empty:
+        card_title: 'Sicherheitsereignisse'
+        title: 'Noch keine Einträge'
+        description: 'Passe die Filter an oder versuche es später erneut.'
+      table:
+        eyebrow: 'Protokoll'
+        title: 'Sicherheitsereignisse'
+        columns:
+          timestamp: 'Zeitpunkt'
+          actor: 'Akteur'
+          type: 'Ereignis'
+          subject: 'Ziel'
+          ip: 'IP-Adresse'
+          context: 'Details'
+      values:
+        system: 'System'
+demo:
+  page:
+    project_title: 'Komponenten-Showcase'
+    page_title: 'UI-Komponentenübersicht'
+    heading:
+      title: 'UI-Komponentenübersicht'
+      subtitle: 'Ein schneller Überblick über Basis-Theme-Komponenten und Tailwind-Helfer für Installer- und Admin-Oberflächen.'
+  buttons:
+    card:
+      eyebrow: 'Buttons'
+      title: 'Button-Varianten'
+    primary: 'Primär'
+    secondary: 'Sekundär'
+    ghost: 'Ghost'
+    full: 'Volle Breite'
+  modules:
+    eyebrow: 'Interaktionen'
+    title: 'Stimulus-Zähler-Demo'
+    active_title: 'Aktive Module'
+    badge: 'Stimulus'
+    actions:
+      add: 'Modul hinzufügen'
+      reset: 'Zurücksetzen'
+    description: 'Stimulus hält den Zähler ohne Seiten-Reload synchron – ideal für Dashboards oder Metrik-Karten.'
+  alerts:
+    success:
+      title: 'Alles läuft rund'
+      description: 'Nutze das Alert-Pattern für Inline-Feedback, Hinweise oder Hero-Notizen.'
+  table:
+    card:
+      eyebrow: 'Tabellen'
+      title: 'Feature-Status'
+    columns:
+      feature: 'Funktion'
+      status: 'Status'
+      notes: 'Notizen'
+    rows:
+      navigation:
+        feature: 'Navigation'
+        status: 'Fertig'
+        notes: 'Sidebar und Hero-Menüs sind bereit.'
+      installer:
+        feature: 'Installer-Assistent'
+        status: 'In Arbeit'
+        notes: 'Cards, Tabellen und Illustrationen verfügbar.'
+      admin:
+        feature: 'Admin-Bereich'
+        status: 'Als Nächstes'
+        notes: 'Navigation und Modulgerüst folgen.'
+  forms:
+    eyebrow: 'Formulare'
+    title: 'Formularsammlung'
+    input:
+      label: 'Name'
+      placeholder: 'Max Mustermann'
+      help: 'Textfeld mit Hilfetext.'
+    select:
+      label: 'Rolle'
+      placeholder: 'Rolle wählen'
+      option:
+        admin: 'Administrator:in'
+        editor: 'Redakteur:in'
+        viewer: 'Leser:in'
+    textarea:
+      label: 'Notizen'
+      placeholder: 'Optionale Notizen …'
+    checkbox:
+      label: 'Ich akzeptiere die Richtlinien'
+      description: 'Checkbox-Beispiel mit Beschreibungstext.'
+    switch:
+      label: 'Benachrichtigungen aktivieren'
+      description: 'Schalter nutzen dieselben Farbtokens wie Buttons.'
+    actions:
+      submit: 'Formular absenden'
+      cancel: 'Abbrechen'
+  codemirror:
+    eyebrow: 'Code-Editor'
+    title: 'CodeMirror-Integration'
+    description: 'Der Codemirror-Controller verwandelt jedes Textfeld in einen Editor mit syntaxsensitivem Highlighting.'
+    placeholder: 'Twig hier einfügen …'
+  turbo:
+    title: 'Turbo-Frame-Tipps'
+    subtitle: 'Inline aktualisierbare Hilfskarten.'
+    loading: 'Lade Tipp …'
+    refresh: 'Tipp aktualisieren'
+    reminder: 'Dokumentationshinweis anzeigen'
+    description: 'Turbo Frames laden Inhalte lazy und aktualisieren inline – ganz ohne zusätzliches JavaScript.'
+  illustrations:
+    title: 'Illustrationen'
+    alt: 'Illustrationsbeispiel'
+  empty:
+    card_title: 'Leerer Zustand'
+    headline: 'Nichts in der Warteschlange'
+    description: 'Nutze leere Zustände, um Nutzer:innen durch nicht konfigurierte Bereiche zu führen.'
+  alpine:
+    description: 'Alpine.js steht global für leichte UI-Helfer bereit – ideal für Toggles, Tabs oder progressive Offenlegungen ohne eigenes JavaScript.'
+  tips:
+    meta:
+      heading: 'Theme-Tipp'
+      badge: 'Live-Tipp'
+    keep_tokens:
+      title: 'Tailwind-Tokens synchron halten'
+      description: 'Theme-Overrides sollten eine eigene theme.css liefern, aber weiterhin die Basistokens importieren, um Regressionen zu vermeiden.'
+    prefer_partials:
+      title: 'Komponenten-Partial bevorzugen'
+      description: 'Composer-nahe Templates bleiben schlank, wenn sie Buttons, Cards, Tabellen und Formulare aus der Komponentenbibliothek nutzen.'
+    bundle_hero:
+      title: 'Hero-Inhalte bündeln'
+      description: 'Nutze das Header-Partial mit projekt- oder adminspezifischen Bildern. Themes können denselben Block überschreiben, ohne Controller anzupassen.'
+    document_overrides:
+      title: 'Overrides dokumentieren'
+      description: 'Wenn du Templates überschreibst, aktualisiere die Entwickler-Doku und die Classmap, damit Beiträge Änderungen schnell finden.'

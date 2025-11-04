@@ -55,6 +55,16 @@
 - [ ] Implement search palette and contextual help drawer
 - [ ] Add Cypress/Stimulus integration tests (or Symfony Panther) for core navigation UX
 
+### Localization & Translation (P0 | M)
+- [x] Switch installer environment/storage/admin forms to deterministic translation keys with updated session writers.
+- [x] Add debug footer locale selector + translator decorator with PHPUnit coverage.
+- [x] Implement translation catalogue manager to cascade theme/module/system resources with caching + tests.
+- [x] Migrate remaining Twig templates (security/auth flows, admin audit/system screens, demo) to deterministic translation keys.
+- [x] Extend German `messages.*` catalogue for outstanding UI strings beyond installer/admin steps.
+- [x] Audit validator error messages to ensure every constraint surfaces localized keys.
+- [x] Localize UI timestamps via translation-driven date/time formats.
+- [x] Normalise built-in/admin role labels to translation keys and document how module-defined roles should supply translated display names.
+
 ### Feat: Schema & Template System (P0 | L)
 - [ ] Implement schema/template persistence with versioning
 - [ ] Integrate JSON schema validation into draft workflow
@@ -346,4 +356,24 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Introduced help-content loader + JSON catalogue with inline/tooltip cards rendered across installer steps.
 - Polished installer UX: wider/delayed tooltips mapped to form labels (including password confirmation), ensured button components honour submit types, and extended functional coverage to guard the new hints.
 - Added Stimulus-powered “Generate secret” control to the environment step so operators can mint secure APP_SECRET values in-browser, including tests and feedback messaging.
+
+### 2025-11-04
 - Localisation pass: wired JS/UI strings through the translator, added Accept-Language/user-profile locale resolution, and covered locale provider/subscriber behaviour with tests.
+- Introduced deterministic translation keys (`installer.*`, `ui.*`, `demo.*`) with refreshed English catalog and seeded German entries for the environment step to prove locale fallback behaviour.
+- Added debug-only locale switcher (footer dropdown) plus translator decorator for key-echo mode to simplify QA across languages.
+- Converted installer environment/storage/admin templates and related form types to deterministic translation keys, expanded `messages.{en,de}.yaml`, and introduced validator catalogues for shared password/display-name constraints.
+- Added the debug footer locale switcher backend (`App\\Controller\\Debug\\LocaleController`) and translator decorator tests, wiring the controller as a public service and covering key-mode behaviour in `tests/Translation/DebugTranslatorTest.php` and `tests/Controller/Debug/LocaleControllerTest.php`.
+- Updated installer functional tests to rely on supported locale/timezone choices, added coverage for the debug locale endpoint, and verified the full PHPUnit suite passes cleanly.
+- Refreshed `docs/dev/classmap.md` with the new controller/service and logged outstanding localization follow-ups in the TODO section for continued translation work.
+- Localized table timestamps via translation-driven date/time format keys and updated Twig templates to consume them consistently.
+- Implemented the translation catalogue manager to cascade theme/module/system translations with cached merges, extended `LocaleProvider` to scan module/theme directories, and added focused unit coverage.
+
+### 2025-11-04 (Session 2)
+- Guarded shared flash partials and layouts against missing app/session context, reusing the computed flashbag for installer-specific errors to eliminate streamed-session warnings.
+- Standardised admin/security form types on deterministic translation keys (API keys, project memberships, profiles, password reset flows) and expanded the English/German catalogues, including role label fallbacks.
+- Added the `twig/intl-extra` dependency, removed manual extension wiring, and regenerated autoloads so date formatting helpers register consistently across environments.
+- Updated functional tests: invitation flow now targets the form directly, installer tests reload session state via cookie-backed helper, and the full suite passes under the new translation setup.
+- Logged follow-up work for role label localisation in the TODO tracker and confirmed composer/phpunit workflows remain green.
+- Converted security login/password pages, the admin security audit log, and demo tip partials to deterministic translation keys; added matching EN/DE catalogue entries and audit action labels.
+- Localised built-in role names through the translator, simplified installer/admin field labels, and refreshed the internationalisation guide with guidance for module-supplied role translations.
+- Harmonised phrasing in English and German catalogues (shorter labels, clearer help text) and introduced shared keys for “not applicable” values; PHPUnit suite remains green.

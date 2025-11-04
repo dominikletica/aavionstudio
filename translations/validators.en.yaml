@@ -1,0 +1,20 @@
+installer:
+  admin:
+    form:
+      password_mismatch: 'The passwords must match.'
+      password_require_length: 'Password must be at least {{ limit }} characters long.'
+      password_require_number: 'Password must contain at least one number.'
+      password_require_mixed_case: 'Password must contain both upper and lower case letters.'
+      password_require_special: 'Password must contain at least one special character.'
+
+security:
+  invitation:
+    form:
+      display_name:
+        not_blank: 'Please provide a display name.'
+        min_length: 'Display name must be at least {{ limit }} characters long.'
+        max_length: 'Display name cannot be longer than {{ limit }} characters.'
+      password:
+        not_blank: 'Enter a password.'
+        min_length: 'Password must be at least {{ limit }} characters long.'
+      password_mismatch: 'Passwords must match.'

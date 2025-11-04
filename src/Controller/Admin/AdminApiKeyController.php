@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/admin/api/api-keys', name: 'admin_api_keys_')]
 #[IsGranted('ROLE_ADMIN')]
@@ -19,6 +20,7 @@ final class AdminApiKeyController extends AbstractController
 {
     public function __construct(
         private readonly ApiKeyManager $apiKeyManager,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -29,7 +31,7 @@ final class AdminApiKeyController extends AbstractController
 
         if ($userId === '') {
             return $this->json([
-                'error' => 'Parameter "user" is required.',
+                'error' => $this->translator->trans('api.api_keys.errors.user_required'),
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -60,7 +62,7 @@ final class AdminApiKeyController extends AbstractController
 
         if ($userId === '' || $label === '') {
             return $this->json([
-                'error' => 'Fields "user_id" and "label" are required.',
+                'error' => $this->translator->trans('api.api_keys.errors.fields_required'),
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -70,7 +72,7 @@ final class AdminApiKeyController extends AbstractController
                 $expiresAt = new \DateTimeImmutable($expiresAtInput);
             } catch (\Exception $exception) {
                 return $this->json([
-                    'error' => sprintf('Invalid expires_at value: %s', $exception->getMessage()),
+                    'error' => $this->translator->trans('api.api_keys.errors.invalid_expires', ['%error%' => $exception->getMessage()]),
                 ], Response::HTTP_BAD_REQUEST);
             }
         }

@@ -2,8 +2,8 @@
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
-        title: 'Summary'|trans,
-        subtitle: 'Review your selections before the installer provisions databases, writes configuration, and locks the wizard.'|trans
+        title: 'installer.summary.heading.title'|trans,
+        subtitle: 'installer.summary.heading.subtitle'|trans
     } only %}
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
@@ -11,39 +11,39 @@
             {% set environment_body %}
                 <dl class="grid gap-2 text-sm leading-relaxed text-text-muted">
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Instance name'|trans }}</dt>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.environment.instance_name'|trans }}</dt>
                         <dd>{{ environment_settings['core.instance_name'] ?? '–' }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Tagline'|trans }}</dt>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.environment.tagline'|trans }}</dt>
                         <dd>{{ environment_settings['core.tagline'] ?? '–' }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Support email'|trans }}</dt>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.environment.support_email'|trans }}</dt>
                         <dd>{{ environment_settings['core.support_email'] ?? '–' }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Base URL'|trans }}</dt>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.environment.base_url'|trans }}</dt>
                         <dd>{{ environment_settings['core.url'] ?? '–' }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Locale / Timezone'|trans }}</dt>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.environment.locale_timezone'|trans }}</dt>
                         <dd>{{ environment_settings['core.locale'] ?? 'en' }} · {{ environment_settings['core.timezone'] ?? 'UTC' }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'User registration'|trans }}</dt>
-                        <dd>{{ environment_settings['core.user_registration'] ? 'enabled'|trans : 'disabled'|trans }}</dd>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.environment.user_registration'|trans }}</dt>
+                        <dd>{{ environment_settings['core.user_registration'] ? 'ui.state.enabled'|trans : 'ui.state.disabled'|trans }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Maintenance mode'|trans }}</dt>
-                        <dd>{{ environment_settings['core.maintenance_mode'] ? 'enabled'|trans : 'disabled'|trans }}</dd>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.environment.maintenance_mode'|trans }}</dt>
+                        <dd>{{ environment_settings['core.maintenance_mode'] ? 'ui.state.enabled'|trans : 'ui.state.disabled'|trans }}</dd>
                     </div>
                 </dl>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Environment',
-                title: 'System defaults',
+                eyebrow: 'installer.summary.environment.eyebrow'|trans,
+                title: 'installer.summary.environment.title'|trans,
                 body: environment_body
             } only %}
 
@@ -59,68 +59,68 @@
                     </div>
                     <div class="flex items-center justify-between gap-4">
                         <dt>APP_SECRET</dt>
-                        <dd>{{ environment_overrides.APP_SECRET is empty ? 'will be generated'|trans : 'provided'|trans }}</dd>
+                        <dd>{{ environment_overrides.APP_SECRET is empty ? 'installer.summary.overrides.secret_pending'|trans : 'installer.summary.overrides.secret_provided'|trans }}</dd>
                     </div>
                 </dl>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: '.env.local',
-                title: 'Environment overrides',
+                eyebrow: 'installer.summary.overrides.eyebrow'|trans,
+                title: 'installer.summary.overrides.title'|trans,
                 body: env_override_body
             } only %}
 
             {% set storage_body %}
                 <p class="text-sm text-text-muted font-mono">{{ storage_config.root }}</p>
-                <p class="text-xs text-text-muted">{{ 'Databases, uploads, snapshots, and backups will live inside this directory.'|trans }}</p>
+                <p class="text-xs text-text-muted">{{ 'installer.summary.storage.description'|trans }}</p>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Storage',
-                title: 'Writable root',
+                eyebrow: 'installer.summary.storage.eyebrow'|trans,
+                title: 'installer.summary.storage.title'|trans,
                 body: storage_body
             } only %}
 
             {% set admin_body %}
                 <dl class="grid gap-2 text-sm leading-relaxed text-text-muted">
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Email'|trans }}</dt>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.admin.email'|trans }}</dt>
                         <dd>{{ admin_account.email ?: '–' }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Display name'|trans }}</dt>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.admin.display_name'|trans }}</dt>
                         <dd>{{ admin_account.display_name ?: '–' }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Locale / Timezone'|trans }}</dt>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.admin.locale_timezone'|trans }}</dt>
                         <dd>{{ admin_account.locale }} · {{ admin_account.timezone }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Require MFA on first login'|trans }}</dt>
-                        <dd>{{ admin_account.require_mfa ? 'yes'|trans : 'no'|trans }}</dd>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.admin.require_mfa'|trans }}</dt>
+                        <dd>{{ admin_account.require_mfa ? 'ui.boolean.yes'|trans : 'ui.boolean.no'|trans }}</dd>
                     </div>
                     {% if admin_account.recovery_email %}
                         <div class="flex items-center justify-between gap-4">
-                            <dt class="font-semibold text-text">{{ 'Recovery email'|trans }}</dt>
+                            <dt class="font-semibold text-text">{{ 'installer.summary.admin.recovery_email'|trans }}</dt>
                             <dd>{{ admin_account.recovery_email }}</dd>
                         </div>
                     {% endif %}
                     {% if admin_account.recovery_phone %}
                         <div class="flex items-center justify-between gap-4">
-                            <dt class="font-semibold text-text">{{ 'Recovery phone'|trans }}</dt>
+                            <dt class="font-semibold text-text">{{ 'installer.summary.admin.recovery_phone'|trans }}</dt>
                             <dd>{{ admin_account.recovery_phone }}</dd>
                         </div>
                     {% endif %}
                     <div class="flex items-center justify-between gap-4">
-                        <dt class="font-semibold text-text">{{ 'Password'|trans }}</dt>
-                        <dd>{{ admin_account.password ? 'provided'|trans : 'pending'|trans }}</dd>
+                        <dt class="font-semibold text-text">{{ 'installer.summary.admin.password'|trans }}</dt>
+                        <dd>{{ admin_account.password ? 'installer.summary.admin.password_provided'|trans : 'installer.summary.admin.password_pending'|trans }}</dd>
                     </div>
                 </dl>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Administrator',
-                title: 'First user',
+                eyebrow: 'installer.summary.admin.eyebrow'|trans,
+                title: 'installer.summary.admin.title'|trans,
                 body: admin_body
             } only %}
 
@@ -131,8 +131,8 @@
             {% if setup.databases_exist %}
                 {% include 'partials/components/card.html.twig' with {
                     variant: 'warning',
-                    title: 'Provisioning pending',
-                    body: '<p class="text-sm text-text-muted">' ~ 'Database files exist, but the setup lock is missing. Finish the wizard to apply outstanding migrations and secure the installer.'|trans ~ '</p>'
+                    title: 'installer.summary.alerts.provisioning_title'|trans,
+                    body: '<p class="text-sm text-text-muted">' ~ 'installer.summary.alerts.provisioning_body'|trans ~ '</p>'
                 } only %}
             {% endif %}
 
@@ -141,9 +141,9 @@
 
             <div class="surface border border-border-strong rounded-md p-6 layout-stack layout-stack--tight">
                 <div class="layout-stack layout-stack--tight">
-                    <h2 class="text-heading text-xl">Finalize installation</h2>
+                    <h2 class="text-heading text-xl">{{ 'installer.summary.finalize.title'|trans }}</h2>
                     <p class="text-sm text-text-muted">
-                        {{ 'Provision the SQLite databases, apply Doctrine migrations, and lock this setup wizard.'|trans }}
+                        {{ 'installer.summary.finalize.description'|trans }}
                     </p>
                 </div>
                 <button
@@ -151,14 +151,14 @@
                     class="btn btn-primary btn--lg self-start{{ finalize_tooltip_text ? ' tooltip' : '' }}"
                     {% if finalize_tooltip_text %}
                         data-tooltip="{{ finalize_tooltip_text }}"
-                        aria-label="{{ ('Create databases & finish setup. ' ~ finalize_tooltip_text)|trim }}"
+                        aria-label="{{ ('installer.summary.finalize.aria_label'|trans ~ ' ' ~ finalize_tooltip_text)|trim }}"
                     {% endif %}
                     data-action-trigger
                     data-action-context="setup"
                     data-action-steps="{{ setup.action_steps|json_encode|e('html_attr') }}"
                     data-action-token="{{ setup.action_token|e('html_attr') }}"
                 >
-                    {{ 'Create databases & finish setup'|trans }}
+                    {{ 'installer.summary.finalize.button'|trans }}
                 </button>
             </div>
         </div>
@@ -168,13 +168,13 @@
                 name: 'about-us-page',
                 variant: 'lg',
                 attributes: { class: 'w-full' },
-                alt: 'Summary illustration'|trans
+                alt: 'installer.summary.illustration_alt'|trans
             } only %}
 
             {% include 'partials/components/card.html.twig' with {
                 variant: 'muted',
-                title: 'Need help?'|trans,
-                body: '<p class="text-sm text-text-muted">' ~ 'Open the diagnostics sidebar or the command palette (coming soon) to jump directly to troubleshooting guides.'|trans ~ '</p>'
+                title: 'installer.summary.help.title'|trans,
+                body: '<p class="text-sm text-text-muted">' ~ 'installer.summary.help.body'|trans ~ '</p>'
             } only %}
         </div>
     </div>

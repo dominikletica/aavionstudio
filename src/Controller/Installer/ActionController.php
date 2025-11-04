@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ActionController extends AbstractController
 {
@@ -25,6 +26,7 @@ final class ActionController extends AbstractController
         private readonly SetupAccessToken $setupAccessToken,
         private readonly Security $security,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly TranslatorInterface $translator,
         private readonly ?Profiler $profiler = null,
     ) {
     }
@@ -40,7 +42,7 @@ final class ActionController extends AbstractController
 
         $providedToken = $payload['token'] ?? $request->headers->get('X-Setup-Token');
         if (! $this->setupAccessToken->validate(\is_string($providedToken) ? $providedToken : null)) {
-            return $this->json(['error' => 'Installer actions require a valid session token.'], Response::HTTP_FORBIDDEN);
+            return $this->json(['error' => $this->translator->trans('installer.errors.invalid_token')], Response::HTTP_FORBIDDEN);
         }
 
         $session = $request->getSession();
@@ -57,7 +59,7 @@ final class ActionController extends AbstractController
         $steps = $payload['steps'] ?? $payload['commands'] ?? [];
 
         if (!\is_array($steps)) {
-            return $this->json(['error' => 'Invalid action format.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['error' => $this->translator->trans('installer.errors.invalid_action_format')], Response::HTTP_BAD_REQUEST);
         }
 
         /** @var UploadedFile|null $package */

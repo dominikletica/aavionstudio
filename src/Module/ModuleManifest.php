@@ -138,6 +138,13 @@ final class ModuleManifest
         return is_dir($assetsDir) ? $assetsDir : null;
     }
 
+    public function translationsPath(): ?string
+    {
+        $translationsDir = $this->resolve('translations');
+
+        return is_dir($translationsDir) ? $translationsDir : null;
+    }
+
     private function resolve(string $relative): string
     {
         return rtrim($this->basePath, '/').'/'.ltrim($relative, '/');

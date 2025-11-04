@@ -3,8 +3,8 @@
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
-        title: 'Environment defaults'|trans,
-        subtitle: 'Review the values that will land in <code>.env.local</code> and in system settings. The installer validates everything before running <code>bin/init</code>.'|trans|raw
+        title: 'installer.environment.heading.title'|trans,
+        subtitle: 'installer.environment.heading.subtitle'|trans|raw
     } only %}
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
@@ -13,20 +13,20 @@
                 <div class="grid gap-4 md:grid-cols-2">
                     {{ ui.form_row_with_tooltip(environment_form.environment, help_tooltips['environment.environment'] ?? null) }}
                     {{ ui.form_row_with_tooltip(environment_form.debug, help_tooltips['environment.debug'] ?? null) }}
-                    <div data-controller="setup-secret" data-setup-secret-message-value="{{ 'Secret generated'|trans }}" class="layout-stack layout-stack--tight">
+                    <div data-controller="setup-secret" data-setup-secret-message-value="{{ 'installer.environment.secret.generated'|trans }}" class="layout-stack layout-stack--tight">
                         {{ ui.form_row_with_tooltip(environment_form.secret, help_tooltips['environment.secret'] ?? null, {
                             attr: { 'data-setup-secret-target': 'input', autocomplete: 'off' }
                         }) }}
                         <div class="flex items-center gap-3">
                             {{ include('partials/components/button.html.twig', {
-                                label: 'Generate secret'|trans,
+                                label: 'installer.environment.secret.generate'|trans,
                                 attributes: {
                                     class: 'btn btn-secondary',
                                     'data-action': 'setup-secret#generate'
                                 }
                             }) }}
                             <span data-setup-secret-target="feedback" class="hidden text-xs text-success font-medium" aria-live="polite">
-                                {{ 'Secret generated'|trans }}
+                                {{ 'installer.environment.secret.generated'|trans }}
                             </span>
                         </div>
                     </div>
@@ -41,7 +41,7 @@
                 </div>
                 <div class="flex justify-end">
                     {{ include('partials/components/button.html.twig', {
-                        label: 'Save environment settings'|trans,
+                        label: 'installer.environment.actions.save'|trans,
                         attributes: { type: 'submit', class: 'btn btn-primary' }
                     }) }}
                 </div>
@@ -52,44 +52,44 @@
                 name: 'adjustments',
                 variant: 'lg',
                 attributes: { class: 'w-full' },
-                alt: 'Configuration illustration'|trans
+                alt: 'installer.environment.illustration_alt'|trans
             } only %}
 
             {% set overrides_body %}
                 <ul class="list-disc space-y-2 pl-5 text-sm leading-relaxed text-text-muted">
-                    <li><strong>APP_ENV</strong> – {{ 'Set <code>prod</code> for production installs; keep <code>dev</code> on staging boxes.'|trans|raw }}</li>
-                    <li><strong>APP_DEBUG</strong> – {{ 'Disable debug outside of trusted environments to prevent verbose error output.'|trans }}</li>
-                    <li><strong>APP_SECRET</strong> – {{ 'Generate a unique random value; never reuse secrets across instances.'|trans }}</li>
-                    <li><strong>DEFAULT_URI</strong> – {{ 'Match the canonical base URL (including HTTPS) so CLI URL generators behave.'|trans }}</li>
-                    <li><strong>MAILER_DSN</strong> – {{ 'Point to your SMTP or transactional provider before onboarding users.'|trans }}</li>
+                    <li><strong>APP_ENV</strong> – {{ 'installer.environment.overrides.app_env'|trans|raw }}</li>
+                    <li><strong>APP_DEBUG</strong> – {{ 'installer.environment.overrides.app_debug'|trans }}</li>
+                    <li><strong>APP_SECRET</strong> – {{ 'installer.environment.overrides.app_secret'|trans }}</li>
+                    <li><strong>DEFAULT_URI</strong> – {{ 'installer.environment.overrides.default_uri'|trans }}</li>
+                    <li><strong>MAILER_DSN</strong> – {{ 'installer.environment.overrides.mailer_dsn'|trans }}</li>
                 </ul>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Configuration',
-                title: 'Recommended overrides',
+                eyebrow: 'installer.environment.overrides.eyebrow'|trans,
+                title: 'installer.environment.overrides.title'|trans,
                 body: overrides_body
             } only %}
 
             {% set deployment_body %}
                 <ol class="list-decimal space-y-3 pl-5 text-sm leading-relaxed text-text-muted">
-                    <li>{{ 'Copy the generated <code>.env.local</code> to your deployment target or secrets manager.'|trans|raw }}</li>
-                    <li>{{ 'Enable opcache, configure PHP-FPM, and point the web server at <code>public/</code>.'|trans|raw }}</li>
-                    <li>{{ 'Schedule the asset rebuild command (`php bin/console app:assets:rebuild --force`) for theme/module updates.'|trans|raw }}</li>
-                    <li>{{ 'Back up <code>var/system.brain</code> and <code>var/user.brain</code> regularly; the storage step will add remote targets soon.'|trans|raw }}</li>
+                    <li>{{ 'installer.environment.readiness.copy_env'|trans|raw }}</li>
+                    <li>{{ 'installer.environment.readiness.opcache'|trans|raw }}</li>
+                    <li>{{ 'installer.environment.readiness.asset_rebuild'|trans|raw }}</li>
+                    <li>{{ 'installer.environment.readiness.backups'|trans|raw }}</li>
                 </ol>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Readiness checklist',
-                title: 'Before pushing to production',
+                eyebrow: 'installer.environment.readiness.eyebrow'|trans,
+                title: 'installer.environment.readiness.title'|trans,
                 body: deployment_body
             } only %}
 
             {% include 'partials/components/card.html.twig' with {
                 variant: 'muted',
-                title: 'Tip'|trans,
-                body: '<p class="text-sm text-text-muted">' ~ 'Values can be fine-tuned later in the admin UI; keep secrets out of version control.'|trans ~ '</p>'
+                title: 'ui.tip'|trans,
+                body: '<p class="text-sm text-text-muted">' ~ 'installer.environment.tip'|trans ~ '</p>'
             } only %}
 
             {% include 'partials/components/help_entries.html.twig' with {

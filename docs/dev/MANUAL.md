@@ -51,7 +51,7 @@ Welcome to the technical companion for aavion Studio. This manual outlines the d
 - **Coding Standards**
   - PHP: PSR-12, strict types when applicable, service autowiring/autoconfigure.
   - Frontend: Tailwind utility classes, Stimulus controllers (`snake_controller.js`), AssetMapper imports.
-  - Translations: English only (`admin`, `validators`, etc.).
+  - Translations: Use deterministic keys (`namespace.section.token`). The runtime loads catalogues in this order: active theme → enabled module manifests (DB state, highest priority first) → base theme fallback → core `translations/`. See [Internationalisation & Translation Cascade](sections/internationalization/translations.md) for details on key naming, caching, and localisation workflows.
 
 - **Testing**
   - PHPUnit for unit/integration; plan to add Panther/Cypress for UI flows.

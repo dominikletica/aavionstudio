@@ -15,12 +15,12 @@ final class StorageSettingsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('root', TextType::class, [
-            'label' => 'Storage root',
+            'label' => 'installer.storage.form.root',
             'constraints' => [
                 new Assert\NotBlank(),
             ],
             'attr' => [
-                'placeholder' => 'var/storage',
+                'placeholder' => 'installer.storage.form.root_placeholder',
             ],
         ]);
     }

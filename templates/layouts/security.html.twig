@@ -1,7 +1,7 @@
 {% extends 'layouts/default.html.twig' %}
 
 {% block title %}
-    {{ security_title is defined and security_title ? security_title ~ ' · ' : 'Sign In · '|trans }}{{ site_title is defined and site_title ? site_title : 'aavion Studio'|trans }}
+    {{ security_title is defined and security_title ? security_title ~ ' · ' : 'security.layout.title_prefix'|trans }}{{ site_title is defined and site_title ? site_title : 'app.name'|trans }}
 {% endblock %}
 
 {% block main %}

@@ -22,6 +22,7 @@
 - Stimulus controllers follow `snake_controller.js` naming and register via the Symfony loader.
 - Apply automated formatters when available (e.g. `php-cs-fixer`); otherwise rely on IDE PSR-12 formatting and composer-normalized JSON.
 - Repository text (code comments, docs, commits) must remain English, even when collaboration happens in other languages.
+- **Translations:** Every user-facing string in Twig, PHP, or JavaScript must be referenced via a deterministic translation key following the `namespace.section.token` pattern (e.g. `installer.environment.form.instance_name`). Keep the English catalogue (`translations/messages.en.yaml`) and the German catalogue (`translations/messages.de.yaml`) in sync whenever strings change. Inline help JSON under `docs/setup/` remains locale-specific outside this rule.
 - Maintainers keep `docs/dev/classmap.md` up to date with every callable (services, commands, Twig components) so contributors can locate references without codewide searches.
 - Every code change must ship with corresponding documentation and tests:
   - Update feature notes, manuals, and class map entries in the same commit when behaviour changes.
@@ -74,5 +75,6 @@
 - Confirm PR checklist items are addressed (testing, documentation, screenshots, security notes).
 - Flag any drift between code and feature drafts (`docs/codex/notes/*.md`) and update or log follow-ups.
 - Review tests (unit/integration/UI) for completeness and determinism; ensure coverage for new logic.
-- Revisit every markdown-file in `docs/` and check for coverage and completeness. Eliminate gaps when possible (excluding `docs/codex/notes/` as these are meant to be internal referenes only).
+- Review translation coverage. Replace every user-facing string with apropriate translation keys and add German and English translation. Logs and CLI-Output dont need to be localzed. Focus on rendered Twig output. Use `.codex/render.php /<route>` if you want to review a specific route's rendered output. Use `.codex/compare_translations.php` to compare available keys between `translations/messages.en.yaml` and `translations/messages.de.yaml` and report missing keys in either of these files.
+- Revisit every markdown-file in `docs/` and check for coverage and completeness. Eliminate gaps when possible (excluding `docs/codex/notes/` as these are meant to be internal referenes only). Make sure, documentation aligns with code changes and also check for gaps between existing documentation and codebase.
 - Run or schedule Markdown link checks; report broken references and update docs during review when possible.

@@ -19,6 +19,8 @@
 | `App\Setup\SetupPayloadBuilder` | `src/Setup/SetupPayloadBuilder.php` | Serialises wizard state into `var/setup/runtime.json` for `bin/init --payload` | Cleaned up once setup locks |
 | `App\Settings\SystemSettings` | `src/Settings/SystemSettings.php` | Lazy loads settings from `app_system_setting` with fallback to defaults | Shared by error resolver, profile registry, etc. |
 | `App\Security\User\UserProfileFieldRegistry` | `src/Security/User/UserProfileFieldRegistry.php` | Supplies configurable profile field metadata & normalisation helpers | Injected into the admin user form and manager |
+| `App\Translation\DebugTranslator` | `src/Translation/DebugTranslator.php` | Decorates the Symfony translator to surface key-only output in debug mode and respect footer overrides | Decorates `translator`; covered by `tests/Translation/DebugTranslatorTest.php` |
+| `App\Translation\CatalogueManager` | `src/Translation/CatalogueManager.php` | Merges translations from active theme, enabled modules, base theme, and system catalogues with caching | Consumed by `DebugTranslator`; covered by `tests/Translation/CatalogueManagerTest.php` |
 | `App\Installer\DefaultProjects` | `src/Installer/DefaultProjects.php` | Provides default project seeds from `config/app/projects.php` | Initial migration inserts `default` project via this helper |
 | `App\Installer\Action\ActionExecutor` | `src/Installer/Action/ActionExecutor.php` | Executes installer/updater action chains (zip extraction, console/init calls, lock creation) with streamed output | Used by `/setup/action` controller |
 | `App\Bootstrap\RootEntryPoint` | `src/Bootstrap/RootEntryPoint.php` | Normalises requests that hit the root fallback (`index.php`) and forwards them to `public/index.php` | Sets compatibility flags for installer rewrite diagnostics |
@@ -81,6 +83,7 @@ For each service added to `config/services.yaml` or module manifests, document:
 | `app_password_forgot` | `src/Controller/Security/PasswordResetController.php` | Password reset request | Core |
 | `app_password_reset` | `src/Controller/Security/PasswordResetController.php` | Password reset confirmation | Core |
 | `app_invitation_accept` | `src/Controller/Security/InvitationAcceptController.php` | Handles invitation acceptance redirect | Core; covered by `tests/Controller/Security/InvitationAcceptControllerTest.php` |
+| `app_debug_locale` | `src/Controller/Debug/LocaleController.php` | Debug-only endpoint toggling locale overrides and key display for the footer switcher | Core (debug); covered by `tests/Controller/Debug/LocaleControllerTest.php` |
 | `admin_users_index` | `src/Controller/Admin/UserController.php` | Lists users for admin management | Core |
 | `admin_users_edit` | `src/Controller/Admin/UserController.php` | Edits user profile/roles | Core |
 | `admin_users_api_keys_revoke` | `src/Controller/Admin/UserController.php` | Revokes an API key for a user | Core |

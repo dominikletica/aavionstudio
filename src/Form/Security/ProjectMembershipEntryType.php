@@ -18,15 +18,16 @@ final class ProjectMembershipEntryType extends AbstractType
         $builder
             ->add('project_id', HiddenType::class)
             ->add('role', ChoiceType::class, [
-                'label' => 'Project role',
+                'label' => 'admin.users.edit.projects.form.role',
                 'choices' => $options['role_choices'],
                 'required' => false,
-                'placeholder' => 'Inherit global role',
+                'placeholder' => 'admin.users.edit.projects.form.role_placeholder',
+                'choice_translation_domain' => false,
             ])
             ->add('capabilities', TextType::class, [
-                'label' => 'Extra capabilities',
+                'label' => 'admin.users.edit.projects.form.capabilities',
                 'required' => false,
-                'help' => 'Comma or space separated capability keys applied to this project only.',
+                'help' => 'admin.users.edit.projects.form.capabilities_help',
             ]);
     }
 

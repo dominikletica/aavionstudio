@@ -2,12 +2,12 @@
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
-        title: 'Environment diagnostics'|trans,
-        subtitle: 'Installer helpers verify server requirements before you continue.'|trans
+        title: 'installer.diagnostics.heading.title'|trans,
+        subtitle: 'installer.diagnostics.heading.subtitle'|trans
     } only %}
 
     {% set summary_body %}
-        <p class="text-sm leading-relaxed text-text">{{ 'PHP version:'|trans }} <strong>{{ diagnostics.php_version }}</strong></p>
+        <p class="text-sm leading-relaxed text-text">{{ 'installer.diagnostics.summary.php_version'|trans }} <strong>{{ diagnostics.php_version }}</strong></p>
     {% endset %}
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
@@ -15,39 +15,39 @@
             {% set rewrite_body %}
                 <div class="layout-stack--tight text-sm leading-relaxed text-text">
                     <p>
-                        {{ 'Rewrite engine:'|trans }} <strong>{{ diagnostics.rewrite.enabled ? 'enabled'|trans : 'compatibility mode'|trans }}</strong>
+                        {{ 'installer.diagnostics.rewrite.label'|trans }} <strong>{{ diagnostics.rewrite.enabled ? 'installer.diagnostics.rewrite.enabled'|trans : 'installer.diagnostics.rewrite.compatibility'|trans }}</strong>
                         {% if diagnostics.rewrite.mode == 'forced' %}
-                            ({{ 'forced via %env%'|trans({ '%env%': '<code>APP_FORCE_ROOT_ENTRY</code>' })|raw }})
+                            ({{ 'installer.diagnostics.rewrite.forced'|trans({ '%env%': '<code>APP_FORCE_ROOT_ENTRY</code>' })|raw }})
                         {% elseif not diagnostics.rewrite.enabled %}
-                            – {{ 'request served by compatibility fallback'|trans }}
+                            – {{ 'installer.diagnostics.rewrite.fallback_notice'|trans }}
                         {% endif %}
                     </p>
                     {% if not diagnostics.rewrite.enabled and not diagnostics.rewrite.forced %}
                         {{ include('partials/components/alert.html.twig', {
                             variant: 'warning',
-                            title: 'Enable URL rewrites'|trans,
-                            description: 'Configure the web server to use the <code>public/</code> directory as document root and enable URL rewrites to avoid exposing sensitive files.'|trans|raw,
+                            title: 'installer.diagnostics.rewrite.alert.title'|trans,
+                            description: 'installer.diagnostics.rewrite.alert.description'|trans|raw,
                             attributes: { role: 'alert' }
                         }) }}
-                        <p role="alert" class="sr-only">{{ 'Configure the web server to use the public directory as document root and enable URL rewrites to avoid exposing sensitive files.'|trans }}</p>
+                        <p role="alert" class="sr-only">{{ 'installer.diagnostics.rewrite.alert.screen_reader'|trans }}</p>
                     {% elseif diagnostics.rewrite.mode == 'forced' %}
                         {{ include('partials/components/alert.html.twig', {
                             variant: 'info',
-                            title: 'Compatibility mode enabled'|trans,
-                            description: 'Compatibility mode is intentionally forced; disable <code>APP_FORCE_ROOT_ENTRY</code> after testing the fallback.'|trans|raw
+                            title: 'installer.diagnostics.rewrite.forced_title'|trans,
+                            description: 'installer.diagnostics.rewrite.forced_description'|trans|raw
                         }) }}
                     {% endif %}
                     <dl class="grid gap-2 text-xs">
                         <div class="flex items-center justify-between gap-3">
-                            <dt class="font-semibold text-text-muted">{{ 'Effective route'|trans }}</dt>
+                            <dt class="font-semibold text-text-muted">{{ 'installer.diagnostics.rewrite.effective_route'|trans }}</dt>
                             <dd><code>{{ diagnostics.rewrite.route }}</code></dd>
                         </div>
                         <div class="flex items-center justify-between gap-3">
-                            <dt class="font-semibold text-text-muted">{{ 'Original request URI'|trans }}</dt>
+                            <dt class="font-semibold text-text-muted">{{ 'installer.diagnostics.rewrite.original_uri'|trans }}</dt>
                             <dd><code>{{ diagnostics.rewrite.original_uri }}</code></dd>
                         </div>
                         <div class="flex items-center justify-between gap-3">
-                            <dt class="font-semibold text-text-muted">{{ 'Effective request URI'|trans }}</dt>
+                            <dt class="font-semibold text-text-muted">{{ 'installer.diagnostics.rewrite.effective_uri'|trans }}</dt>
                             <dd><code>{{ diagnostics.rewrite.request_uri }}</code></dd>
                         </div>
                     </dl>
@@ -55,29 +55,29 @@
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                title: 'Docroot & rewrite status'|trans,
-                subtitle: 'Validate that requests are routed through the public front controller.'|trans,
+                title: 'installer.diagnostics.rewrite.card_title'|trans,
+                subtitle: 'installer.diagnostics.rewrite.card_subtitle'|trans,
                 body: rewrite_body,
-                eyebrow: 'Routing'|trans
+                eyebrow: 'installer.diagnostics.rewrite.eyebrow'|trans
             } only %}
 
             {% set extension_rows = [] %}
             {% for extension in diagnostics.extensions %}
                 {% set extension_rows = extension_rows|merge([{
                     label: extension.label,
-                    status: extension.available ? 'available'|trans : 'missing'|trans,
+                    status: extension.available ? 'installer.diagnostics.status.available'|trans : 'installer.diagnostics.status.missing'|trans,
                     hint: extension.available ? '—' : extension.hint
                 }]) %}
             {% endfor %}
 
             {% include 'partials/components/card.html.twig' with {
-                title: 'PHP extensions'|trans,
-                subtitle: 'Required extensions must be available before installation can continue.'|trans,
+                title: 'installer.diagnostics.extensions.title'|trans,
+                subtitle: 'installer.diagnostics.extensions.subtitle'|trans,
                 body: include('partials/components/table.html.twig', {
                     columns: [
-                        { label: 'Extension'|trans, key: 'label', class: 'font-mono text-xs' },
-                        { label: 'Status'|trans, key: 'status' },
-                        { label: 'Hint'|trans, key: 'hint' }
+                        { label: 'installer.diagnostics.extensions.column.extension'|trans, key: 'label', class: 'font-mono text-xs' },
+                        { label: 'installer.diagnostics.extensions.column.status'|trans, key: 'status' },
+                        { label: 'installer.diagnostics.extensions.column.hint'|trans, key: 'hint' }
                     ],
                     rows: extension_rows,
                     compact: true,
@@ -88,28 +88,28 @@
             {% set filesystem_rows = [] %}
             {% for directory in diagnostics.filesystem %}
                 {% set writable_text = directory.writable
-                    ? 'yes'|trans
+                    ? 'ui.boolean.yes'|trans
                     : (directory.exists
-                        ? (directory.parent_writable ? 'parent writable'|trans : 'no'|trans)
-                        : 'no'|trans)
+                        ? (directory.parent_writable ? 'installer.diagnostics.filesystem.parent_writable'|trans : 'ui.boolean.no'|trans)
+                        : 'ui.boolean.no'|trans)
                 %}
                 {% set filesystem_rows = filesystem_rows|merge([{
                     path: directory.path,
-                    exists: directory.exists ? 'yes'|trans : 'no'|trans,
+                    exists: directory.exists ? 'ui.boolean.yes'|trans : 'ui.boolean.no'|trans,
                     writable: writable_text,
                     hint: directory.writable ? '—' : directory.hint
                 }]) %}
             {% endfor %}
 
             {% include 'partials/components/card.html.twig' with {
-                title: 'Filesystem checks'|trans,
-                subtitle: 'Verify that critical directories exist and are writable by PHP.'|trans,
+                title: 'installer.diagnostics.filesystem.title'|trans,
+                subtitle: 'installer.diagnostics.filesystem.subtitle'|trans,
                 body: include('partials/components/table.html.twig', {
                     columns: [
-                        { label: 'Directory'|trans, key: 'path', class: 'font-mono text-xs' },
-                        { label: 'Exists'|trans, key: 'exists', class: 'text-center' },
-                        { label: 'Writable'|trans, key: 'writable', class: 'text-center' },
-                        { label: 'Hint'|trans, key: 'hint' }
+                        { label: 'installer.diagnostics.filesystem.column.directory'|trans, key: 'path', class: 'font-mono text-xs' },
+                        { label: 'installer.diagnostics.filesystem.column.exists'|trans, key: 'exists', class: 'text-center' },
+                        { label: 'installer.diagnostics.filesystem.column.writable'|trans, key: 'writable', class: 'text-center' },
+                        { label: 'installer.diagnostics.filesystem.column.hint'|trans, key: 'hint' }
                     ],
                     rows: filesystem_rows,
                     compact: true,
@@ -121,51 +121,51 @@
         <div class="layout-stack layout-stack--loose">
             {% include 'partials/components/card.html.twig' with {
                 variant: 'emphasis',
-                title: 'Environment summary'|trans,
+                title: 'installer.diagnostics.environment.title'|trans,
                 body: summary_body,
-                eyebrow: 'System'|trans
+                eyebrow: 'installer.diagnostics.environment.eyebrow'|trans
             } only %}
 
             {% include 'partials/components/illustration.html.twig' with {
                 name: 'active-support',
                 variant: 'lg',
                 attributes: { class: 'w-full' },
-                alt: 'Support team illustration'|trans
+                alt: 'installer.diagnostics.illustration_alt'|trans
             } only %}
 
             {% set sqlite_body %}
                 <dl class="grid gap-2 text-sm">
                     <div class="flex items-center justify-between gap-3">
-                        <dt class="text-text-muted">{{ 'Primary path'|trans }}</dt>
-                        <dd class="font-mono text-xs">{{ diagnostics.sqlite.primary_path ?: 'n/a'|trans }}</dd>
+                        <dt class="text-text-muted">{{ 'installer.diagnostics.sqlite.primary_path'|trans }}</dt>
+                        <dd class="font-mono text-xs">{{ diagnostics.sqlite.primary_path ?: 'installer.diagnostics.not_applicable'|trans }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-3">
-                        <dt class="text-text-muted">{{ 'Secondary path'|trans }}</dt>
-                        <dd class="font-mono text-xs">{{ diagnostics.sqlite.secondary_path ?: 'n/a'|trans }}</dd>
+                        <dt class="text-text-muted">{{ 'installer.diagnostics.sqlite.secondary_path'|trans }}</dt>
+                        <dd class="font-mono text-xs">{{ diagnostics.sqlite.secondary_path ?: 'installer.diagnostics.not_applicable'|trans }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-3">
-                        <dt class="text-text-muted">{{ 'Primary exists'|trans }}</dt>
-                        <dd>{{ diagnostics.sqlite.primary_exists ? 'yes'|trans : 'no'|trans }}</dd>
+                        <dt class="text-text-muted">{{ 'installer.diagnostics.sqlite.primary_exists'|trans }}</dt>
+                        <dd>{{ diagnostics.sqlite.primary_exists ? 'ui.boolean.yes'|trans : 'ui.boolean.no'|trans }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-3">
-                        <dt class="text-text-muted">{{ 'Secondary exists'|trans }}</dt>
-                        <dd>{{ diagnostics.sqlite.secondary_exists ? 'yes'|trans : 'no'|trans }}</dd>
+                        <dt class="text-text-muted">{{ 'installer.diagnostics.sqlite.secondary_exists'|trans }}</dt>
+                        <dd>{{ diagnostics.sqlite.secondary_exists ? 'ui.boolean.yes'|trans : 'ui.boolean.no'|trans }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-3">
-                        <dt class="text-text-muted">{{ 'Secondary attached'|trans }}</dt>
-                        <dd>{{ diagnostics.sqlite.secondary_attached ? 'yes'|trans : 'no'|trans }}</dd>
+                        <dt class="text-text-muted">{{ 'installer.diagnostics.sqlite.secondary_attached'|trans }}</dt>
+                        <dd>{{ diagnostics.sqlite.secondary_attached ? 'ui.boolean.yes'|trans : 'ui.boolean.no'|trans }}</dd>
                     </div>
                     <div class="flex items-center justify-between gap-3">
-                        <dt class="text-text-muted">{{ 'busy_timeout (ms)'|trans }}</dt>
+                        <dt class="text-text-muted">{{ 'installer.diagnostics.sqlite.busy_timeout'|trans }}</dt>
                         <dd>{{ diagnostics.sqlite.busy_timeout_ms }}</dd>
                     </div>
                 </dl>
             {% endset %}
 
             {% include 'partials/components/card.html.twig' with {
-                title: 'SQLite health'|trans,
+                title: 'installer.diagnostics.sqlite.title'|trans,
                 body: sqlite_body,
-                eyebrow: 'Database'|trans
+                eyebrow: 'installer.diagnostics.sqlite.eyebrow'|trans
             } only %}
 
             {% include 'partials/components/help_entries.html.twig' with {

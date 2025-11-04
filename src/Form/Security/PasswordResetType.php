@@ -18,9 +18,9 @@ final class PasswordResetType extends AbstractType
     {
         $builder->add('plainPassword', RepeatedType::class, [
             'type' => PasswordType::class,
-            'first_options' => ['label' => 'New password'],
-            'second_options' => ['label' => 'Confirm password'],
-            'invalid_message' => 'The password fields must match.',
+            'first_options' => ['label' => 'security.password.reset.fields.password.label'],
+            'second_options' => ['label' => 'security.password.reset.fields.confirm.label'],
+            'invalid_message' => 'security.password.reset.errors.mismatch',
             'constraints' => [
                 new NotBlank(),
                 new Length(min: 8),

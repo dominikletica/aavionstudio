@@ -1,5 +1,13 @@
-{% for label, messages in app.flashes %}
+{% set context = appContext is defined ? appContext : (app is defined ? app : null) %}
+{% set flash_messages = flashes is defined ? flashes : [] %}
+{% if flash_messages is empty and context %}
+    {% set request = context.request is defined ? context.request : null %}
+    {% if request and request.hasPreviousSession() %}
+        {% set flash_messages = context.flashes %}
+    {% endif %}
+{% endif %}
+{% for label, messages in flash_messages %}
     {% for message in messages %}
         <div class="alert alert--{{ label }} mb-4">{{ message }}</div>
     {% endfor %}
-{% endfor %}   
+{% endfor %}

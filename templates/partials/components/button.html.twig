@@ -58,7 +58,7 @@
 {% endif %}
 
 {% set badge = badge|default(null) %}
-{% set button_label = content|default(label|default('Button')) %}
+{% set button_label = content|default(label|default('ui.buttons.default'|trans)) %}
 
 {% if tag == 'a' %}
 <a{{ component.attributes(attributes) }}>

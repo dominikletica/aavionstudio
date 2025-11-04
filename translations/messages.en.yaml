@@ -1,0 +1,767 @@
+app:
+  name: 'aavion Studio'
+
+ui:
+  tip: 'Tip'
+  close: 'Close'
+  roadmap: 'Roadmap'
+  preview: 'Preview'
+  code: 'Code'
+  buttons:
+    default: 'Button'
+  actions:
+    submit: 'Submit'
+  boolean:
+    yes: 'Yes'
+    no: 'No'
+  state:
+    enabled: 'Enabled'
+    disabled: 'Disabled'
+  not_applicable: 'n/a'
+  action_overlay:
+    title: 'Execution Progress'
+    processing: 'Processing…'
+    no_steps: 'Action steps missing'
+    missing_token: 'Missing session token. Refresh the page to continue.'
+    error_label: 'Error'
+    unknown_error: 'Unknown error'
+    network_error: 'Network error'
+
+region:
+  date:
+    short: 'Y-m-d'
+    long: 'F j, Y'
+  datetime:
+    short: 'Y-m-d H:i'
+    long: 'F j, Y H:i'
+    precise: 'Y-m-d H:i:s'
+  time:
+    short: 'H:i'
+    long: 'H:i:s'
+
+flash:
+  common:
+    invalid_csrf: 'Invalid CSRF token.'
+    invalid_csrf_retry: 'Invalid CSRF token. Please try again.'
+  assets:
+    rebuild:
+      success: 'Asset pipeline rebuilt successfully.'
+      up_to_date: 'Assets already up to date; nothing to rebuild.'
+      failed: 'Asset rebuild failed: %error%'
+      queued: 'Queued asset rebuild job.'
+      queued_skip: 'Assets already up to date; no rebuild queued.'
+    module:
+      not_found: 'Module "%slug%" not found.'
+      locked: 'Module "%name%" is locked and cannot be modified.'
+      unknown_action: 'Unknown module action.'
+      enabled: 'Module "%name%" enabled.'
+      disabled: 'Module "%name%" disabled.'
+    theme:
+      not_found: 'Theme "%slug%" not found.'
+      locked_disable: 'Theme "%name%" is locked and cannot be disabled.'
+      locked_always: 'Theme "%name%" is locked and always available.'
+      unknown_action: 'Unknown theme action.'
+      enabled: 'Theme "%name%" enabled.'
+      disabled: 'Theme "%name%" disabled.'
+      activated: 'Theme "%name%" is now active.'
+  invitations:
+    sent: 'Invitation sent to %email%.'
+    cancelled: 'Invitation cancelled.'
+  invitation:
+    invalid: 'Invitation is invalid or has expired.'
+    account_created: 'Account created. You can now sign in.'
+  password_reset:
+    link_sent: 'If an account exists for this email, a reset link has been sent.'
+    invalid_link: 'The reset link is invalid or has expired.'
+    unable: 'Unable to reset password for this account.'
+    updated: 'Password updated. You can now sign in.'
+  installer:
+    environment_saved: 'Environment settings saved.'
+    storage_saved: 'Storage settings saved.'
+    admin_saved: 'Administrator details saved.'
+  users:
+    updated: 'User updated.'
+    not_found: 'User not found.'
+    projects:
+      updated: 'Project memberships updated.'
+    api:
+      created: 'API key "%label%" created. Secret: %secret% (copy now).'
+      invalid_csrf: 'Invalid CSRF token for API key revoke.'
+      not_found: 'API key not found.'
+      revoked: 'API key "%label%" revoked.'
+    password:
+      invalid_csrf: 'Invalid CSRF token for password reset.'
+      sent: 'Password reset email sent to %email%.'
+
+email:
+  invitation:
+    subject: 'You are invited to aavion Studio'
+  password_reset:
+    subject: 'Reset your aavion Studio password'
+
+error:
+  generic:
+    title: 'Error'
+    snag: 'We hit a snag while processing your request. Please try again or contact support if the issue persists.'
+    debug_details: 'Debug details'
+    not_applicable: 'n/a'
+  404:
+    title: 'Page not found'
+    subtitle: 'The resource you requested could not be located.'
+    help: 'Check the address, go back, or reach out to your administrator if you need assistance.'
+
+installer:
+  layout:
+    page_title: 'aavion Studio Setup Wizard'
+    heading: 'aavion Studio • Setup Wizard'
+    description: 'This guided flow prepares the core platform. Styling is minimal so themes can extend it later.'
+    steps_aria: 'Wizard Steps'
+    error_title: 'Setup failed'
+  steps:
+    diagnostics: 'Diagnostics'
+    environment: 'Environment'
+    storage: 'Storage'
+    admin: 'Administrator'
+    summary: 'Summary'
+  errors:
+    already_completed: 'Setup already completed.'
+    invalid_token: 'Installer actions require a valid session token.'
+    invalid_action_format: 'Invalid action format.'
+  action:
+    log:
+      start: 'Start setup routine...'
+      completed: 'Setup completed successfully.'
+  environment:
+    heading:
+      title: 'Environment defaults'
+      subtitle: 'Review the values that will land in <code>.env.local</code> and in system settings. The installer validates everything before running <code>bin/init</code>.'
+    form:
+      environment: 'Environment'
+      environment_choices:
+        development: 'Development'
+        testing: 'Testing'
+        production: 'Production'
+      debug: 'Enable debug mode'
+      secret: 'App secret (optional)'
+      instance_name: 'Instance name'
+      tagline: 'Tagline'
+      support_email: 'Support email'
+      base_url: 'Base URL'
+      locale: 'Default locale'
+      locale_placeholder: 'Select locale'
+      timezone: 'Default timezone'
+      timezone_placeholder: 'Select timezone'
+      user_registration: 'Allow user self-registration'
+      maintenance_mode: 'Enable maintenance mode'
+    actions:
+      save: 'Save environment settings'
+    illustration_alt: 'Configuration illustration'
+    secret:
+      generate: 'Generate secret'
+      generated: 'Secret generated'
+    overrides:
+      eyebrow: 'Configuration'
+      title: 'Recommended overrides'
+      app_env: 'Set <code>prod</code> for production installs; keep <code>dev</code> on staging boxes.'
+      app_debug: 'Disable debug outside of trusted environments to prevent verbose error output.'
+      app_secret: 'Generate a unique random value; never reuse secrets across instances.'
+      default_uri: 'Match the canonical base URL (including HTTPS) so CLI URL generators behave.'
+      mailer_dsn: 'Point to your SMTP or transactional provider before onboarding users.'
+    readiness:
+      eyebrow: 'Readiness checklist'
+      title: 'Before pushing to production'
+      copy_env: 'Copy the generated <code>.env.local</code> to your deployment target or secrets manager.'
+      opcache: 'Enable opcache, configure PHP-FPM, and point the web server at <code>public/</code>.'
+      asset_rebuild: 'Schedule the asset rebuild command (`php bin/console app:assets:rebuild --force`) for theme/module updates.'
+      backups: 'Back up <code>var/system.brain</code> and <code>var/user.brain</code> regularly; the storage step will add remote targets soon.'
+    tip: 'Values can be fine-tuned later in the admin UI; keep secrets out of version control.'
+  summary:
+    heading:
+      title: 'Summary'
+      subtitle: 'Review your selections before the installer provisions databases, writes configuration, and locks the wizard.'
+    environment:
+      eyebrow: 'Environment'
+      title: 'System defaults'
+      instance_name: 'Instance name'
+      tagline: 'Tagline'
+      support_email: 'Support email'
+      base_url: 'Base URL'
+      locale_timezone: 'Locale / Timezone'
+      user_registration: 'User registration'
+      maintenance_mode: 'Maintenance mode'
+    overrides:
+      eyebrow: '.env.local'
+      title: 'Environment overrides'
+      secret_pending: 'Will be generated'
+      secret_provided: 'Provided'
+    storage:
+      eyebrow: 'Storage'
+      title: 'Writable root'
+      description: 'Databases, uploads, snapshots, and backups will live inside this directory.'
+    admin:
+      eyebrow: 'Administrator'
+      title: 'First user'
+      email: 'Email'
+      display_name: 'Display name'
+      locale_timezone: 'Locale / Timezone'
+      require_mfa: 'Require MFA on first login'
+      recovery_email: 'Recovery email'
+      recovery_phone: 'Recovery phone'
+      password: 'Password'
+      password_provided: 'Provided'
+      password_pending: 'Pending'
+    alerts:
+      provisioning_title: 'Provisioning pending'
+      provisioning_body: 'Database files exist, but the setup lock is missing. Finish the wizard to apply outstanding migrations and secure the installer.'
+    finalize:
+      title: 'Finalize installation'
+      description: 'Provision the SQLite databases, apply Doctrine migrations, and lock this setup wizard.'
+      button: 'Create databases & finish setup'
+      aria_label: 'Create databases & finish setup.'
+    help:
+      title: 'Need help?'
+      body: 'Open the diagnostics sidebar or the command palette (coming soon) to jump directly to troubleshooting guides.'
+    illustration_alt: 'Summary illustration'
+  storage:
+    heading:
+      title: 'Storage configuration'
+      subtitle: 'Pick the writable location for databases, uploads, snapshots, and backups. Additional backends will plug into this root later on.'
+    instructions: 'Ensure the selected directory is writable by PHP. The installer will provision <code>databases</code>, <code>uploads</code>, <code>snapshots</code>, and <code>backups</code> subfolders automatically.'
+    form:
+      root: 'Storage root'
+      root_placeholder: 'var/storage'
+    actions:
+      save: 'Save storage settings'
+    illustration_alt: 'Storage illustration'
+    prep:
+      eyebrow: 'Get ready'
+      title: 'Steps you can already take'
+      item1: 'Ensure the server user can read/write <code>var/</code> and has space for media + snapshots.'
+      item2: 'Provision object storage buckets and credentials if you plan to offload media from day one.'
+      item3: 'Decide on encryption-at-rest requirements; the wizard will offer client-side and provider-managed options.'
+      item4: 'Document data residency expectations so projects know where uploads will live.'
+    roadmap:
+      body: 'Remote adapters (S3, Azure, MinIO), retention policies, and CDN hooks land in upcoming milestones.'
+  admin:
+    heading:
+      title: 'Administrator account'
+      subtitle: 'Create the first administrator, set their locale, and capture recovery contacts. The password is stored securely after the installer runs.'
+    form:
+      email: 'Email address'
+      display_name: 'Display name'
+      password: 'Password'
+      password_confirmation: 'Confirm password'
+      password_mismatch: 'The passwords must match.'
+      password_require_length: 'Password must be at least {{ limit }} characters long.'
+      password_require_number: 'Password must contain at least one number.'
+      password_require_mixed_case: 'Password must contain both upper and lower case letters.'
+      password_require_special: 'Password must contain at least one special character.'
+      locale: 'Preferred locale'
+      locale_placeholder: 'Select locale'
+      timezone: 'Preferred timezone'
+      timezone_placeholder: 'Select timezone'
+      require_mfa: 'Require MFA on first login'
+      recovery_email: 'Recovery email (optional)'
+      recovery_phone: 'Recovery phone (optional)'
+    actions:
+      save: 'Save administrator'
+    illustration_alt: 'Admin invitation illustration'
+    requirements:
+      eyebrow: 'Good practice'
+      title: 'Secure onboarding guidance'
+      item1: 'Create at least two administrators after launch to avoid lockouts during MFA rollout.'
+      item2: 'Store recovery codes or backup tokens in a secure vault once MFA is enforced.'
+      item3: 'Restrict SMTP access to the installer host to prevent spoofing while bootstrapping.'
+      item4: 'Enable audit notifications so credential changes trigger alerts for the initial team.'
+  diagnostics:
+    heading:
+      title: 'Environment diagnostics'
+      subtitle: 'Installer helpers verify server requirements before you continue.'
+    summary:
+      php_version: 'PHP version:'
+    rewrite:
+      label: 'Rewrite engine:'
+      enabled: 'Enabled'
+      compatibility: 'Compatibility mode'
+      forced: 'forced via %env%'
+      fallback_notice: 'request served by compatibility fallback'
+      alert:
+        title: 'Enable URL rewrites'
+        description: 'Configure the web server to use the <code>public/</code> directory as document root and enable URL rewrites to avoid exposing sensitive files.'
+        screen_reader: 'Configure the web server to use the public directory as document root and enable URL rewrites to avoid exposing sensitive files.'
+      forced_title: 'Compatibility mode enabled'
+      forced_description: 'Compatibility mode is intentionally forced; disable <code>APP_FORCE_ROOT_ENTRY</code> after testing the fallback.'
+      effective_route: 'Effective route'
+      original_uri: 'Original request URI'
+      effective_uri: 'Effective request URI'
+      card_title: 'Docroot & rewrite status'
+      card_subtitle: 'Validate that requests are routed through the public front controller.'
+      eyebrow: 'Routing'
+    extensions:
+      title: 'PHP extensions'
+      subtitle: 'Required extensions must be available before installation can continue.'
+      column:
+        extension: 'Extension'
+        status: 'Status'
+        hint: 'Hint'
+      hints:
+        intl: 'Install or enable the Intl extension (`php-intl`) to provide locale, date, and number formatting.'
+        sqlite: 'Enable the SQLite3 extension to power the system and user data stores.'
+        fileinfo: 'Enable the Fileinfo extension for media uploads and MIME detection.'
+        json: 'Enable the JSON extension. Most PHP distributions ship it by default.'
+        mbstring: 'Enable mbstring for multibyte string handling (content editing & localisation).'
+        ctype: 'Enable the ctype extension for validation helpers.'
+    filesystem:
+      title: 'Filesystem checks'
+      subtitle: 'Verify that critical directories exist and are writable by PHP.'
+      parent_writable: 'Parent writable'
+      column:
+        directory: 'Directory'
+        exists: 'Exists'
+        writable: 'Writable'
+        hint: 'Hint'
+      labels:
+        var_root: 'var/ directory'
+        var_cache: 'var/cache'
+        var_log: 'var/log'
+        var_snapshots: 'var/snapshots'
+        var_uploads: 'var/uploads'
+        var_themes: 'var/themes'
+        public_assets: 'public/assets'
+      hints:
+        var_root: 'Ensure the web user can write to var/ for cache, logs, and databases.'
+        var_cache: 'Symfony stores runtime cache here; make sure it exists and is writable.'
+        var_log: 'Application logs are written here; grant write access.'
+        var_snapshots: 'Published site snapshots live here; create the directory if missing.'
+        var_uploads: 'Uploads and temporary media storage; ensure the directory exists and is writable.'
+        var_themes: 'Theme bundles unpack here; create and grant write permissions.'
+        public_assets: 'AssetMapper builds JS/CSS here; make sure deploy user can write.'
+    status:
+      available: 'Available'
+      missing: 'Missing'
+    environment:
+      title: 'Environment summary'
+      eyebrow: 'System'
+    illustration_alt: 'Support team illustration'
+    sqlite:
+      title: 'SQLite health'
+      eyebrow: 'Database'
+      primary_path: 'Primary path'
+      secondary_path: 'Secondary path'
+      primary_exists: 'Primary exists'
+      secondary_exists: 'Secondary exists'
+      secondary_attached: 'Secondary attached'
+      busy_timeout: 'busy_timeout (ms)'
+    not_applicable: 'n/a'
+
+demo:
+  page:
+    project_title: 'Component Showcase'
+    page_title: 'UI Component Showcase'
+    heading:
+      title: 'UI Component Showcase'
+      subtitle: 'A quick overview of the base theme components and Tailwind utilities available for installer/admin screens.'
+  forms:
+    eyebrow: 'Forms'
+    title: 'Form field collection'
+    input:
+      label: 'Name'
+      placeholder: 'Jane Doe'
+      help: 'Text input and help text styling.'
+    select:
+      label: 'Role'
+      placeholder: 'Choose a role'
+      option:
+        admin: 'Administrator'
+        editor: 'Editor'
+        viewer: 'Viewer'
+    textarea:
+      label: 'Notes'
+      placeholder: 'Optional notes ...'
+    checkbox:
+      label: 'I agree to the guidelines'
+      description: 'Checkbox component with description copy.'
+    switch:
+      label: 'Enable notifications'
+      description: 'Switches reuse the same color tokens as buttons.'
+    actions:
+      submit: 'Submit form'
+      cancel: 'Cancel'
+  modules:
+    eyebrow: 'Interactions'
+    title: 'Stimulus counter demo'
+    active_title: 'Active modules'
+    badge: 'Stimulus'
+    actions:
+      add: 'Add module'
+      reset: 'Reset'
+    description: 'Stimulus keeps the counter in sync without reloading the page. Attach the controller to any dashboard metric for live previews.'
+  codemirror:
+    eyebrow: 'Code editor'
+    title: 'CodeMirror integration'
+    description: 'The Codemirror Stimulus controller transforms any textarea into an editor with language-aware highlighting.'
+    placeholder: 'Paste Twig here…'
+  turbo:
+    title: 'Turbo frame tips'
+    subtitle: 'Inline refreshable help blocks.'
+    loading: 'Loading tip…'
+    refresh: 'Refresh tip'
+    reminder: 'Show docs reminder'
+    description: 'Turbo frames lazy-load snippets and refresh inline without manual JavaScript.'
+  illustrations:
+    title: 'Illustrations'
+    alt: 'Illustration sample'
+  empty:
+    card_title: 'Empty state'
+    headline: 'Nothing queued'
+    description: 'Use empty states to onboard users when a section has not yet been configured.'
+  alpine:
+    description: 'Alpine.js is available globally for lightweight UI helpers—ideal for toggles, tabs, or progressive disclosure without adding bespoke controllers.'
+  tips:
+    meta:
+      heading: 'Theme note'
+      badge: 'Live tip'
+    keep_tokens:
+      title: 'Keep Tailwind tokens in sync'
+      description: 'Theme overrides should ship their own theme.css but continue importing the base tokens to avoid regressions.'
+    prefer_partials:
+      title: 'Prefer partial components'
+      description: 'Composer-facing templates stay lean when they reuse buttons, cards, tables, and forms from the component library.'
+    bundle_hero:
+      title: 'Bundle hero content'
+      description: 'Use the header partial with project- or admin-specific imagery. Themes can override the same block without touching controllers.'
+    document_overrides:
+      title: 'Document overrides'
+      description: 'Whenever you override templates, update the developer docs and class map so contributors discover them quickly.'
+  buttons:
+    card:
+      eyebrow: 'Buttons'
+      title: 'Button variants'
+    primary: 'Primary'
+    secondary: 'Secondary'
+    ghost: 'Ghost'
+    full: 'Full width'
+  alerts:
+    success:
+      title: 'All systems operational'
+      description: 'You can reuse the alert component for inline feedback, toast-style callouts, or hero notes.'
+  table:
+    card:
+      eyebrow: 'Tables'
+      title: 'Feature status'
+    columns:
+      feature: 'Feature'
+      status: 'Status'
+      notes: 'Notes'
+    rows:
+      navigation:
+        feature: 'Navigation'
+        status: 'Complete'
+        notes: 'Sidebar + hero menus ready.'
+      installer:
+        feature: 'Installer Wizard'
+        status: 'In progress'
+        notes: 'Cards, tables, illustrations available.'
+      admin:
+        feature: 'Admin UI'
+        status: 'Next up'
+        notes: 'Navigation + module scaffolding queued.'
+
+debug:
+  locale:
+    label: 'Language override'
+    apply: 'Apply'
+    option:
+      auto: 'Automatic'
+      keys: 'Show translation keys'
+      locale: '%locale% locale'
+security:
+  invitation:
+    page_title: 'Complete your invitation'
+    heading: 'Welcome to %site%'
+    intro: "You're joining as <strong class=\"text-text\">%email%</strong>. Choose a display name and password to activate your account."
+    activate: 'Activate account'
+    back_to_login: 'Back to sign in'
+    form:
+      display_name: 'Display name'
+      password: 'Password'
+      password_confirmation: 'Confirm password'
+  layout:
+    title_prefix: 'Sign In · '
+  login:
+    page_title: 'Sign in'
+    heading: 'Welcome back'
+    subtitle: 'Sign in with your admin credentials.'
+    fields:
+      email:
+        label: 'Email address'
+      password:
+        label: 'Password'
+      remember: 'Remember this device'
+    actions:
+      submit: 'Sign in'
+    help:
+      contact_admin: 'Need access? Ask an administrator.'
+      forgot_password: 'Forgot password?'
+  password:
+    shared:
+      back_to_login: 'Back to sign in'
+    request:
+      page_title: 'Reset password'
+      heading: 'Reset your password'
+      subtitle: 'Enter the email for your account. If it exists, we will send you a reset link.'
+      fields:
+        email:
+          label: 'Email address'
+      actions:
+        submit: 'Send link'
+    reset:
+      page_title: 'Set a new password'
+      heading: 'Choose a new password'
+      subtitle: 'Enter your new password and confirm it.'
+      fields:
+        password:
+          label: 'New password'
+        confirm:
+          label: 'Confirm password'
+      actions:
+        submit: 'Save password'
+      errors:
+        mismatch: 'The password fields must match.'
+  roles:
+    ROLE_ADMIN: 'Administrator'
+    ROLE_MANAGER: 'Manager'
+    ROLE_EDITOR: 'Editor'
+    ROLE_VIEWER: 'Viewer'
+    ROLE_USER: 'User'
+
+validation:
+  invitations:
+    invalid_email: 'Please provide a valid email address.'
+  invitation:
+    email_exists: 'An account with this email already exists.'
+    fix_errors: 'Please fix the highlighted errors.'
+  users:
+    profile_invalid: 'Please review the highlighted fields.'
+  api_keys:
+    invalid_datetime: 'Invalid date/time format.'
+    form_invalid: 'Please review the API key form.'
+  projects:
+    missing_role: 'Select a role for project assignment "%project%" before adding capabilities.'
+    assignments_invalid: 'Please review the project assignments.'
+  password_reset:
+    fix_errors: 'Please correct the highlighted errors.'
+
+api:
+  api_keys:
+    errors:
+      user_required: 'Parameter "user" is required.'
+      fields_required: 'Fields "user_id" and "label" are required.'
+      invalid_expires: 'Invalid expires_at value: %error%'
+  key:
+    issued: 'API key issued'
+    revoked: 'API key revoked'
+auth:
+  password:
+    reset:
+      requested: 'Password reset requested'
+      completed: 'Password reset completed'
+user:
+  roles:
+    updated: 'Roles updated'
+  profile:
+    updated: 'Profile updated'
+  created:
+    invitation: 'Administrator created via invitation'
+  invitation:
+    created: 'Invitation sent'
+    cancelled: 'Invitation cancelled'
+    accepted: 'Invitation accepted'
+admin:
+  layout:
+    title: 'Admin'
+  users:
+    page_title: 'Admin: Users'
+    heading:
+      title: 'User management'
+      subtitle: 'Search, filter, and manage user accounts.'
+      manage_invitations: 'Manage invitations'
+    filters:
+      card_title: 'Filters'
+      search:
+        label: 'Search'
+        placeholder: 'Email or name'
+      status:
+        label: 'Status'
+        all: 'All statuses'
+      status_choices:
+        active: 'Active'
+        pending: 'Pending'
+        disabled: 'Disabled'
+        archived: 'Archived'
+      actions:
+        clear: 'Clear filters'
+        apply: 'Apply filters'
+    empty:
+      card_title: 'No users found'
+      title: 'No users match your filters'
+      description: 'Adjust search terms or invite a new administrator.'
+      action: 'Invite administrator'
+    status:
+      active: 'Active'
+      pending: 'Pending'
+      disabled: 'Disabled'
+      archived: 'Archived'
+    table:
+      eyebrow: 'Results'
+      title: 'Users'
+      columns:
+        email: 'Email'
+        name: 'Name'
+        status: 'Status'
+        roles: 'Roles'
+        last_login: 'Last login'
+        actions: 'Actions'
+      actions:
+        edit: 'Edit'
+    edit:
+      page_title: 'Admin: Edit user'
+      heading:
+        title: 'Edit user'
+        subtitle: 'Update profile, credentials, and project access.'
+        back: 'Back to users'
+      profile:
+        eyebrow: 'Profile'
+        title: 'User details'
+        email: 'Email'
+        created: 'Created'
+        updated: 'Last updated'
+        save: 'Save changes'
+        form:
+          display_name: 'Display name'
+          locale: 'Locale'
+          timezone: 'Timezone'
+          status: 'Account status'
+          roles: 'Roles'
+      password:
+        description: 'Send a one-time password reset email to this user.'
+        send: 'Send password reset email'
+      api:
+        eyebrow: 'Integrations'
+        title: 'API keys'
+        subtitle: 'Secrets are shown once—store them securely.'
+        create: 'Create API key'
+        form:
+          label: 'Label'
+          scopes: 'Scopes'
+          scopes_help: 'Comma or space separated capability keys (for example content.read content.write). Leave empty for read-only access.'
+          expires_at: 'Expires at (optional)'
+          expires_help: 'Accepts YYYY-MM-DD or ISO 8601 date/time.'
+        status:
+          revoked: 'Revoked'
+          expired: 'Expired'
+          active: 'Active'
+          inactive: 'Inactive'
+        actions:
+          revoke: 'Revoke'
+          revoked_on: 'Revoked on %date%'
+        table:
+          columns:
+            label: 'Label'
+            created: 'Created'
+            status: 'Status'
+            actions: 'Actions'
+        empty:
+          title: 'No API keys yet'
+          description: 'Create an API key to integrate with external services.'
+      projects:
+        empty: 'No projects available yet.'
+        columns:
+          project: 'Project'
+          role: 'Role'
+          capabilities: 'Extra capabilities'
+        unknown: 'Unknown project'
+        save: 'Save project access'
+        eyebrow: 'Projects'
+        title: 'Project access'
+        subtitle: 'Override roles or add project-specific capabilities.'
+        form:
+          role: 'Project role'
+          role_placeholder: 'Inherit global role'
+          capabilities: 'Extra capabilities'
+          capabilities_help: 'Comma or space separated capability keys applied only to this project.'
+  invitations:
+    page_title: 'Admin: User Invitations'
+    heading:
+      title: 'User invitations'
+      subtitle: 'Invite administrators and manage pending tokens.'
+    form:
+      email:
+        label: 'Invite by email'
+      submit: 'Send invitation'
+    create:
+      eyebrow: 'New invitation'
+      title: 'Create invitation'
+      subtitle: 'Send an email invitation to a new administrator.'
+    empty:
+      card_title: 'Pending invitations'
+      title: 'No invitations yet'
+      description: 'Invite your first administrator to collaborate on the workspace.'
+    status:
+      pending: 'Pending'
+      completed: 'Completed'
+    actions:
+      cancel: 'Cancel'
+    list:
+      eyebrow: 'Queue'
+      title: 'Pending invitations'
+      subtitle: 'Invitations expire automatically after the configured window.'
+    table:
+      columns:
+        email: 'Email'
+        status: 'Status'
+        created: 'Created'
+        expires: 'Expires'
+        actions: 'Actions'
+  security:
+    audit:
+      page_title: 'Admin: Security audit log'
+      heading:
+        title: 'Security audit log'
+        subtitle: 'Review authentication attempts and permission changes.'
+      filters:
+        card:
+          eyebrow: 'Filters'
+          title: 'Refine results'
+        actor:
+          label: 'Actor'
+          placeholder: 'User ID or email'
+        subject:
+          label: 'Subject'
+          placeholder: 'Subject ID'
+        action:
+          label: 'Action'
+          all: 'All actions'
+        from:
+          label: 'From'
+        to:
+          label: 'To'
+        actions:
+          clear: 'Clear'
+          apply: 'Apply filters'
+      empty:
+        card_title: 'Security events'
+        title: 'No security events'
+        description: 'Adjust the filters or check back after more activity.'
+      table:
+        eyebrow: 'Log'
+        title: 'Security events'
+        columns:
+          timestamp: 'Timestamp'
+          actor: 'Actor'
+          type: 'Event'
+          subject: 'Subject'
+          ip: 'IP address'
+          context: 'Context'
+      values:
+        system: 'System'

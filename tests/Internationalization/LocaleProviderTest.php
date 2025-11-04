@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Internationalization;
 
 use App\Internationalization\LocaleProvider;
+use App\Module\ModuleRegistry;
+use App\Theme\ThemeRegistry;
 use PHPUnit\Framework\TestCase;
 
 final class LocaleProviderTest extends TestCase
@@ -26,7 +28,7 @@ final class LocaleProviderTest extends TestCase
 
     public function testReturnsEnglishWhenNoTranslationsPresent(): void
     {
-        $provider = new LocaleProvider($this->projectDir);
+        $provider = $this->createProvider();
         self::assertSame(['en'], $provider->available());
         self::assertTrue($provider->isSupported('en'));
     }
@@ -36,10 +38,19 @@ final class LocaleProviderTest extends TestCase
         file_put_contents($this->projectDir.'/translations/messages.de.yaml', "");
         file_put_contents($this->projectDir.'/translations/validators.fr.xlf', "");
 
-        $provider = new LocaleProvider($this->projectDir);
+        $provider = $this->createProvider();
         self::assertSame(['de', 'en', 'fr'], $provider->available());
         self::assertTrue($provider->isSupported('fr'));
         self::assertFalse($provider->isSupported('es'));
+    }
+
+    private function createProvider(): LocaleProvider
+    {
+        return new LocaleProvider(
+            $this->projectDir,
+            new ModuleRegistry([]),
+            new ThemeRegistry([]),
+        );
     }
 
     private function removeDirectory(string $path): void

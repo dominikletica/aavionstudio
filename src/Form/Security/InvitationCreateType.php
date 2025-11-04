@@ -16,7 +16,7 @@ final class InvitationCreateType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('email', EmailType::class, [
-            'label' => 'Invite by email',
+            'label' => 'admin.invitations.form.email.label',
             'constraints' => [
                 new NotBlank(),
                 new Email(),

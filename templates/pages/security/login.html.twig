@@ -1,11 +1,11 @@
 {% extends 'layouts/security.html.twig' %}
 
-{% set security_title = 'Sign in'|trans %}
+{% set security_title = 'security.login.page_title'|trans %}
 
 {% block content %}
     <header class="layout-stack--tight">
-        <h1 class="text-heading text-2xl">{{ 'Welcome back'|trans }}</h1>
-        <p class="text-text-muted">{{ 'Sign in with your administrator credentials.'|trans }}</p>
+        <h1 class="text-heading text-2xl">{{ 'security.login.heading'|trans }}</h1>
+        <p class="text-text-muted">{{ 'security.login.subtitle'|trans }}</p>
     </header>
 
     {% if error %}
@@ -14,7 +14,7 @@
 
     <form action="{{ path('app_login') }}" method="post" class="layout-stack" novalidate>
         {% include 'partials/forms/fields/input.html.twig' with {
-            label: 'Email address'|trans,
+            label: 'security.login.fields.email.label'|trans,
             id: 'email',
             name: 'email',
             type: 'email',
@@ -24,7 +24,7 @@
         } %}
 
         {% include 'partials/forms/fields/input.html.twig' with {
-            label: 'Password'|trans,
+            label: 'security.login.fields.password.label'|trans,
             id: 'password',
             name: 'password',
             type: 'password',
@@ -34,18 +34,18 @@
 
         <label class="flex items-center gap-2 text-sm text-text">
             <input type="checkbox" name="_remember_me" value="1" class="h-4 w-4">
-            <span>{{ 'Remember this device'|trans }}</span>
+            <span>{{ 'security.login.fields.remember'|trans }}</span>
         </label>
 
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
         {% include 'partials/forms/buttons/primary.html.twig' with {
-            label: 'Sign in'|trans
+            label: 'security.login.actions.submit'|trans
         } %}
     </form>
 
     <p class="text-sm text-text-muted">
-        {{ 'Need access? Contact an administrator.'|trans }}<br>
-        <a class="text-primary hover:text-primary-darker" href="{{ path('app_password_forgot') }}">{{ 'Forgot password?'|trans }}</a>
+        {{ 'security.login.help.contact_admin'|trans }}<br>
+        <a class="text-primary hover:text-primary-darker" href="{{ path('app_password_forgot') }}">{{ 'security.login.help.forgot_password'|trans }}</a>
     </p>
 {% endblock %}

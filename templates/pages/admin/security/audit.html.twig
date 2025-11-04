@@ -1,11 +1,11 @@
 {% extends 'layouts/admin.html.twig' %}
 
-{% set admin_title = 'Admin: Security Audit Log'|trans %}
+{% set admin_title = 'admin.security.audit.page_title'|trans %}
 
 {% block content %}
     {% include 'partials/components/section_heading.html.twig' with {
-        title: 'Security audit log'|trans,
-        subtitle: 'Track authentication attempts and permission changes.'|trans
+        title: 'admin.security.audit.heading.title'|trans,
+        subtitle: 'admin.security.audit.heading.subtitle'|trans
     } only %}
 
     <div class="layout-stack layout-stack--loose">
@@ -15,20 +15,20 @@
                     {% include 'partials/forms/fields/input.html.twig' with {
                         id: 'audit-filter-actor',
                         name: 'actor',
-                        label: 'Actor'|trans,
+                        label: 'admin.security.audit.filters.actor.label'|trans,
                         value: filters.actor,
-                        placeholder: 'User ID or email'|trans
+                        placeholder: 'admin.security.audit.filters.actor.placeholder'|trans
                     } only %}
 
                     {% include 'partials/forms/fields/input.html.twig' with {
                         id: 'audit-filter-subject',
                         name: 'subject',
-                        label: 'Subject'|trans,
+                        label: 'admin.security.audit.filters.subject.label'|trans,
                         value: filters.subject,
-                        placeholder: 'Subject ID'|trans
+                        placeholder: 'admin.security.audit.filters.subject.placeholder'|trans
                     } only %}
 
-                    {% set action_options = [{ value: '', label: 'All actions'|trans }] %}
+                    {% set action_options = [{ value: '', label: 'admin.security.audit.filters.action.all'|trans }] %}
                     {% for actionKey in actions %}
                         {% set action_options = action_options|merge([{ value: actionKey, label: actionKey|trans }]) %}
                     {% endfor %}
@@ -36,7 +36,7 @@
                     {% include 'partials/forms/fields/select.html.twig' with {
                         id: 'audit-filter-action',
                         name: 'action',
-                        label: 'Action'|trans,
+                        label: 'admin.security.audit.filters.action.label'|trans,
                         value: filters.action,
                         options: action_options
                     } only %}
@@ -44,7 +44,7 @@
                     {% include 'partials/forms/fields/input.html.twig' with {
                         id: 'audit-filter-from',
                         name: 'from',
-                        label: 'From'|trans,
+                        label: 'admin.security.audit.filters.from.label'|trans,
                         type: 'datetime-local',
                         value: filters.from
                     } only %}
@@ -52,21 +52,21 @@
                     {% include 'partials/forms/fields/input.html.twig' with {
                         id: 'audit-filter-to',
                         name: 'to',
-                        label: 'To'|trans,
+                        label: 'admin.security.audit.filters.to.label'|trans,
                         type: 'datetime-local',
                         value: filters.to
                     } only %}
                 </div>
                 <div class="flex justify-end gap-3">
                     {{ include('partials/components/button.html.twig', {
-                        label: 'Clear'|trans,
+                        label: 'admin.security.audit.filters.actions.clear'|trans,
                         tag: 'a',
                         variant: 'ghost',
                         url: path('admin_security_audit'),
                         icon: 'eraser'
                     }, with_context = false) }}
                     {{ include('partials/components/button.html.twig', {
-                        label: 'Apply filters'|trans,
+                        label: 'admin.security.audit.filters.actions.apply'|trans,
                         type: 'submit',
                         icon: 'filter'
                     }, with_context = false) }}
@@ -75,18 +75,18 @@
         {% endset %}
 
         {% include 'partials/components/card.html.twig' with {
-            eyebrow: 'Filters'|trans,
-            title: 'Refine results'|trans,
+            eyebrow: 'admin.security.audit.filters.card.eyebrow'|trans,
+            title: 'admin.security.audit.filters.card.title'|trans,
             body: filter_form
         } only %}
 
         {% if entries is empty %}
             {% include 'partials/components/card.html.twig' with {
                 variant: 'muted',
-                title: 'Security events'|trans,
+                title: 'admin.security.audit.empty.card_title'|trans,
                 body: include('partials/components/empty_state.html.twig', {
-                    title: 'No security events'|trans,
-                    description: 'Adjust the filters or check back after more user activity.'|trans
+                    title: 'admin.security.audit.empty.title'|trans,
+                    description: 'admin.security.audit.empty.description'|trans
                 }, with_context = false)|raw
             } only %}
         {% else %}
@@ -99,26 +99,26 @@
                     <code class="text-xs">{{ entry.context|json_encode(constant('JSON_PRETTY_PRINT')) }}</code>
                 {% endset %}
                 {% set entry_rows = entry_rows|merge([{
-                    timestamp: entry.occurred_at|date('Y-m-d H:i:s'),
-                    actor: entry.actor_email ?? entry.actor_name ?? 'system'|trans,
+                    timestamp: entry.occurred_at|format_datetime(pattern='region.datetime.precise'|trans),
+                    actor: entry.actor_email ?? entry.actor_name ?? 'admin.security.audit.values.system'|trans,
                     action: action_badge,
-                    subject: entry.subject_id ?? 'n/a'|trans,
-                    ip: entry.context.ip ?? 'n/a'|trans,
+                    subject: entry.subject_id ?? 'ui.not_applicable'|trans,
+                    ip: entry.context.ip ?? 'ui.not_applicable'|trans,
                     context: context_markup
                 }]) %}
             {% endfor %}
 
             {% include 'partials/components/card.html.twig' with {
-                eyebrow: 'Log'|trans,
-                title: 'Security events'|trans,
+                eyebrow: 'admin.security.audit.table.eyebrow'|trans,
+                title: 'admin.security.audit.table.title'|trans,
                 body: include('partials/components/table.html.twig', {
                     columns: [
-                        { label: 'Timestamp'|trans, key: 'timestamp', class: 'whitespace-nowrap text-sm text-text-muted' },
-                        { label: 'Actor'|trans, key: 'actor' },
-                        { label: 'Type'|trans, key: 'action', template: 'partials/components/table/value_raw.html.twig' },
-                        { label: 'Subject'|trans, key: 'subject' },
-                        { label: 'IP'|trans, key: 'ip' },
-                        { label: 'Context'|trans, key: 'context', template: 'partials/components/table/value_raw.html.twig' }
+                        { label: 'admin.security.audit.table.columns.timestamp'|trans, key: 'timestamp', class: 'whitespace-nowrap text-sm text-text-muted' },
+                        { label: 'admin.security.audit.table.columns.actor'|trans, key: 'actor' },
+                        { label: 'admin.security.audit.table.columns.type'|trans, key: 'action', template: 'partials/components/table/value_raw.html.twig' },
+                        { label: 'admin.security.audit.table.columns.subject'|trans, key: 'subject' },
+                        { label: 'admin.security.audit.table.columns.ip'|trans, key: 'ip' },
+                        { label: 'admin.security.audit.table.columns.context'|trans, key: 'context', template: 'partials/components/table/value_raw.html.twig' }
                     ],
                     rows: entry_rows,
                     compact: true

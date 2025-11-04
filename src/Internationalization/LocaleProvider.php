@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Internationalization;
 
+use App\Module\ModuleRegistry;
+use App\Theme\ThemeManifest;
+use App\Theme\ThemeRegistry;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class LocaleProvider
@@ -13,6 +16,8 @@ final class LocaleProvider
 
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
+        private readonly ModuleRegistry $moduleRegistry,
+        private readonly ThemeRegistry $themeRegistry,
     ) {
         $this->cache = [];
     }
@@ -27,15 +32,14 @@ final class LocaleProvider
         }
 
         $locales = ['en'];
-        $translationDir = $this->projectDir.'/translations';
 
-        if (is_dir($translationDir)) {
-            foreach (scandir($translationDir) ?: [] as $file) {
+        foreach ($this->translationDirectories() as $directory) {
+            foreach (scandir($directory) ?: [] as $file) {
                 if ($file === '.' || $file === '..') {
                     continue;
                 }
 
-                $path = $translationDir.'/'.$file;
+                $path = $directory.'/'.$file;
                 if (!is_file($path)) {
                     continue;
                 }
@@ -68,5 +72,39 @@ final class LocaleProvider
     public function fallback(): string
     {
         return 'en';
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function translationDirectories(): array
+    {
+        $directories = [$this->projectDir.'/translations'];
+
+        if (($activeTheme = $this->themeRegistry->active()) instanceof ThemeManifest) {
+            $path = $activeTheme->translationsPath();
+            if ($path !== null) {
+                $directories[] = $path;
+            }
+        }
+
+        $fallbackTheme = $this->themeRegistry->find('base');
+        if ($fallbackTheme instanceof ThemeManifest) {
+            $path = $fallbackTheme->translationsPath();
+            if ($path !== null) {
+                $directories[] = $path;
+            }
+        }
+
+        foreach ($this->moduleRegistry->enabled() as $manifest) {
+            $path = $manifest->translationsPath();
+            if ($path !== null) {
+                $directories[] = $path;
+            }
+        }
+
+        $directories = array_filter($directories, static fn (string $dir): bool => is_dir($dir));
+
+        return array_values(array_unique($directories));
     }
 }

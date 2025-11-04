@@ -29,31 +29,31 @@ final class AdminAccountType extends AbstractType
 
         $builder
             ->add('email', EmailType::class, [
-                'label' => 'Administrator email',
+                'label' => 'installer.admin.form.email',
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\Email(),
                 ],
             ])
             ->add('display_name', TextType::class, [
-                'label' => 'Display name',
+                'label' => 'installer.admin.form.display_name',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
             ])
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'invalid_message' => 'The password fields must match.',
+                'invalid_message' => 'installer.admin.form.password_mismatch',
                 'required' => true,
                 'first_options' => [
-                    'label' => 'Password',
+                    'label' => 'installer.admin.form.password',
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],
                     'label_attr' => $passwordLabelAttr,
                 ],
                 'second_options' => [
-                    'label' => 'Confirm password',
+                    'label' => 'installer.admin.form.password_confirmation',
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],
@@ -65,33 +65,33 @@ final class AdminAccountType extends AbstractType
                 ],
             ])
             ->add('locale', ChoiceType::class, [
-                'label' => 'Preferred locale',
+                'label' => 'installer.admin.form.locale',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
                 'choices' => $localeChoices,
-                'placeholder' => 'Select locale',
+                'placeholder' => 'installer.admin.form.locale_placeholder',
                 'choice_translation_domain' => false,
             ])
             ->add('timezone', ChoiceType::class, [
-                'label' => 'Preferred timezone',
+                'label' => 'installer.admin.form.timezone',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
                 'choices' => $timezoneChoices,
-                'placeholder' => 'Select timezone',
+                'placeholder' => 'installer.admin.form.timezone_placeholder',
                 'choice_translation_domain' => false,
             ])
             ->add('require_mfa', CheckboxType::class, [
-                'label' => 'Require multi-factor authentication on first login',
+                'label' => 'installer.admin.form.require_mfa',
                 'required' => false,
             ])
             ->add('recovery_email', EmailType::class, [
-                'label' => 'Recovery email (optional)',
+                'label' => 'installer.admin.form.recovery_email',
                 'required' => false,
             ])
             ->add('recovery_phone', TextType::class, [
-                'label' => 'Recovery phone (optional)',
+                'label' => 'installer.admin.form.recovery_phone',
                 'required' => false,
             ]);
     }
@@ -140,7 +140,7 @@ final class AdminAccountType extends AbstractType
         $attributes['class'] = trim($existingClass.' tooltip');
         $attributes['data-tooltip'] = $body;
 
-        $title = trim((string) ($tooltip['title'] ?? 'Tip'));
+        $title = trim((string) ($tooltip['title'] ?? ''));
         $attributes['aria-label'] = $title === '' ? $body : sprintf('%s: %s', $title, $body);
 
         return $attributes;
@@ -164,27 +164,30 @@ final class AdminAccountType extends AbstractType
 
         $constraints = [
             new Assert\NotBlank(),
-            new Assert\Length(min: (int) $policy['min_length']),
+            new Assert\Length(
+                min: (int) $policy['min_length'],
+                minMessage: 'installer.admin.form.password_require_length'
+            ),
         ];
 
         if (!empty($policy['require_numbers'])) {
             $constraints[] = new Assert\Regex(
                 pattern: '/\d/',
-                message: 'Password must contain at least one number.'
+                message: 'installer.admin.form.password_require_number'
             );
         }
 
         if (!empty($policy['require_mixed_case'])) {
             $constraints[] = new Assert\Regex(
                 pattern: '/(?=.*[a-z])(?=.*[A-Z])/',
-                message: 'Password must contain both upper and lower case characters.'
+                message: 'installer.admin.form.password_require_mixed_case'
             );
         }
 
         if (!empty($policy['require_special_characters'])) {
             $constraints[] = new Assert\Regex(
                 pattern: '/[^a-zA-Z0-9]/',
-                message: 'Password must contain at least one special character.'
+                message: 'installer.admin.form.password_require_special'
             );
         }
 

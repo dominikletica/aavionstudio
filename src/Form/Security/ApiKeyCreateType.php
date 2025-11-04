@@ -17,21 +17,21 @@ final class ApiKeyCreateType extends AbstractType
     {
         $builder
             ->add('label', TextType::class, [
-                'label' => 'Label',
+                'label' => 'admin.users.edit.api.form.label',
                 'constraints' => [
                     new NotBlank(),
                     new Length(min: 3, max: 190),
                 ],
             ])
             ->add('scopes', TextType::class, [
-                'label' => 'Scopes',
+                'label' => 'admin.users.edit.api.form.scopes',
                 'required' => false,
-                'help' => 'Comma or space separated capability keys (e.g. content.read content.write). Leave empty for read-only.',
+                'help' => 'admin.users.edit.api.form.scopes_help',
             ])
             ->add('expires_at', TextType::class, [
-                'label' => 'Expires at (optional)',
+                'label' => 'admin.users.edit.api.form.expires_at',
                 'required' => false,
-                'help' => 'Accepts YYYY-MM-DD or ISO 8601 date/time',
+                'help' => 'admin.users.edit.api.form.expires_help',
             ]);
     }
 

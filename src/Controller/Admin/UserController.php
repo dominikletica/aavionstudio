@@ -24,6 +24,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 final class UserController extends AbstractController
@@ -40,6 +41,7 @@ final class UserController extends AbstractController
         private readonly MailerInterface $mailer,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly UserProfileFieldRegistry $profileFieldRegistry,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -67,7 +69,7 @@ final class UserController extends AbstractController
         $user = $this->userAdminManager->getUser($id);
 
         if ($user === null) {
-            throw $this->createNotFoundException('User not found.');
+            throw $this->createNotFoundException($this->translator->trans('flash.users.not_found'));
         }
 
         $roleChoices = $this->userAdminManager->getRoleChoices();
@@ -115,12 +117,12 @@ final class UserController extends AbstractController
                     'flags' => $flags,
                 ], $roles, $this->getActorId());
 
-                $this->addFlash('success', 'User updated.');
+                $this->addFlash('success', $this->translator->trans('flash.users.updated'));
 
                 return $this->redirectToRoute('admin_users_edit', ['id' => $id]);
             }
 
-            $profileForm->addError(new FormError('Please review the highlighted fields.'));
+            $profileForm->addError(new FormError($this->translator->trans('validation.users.profile_invalid')));
         }
 
         $apiKeyForm = $this->createForm(ApiKeyCreateType::class);
@@ -135,7 +137,7 @@ final class UserController extends AbstractController
                     try {
                         $expiresAt = new \DateTimeImmutable((string) $data['expires_at']);
                     } catch (\Exception $exception) {
-                        $apiKeyForm->get('expires_at')->addError(new FormError('Invalid date/time format.'));
+                        $apiKeyForm->get('expires_at')->addError(new FormError($this->translator->trans('validation.api_keys.invalid_datetime')));
 
                         return $this->render('pages/admin/users/edit.html.twig', [
                             'form' => $profileForm->createView(),
@@ -154,12 +156,15 @@ final class UserController extends AbstractController
                     $this->getActorId()
                 );
 
-                $this->addFlash('success', sprintf('API key "%s" created. Secret: %s (copy now).', $apiKey['label'], $apiKey['secret']));
+                $this->addFlash('success', $this->translator->trans('flash.users.api.created', [
+                    '%label%' => $apiKey['label'],
+                    '%secret%' => $apiKey['secret'],
+                ]));
 
                 return $this->redirectToRoute('admin_users_edit', ['id' => $id]);
             }
 
-            $apiKeyForm->addError(new FormError('Please review the API key form.'));
+            $apiKeyForm->addError(new FormError($this->translator->trans('validation.api_keys.form_invalid')));
         }
 
         $projectAssignmentsData = [
@@ -191,7 +196,7 @@ final class UserController extends AbstractController
                     $capabilities = $this->parseCapabilities((string) ($assignment['capabilities'] ?? ''));
 
                     if ($role === '' && $capabilities !== []) {
-                        $projectMembershipForm->addError(new FormError(sprintf('Select a role for project assignment "%s" before adding capabilities.', $projectId)));
+                        $projectMembershipForm->addError(new FormError($this->translator->trans('validation.projects.missing_role', ['%project%' => $projectId])));
                         $errors = true;
                         continue;
                     }
@@ -211,12 +216,12 @@ final class UserController extends AbstractController
                 }
 
                 if (!$errors) {
-                    $this->addFlash('success', 'Project memberships updated.');
+                    $this->addFlash('success', $this->translator->trans('flash.users.projects.updated'));
 
                     return $this->redirectToRoute('admin_users_edit', ['id' => $id]);
                 }
             } else {
-                $projectMembershipForm->addError(new FormError('Please review the project assignments.'));
+                $projectMembershipForm->addError(new FormError($this->translator->trans('validation.projects.assignments_invalid')));
             }
         }
 
@@ -240,7 +245,7 @@ final class UserController extends AbstractController
     public function revokeApiKey(string $userId, string $apiKeyId, Request $request): Response
     {
         if (!$this->isCsrfTokenValid('revoke_api_key_'.$apiKeyId, (string) $request->request->get('_token'))) {
-            $this->addFlash('error', 'Invalid CSRF token for API key revoke.');
+            $this->addFlash('error', $this->translator->trans('flash.users.api.invalid_csrf'));
 
             return $this->redirectToRoute('admin_users_edit', ['id' => $userId]);
         }
@@ -248,13 +253,13 @@ final class UserController extends AbstractController
         $apiKey = $this->apiKeyManager->get($apiKeyId);
 
         if ($apiKey === null || $apiKey->userId !== $userId) {
-            $this->addFlash('error', 'API key not found.');
+            $this->addFlash('error', $this->translator->trans('flash.users.api.not_found'));
 
             return $this->redirectToRoute('admin_users_edit', ['id' => $userId]);
         }
 
         $this->apiKeyManager->revoke($apiKeyId, $this->getActorId());
-        $this->addFlash('success', sprintf('API key "%s" revoked.', $apiKey->label));
+        $this->addFlash('success', $this->translator->trans('flash.users.api.revoked', ['%label%' => $apiKey->label]));
 
         return $this->redirectToRoute('admin_users_edit', ['id' => $userId]);
     }
@@ -263,7 +268,7 @@ final class UserController extends AbstractController
     public function sendPasswordReset(string $id, Request $request): Response
     {
         if (!$this->isCsrfTokenValid('admin_user_password_reset_'.$id, (string) $request->request->get('_token'))) {
-            $this->addFlash('error', 'Invalid CSRF token for password reset.');
+            $this->addFlash('error', $this->translator->trans('flash.users.password.invalid_csrf'));
 
             return $this->redirectToRoute('admin_users_edit', ['id' => $id]);
         }
@@ -271,7 +276,7 @@ final class UserController extends AbstractController
         $user = $this->userAdminManager->getUser($id);
 
         if ($user === null) {
-            $this->addFlash('error', 'User not found.');
+            $this->addFlash('error', $this->translator->trans('flash.users.not_found'));
 
             return $this->redirectToRoute('admin_users_index');
         }
@@ -286,7 +291,7 @@ final class UserController extends AbstractController
         ], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $message = (new Email())
-            ->subject('Reset your aavion Studio password')
+            ->subject($this->translator->trans('email.password_reset.subject'))
             ->to($user['email'])
             ->text($this->renderView('emails/password_reset.txt.twig', [
                 'reset_url' => $resetUrl,
@@ -300,7 +305,7 @@ final class UserController extends AbstractController
             'initiated_by' => $this->getActorId(),
         ], actorId: $this->getActorId(), subjectId: $id);
 
-        $this->addFlash('success', sprintf('Password reset email sent to %s.', $user['email']));
+        $this->addFlash('success', $this->translator->trans('flash.users.password.sent', ['%email%' => $user['email']]));
 
         return $this->redirectToRoute('admin_users_edit', ['id' => $id]);
     }
