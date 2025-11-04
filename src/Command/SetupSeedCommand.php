@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Security\User\UserCreator;
+use App\Setup\SetupConfigurator;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -23,6 +24,7 @@ final class SetupSeedCommand extends Command
         private readonly UserCreator $userCreator,
         private readonly Connection $connection,
         private readonly Filesystem $filesystem,
+        private readonly SetupConfigurator $setupConfigurator,
         #[Autowire('%kernel.project_dir%')]
         private readonly string $projectDir,
     ) {
@@ -122,6 +124,10 @@ final class SetupSeedCommand extends Command
             $io->error(sprintf('Failed to create administrator: %s', $exception->getMessage()));
             return Command::FAILURE;
         }
+
+        $settings = \is_array($data['settings'] ?? null) ? $data['settings'] : [];
+        $projects = \is_array($data['projects'] ?? null) ? $data['projects'] : [];
+        $this->setupConfigurator->applyFromData($settings, $projects);
 
         $io->success(sprintf('Administrator account %s seeded successfully.', $email));
         $this->cleanup($payloadPath);

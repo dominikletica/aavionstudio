@@ -44,6 +44,23 @@ final class SetupSeedCommandTest extends KernelTestCase
             assigned_at TEXT NOT NULL,
             assigned_by TEXT NULL
         )');
+        $connection->executeStatement('CREATE TABLE IF NOT EXISTS app_system_setting (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            type TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )');
+        $connection->executeStatement('CREATE TABLE IF NOT EXISTS app_project (
+            id TEXT PRIMARY KEY,
+            slug TEXT NOT NULL,
+            name TEXT NOT NULL,
+            locale TEXT NOT NULL,
+            timezone TEXT NOT NULL,
+            settings TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )');
     }
 
     protected static function getKernelClass(): string
@@ -60,6 +77,8 @@ final class SetupSeedCommandTest extends KernelTestCase
                 'email' => 'admin@example.com',
             ]);
             $connection->executeStatement('DELETE FROM app_user_role WHERE user_id NOT IN (SELECT id FROM app_user)');
+            $connection->executeStatement('DELETE FROM app_system_setting');
+            $connection->executeStatement('DELETE FROM app_project');
         }
 
         $this->filesystem->remove($this->projectDir.'/var/setup');
@@ -68,8 +87,12 @@ final class SetupSeedCommandTest extends KernelTestCase
 
     public function testSeedsAdminAccountFromPayload(): void
     {
+        $systemSettings = require $this->projectDir.'/config/app/system_settings.php';
+        $systemSettings['core.instance_name'] = 'Installer QA';
+
+        $projects = require $this->projectDir.'/config/app/projects.php';
+
         $payload = [
-            'environment' => ['APP_ENV' => 'test', 'APP_DEBUG' => '1'],
             'storage' => ['root' => 'var/storage'],
             'admin' => [
                 'email' => 'admin@example.com',
@@ -80,7 +103,8 @@ final class SetupSeedCommandTest extends KernelTestCase
                 'require_mfa' => true,
                 'recovery_email' => 'security@example.com',
             ],
-            'settings' => [],
+            'settings' => $systemSettings,
+            'projects' => $projects,
         ];
 
         $payloadPath = $this->projectDir.'/var/setup/runtime.json';
@@ -102,5 +126,16 @@ final class SetupSeedCommandTest extends KernelTestCase
         self::assertNotFalse($row, 'Administrator should be created');
         self::assertSame('Initial Admin', $row['display_name']);
         self::assertFileDoesNotExist($payloadPath);
+
+        $setting = $connection->fetchAssociative('SELECT value FROM app_system_setting WHERE key = :key', [
+            'key' => 'core.instance_name',
+        ]);
+        self::assertNotFalse($setting, 'System settings should be saved');
+        self::assertSame('"Installer QA"', $setting['value']);
+
+        $projectRow = $connection->fetchAssociative('SELECT slug, name FROM app_project WHERE slug = :slug', [
+            'slug' => $projects[0]['slug'],
+        ]);
+        self::assertNotFalse($projectRow, 'Default project should be persisted');
     }
 }

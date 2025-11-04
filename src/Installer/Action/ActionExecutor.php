@@ -17,7 +17,7 @@ use Symfony\Component\Process\Process;
 use DateTimeImmutable;
 use ZipArchive;
 
-final class ActionExecutor
+final class ActionExecutor implements ActionExecutorInterface
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')]

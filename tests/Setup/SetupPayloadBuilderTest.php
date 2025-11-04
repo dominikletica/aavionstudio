@@ -52,19 +52,22 @@ final class SetupPayloadBuilderTest extends TestCase
 
     public function testBuildCreatesPayloadFile(): void
     {
-        $builder = new SetupPayloadBuilder($this->configuration, $this->projectDir, $this->filesystem);
+        $payloadPath = $this->projectDir.'/runtime.json';
+        $builder = new SetupPayloadBuilder($this->configuration, $this->filesystem, $payloadPath);
         $path = $builder->build();
 
         self::assertFileExists($path);
         $json = json_decode((string) file_get_contents($path), true, flags: JSON_THROW_ON_ERROR);
-        self::assertSame('prod', $json['environment']['APP_ENV']);
         self::assertSame('var/storage', $json['storage']['root']);
         self::assertSame('admin@example.com', $json['admin']['email']);
+        self::assertArrayHasKey('projects', $json);
+        self::assertIsArray($json['projects']);
     }
 
     public function testCleanupRemovesPayload(): void
     {
-        $builder = new SetupPayloadBuilder($this->configuration, $this->projectDir, $this->filesystem);
+        $payloadPath = $this->projectDir.'/runtime.json';
+        $builder = new SetupPayloadBuilder($this->configuration, $this->filesystem, $payloadPath);
         $path = $builder->build();
         self::assertFileExists($path);
 

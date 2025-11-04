@@ -28,3 +28,15 @@
     {% endif %}
     {{ form_row(field, config) }}
 {% endmacro %}
+
+{% macro form_row_with_help(field, help = {}, options = {}) %}
+    {% set map = help is iterable ? help : {} %}
+    {% set key = field.vars.attr['data-help-key'] ?? field.vars.row_attr['data-help-key'] ?? null %}
+    {% set tooltip = null %}
+
+    {% if key %}
+        {% set tooltip = attribute(map, key)|default(null) %}
+    {% endif %}
+
+    {{ _self.form_row_with_tooltip(field, tooltip, options) }}
+{% endmacro %}

@@ -139,15 +139,11 @@ PHP;
      */
     private function runConsoleCommand(array $arguments, string $label): void
     {
-        $command = array_merge(
-            ['php', 'bin/console'],
-            $arguments,
-            ['--env=dev', '--no-debug', '--quiet'],
-        );
+        $command = array_merge(['php', 'bin/console'], $arguments, ['--env=test', '--no-debug', '--quiet']);
 
         $process = new Process($command, $this->projectDir, [
-            'APP_ENV' => 'dev',
-            'APP_DEBUG' => '1',
+            'APP_ENV' => 'test',
+            'APP_DEBUG' => '0',
         ]);
         $process->setTimeout(self::PROCESS_TIMEOUT);
         $process->run();

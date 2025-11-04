@@ -93,14 +93,15 @@
 - [x] Add persistent setup log writer (stream to `var/log/setup/*.ndjson`) within `ActionExecutor`.
 - [x] Wire new help-content JSON loader and replace inline doc links in installer templates.
 - [x] Harden `/setup/action` streaming response by starting/saving the session before flushing NDJSON output (prevents "headers already sent" errors reported on step 2).
+- [x] Introduce configurable installer action session strategy (`INSTALLER_ACTION_MODE`) to choose between streaming with an open session or buffered JSON output; add controller tests and developer manual updates covering both options.
 - [x] Split help JSON entries into inline panels vs. targeted tooltips; update installer templates/macros to attach tooltips to environment/storage/admin fields and to surface summary actions as hoverable badges.
 - [x] Polish tooltip UX (0.5s hover delay, wider responsive container, label-level wiring for password confirmation) to keep wizard copy readable without layout jitter.
 - [x] Correct button component defaults so installer forms submit properly without passing explicit `type` parameters hook-ups.
 - [x] Tighten wizard navigation gating (disable future steps, redirect invalid `step` query selections) and add accessibility metadata (`aria-disabled`).
 - [x] Expand installer functional coverage (tooltip rendering, summary action badges, step gating) and add unit tests for `SetupConfiguration` boolean helpers + `SetupHelpLoader` target propagation.
-- [ ] Update `SetupConfigurator` + `SystemSettings` reload flow to consume session data safely prior to `bin/init`, including default project metadata handling.
-- [ ] Add unit/integration/functional coverage for the full installer pipeline (forms, env writer, action executor, bin/init seeding) and document manual verification steps in developer/user manuals.
-- [ ] Introduce field-aware tooltip binding (Stimulus helper or Twig extensions) so targeted help entries decorate the precise form controls without manual badge duplication.
+- [x] Update `SetupConfigurator` + `SystemSettings` reload flow to consume session data safely prior to `bin/init`, including default project metadata handling.
+- [x] Add unit/integration/functional coverage for the full installer pipeline (forms, env writer, action executor, bin/init seeding) and document manual verification steps in developer/user manuals.
+- [x] Introduce field-aware tooltip binding (Stimulus helper or Twig extensions) so targeted help entries decorate the precise form controls without manual badge duplication.
 
 ### Feat: Frontend Delivery & Rendering (P0 | L)
 - [ ] Implement catch-all frontend controller backed by snapshots and schema templates
@@ -378,7 +379,23 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Localised built-in role names through the translator, simplified installer/admin field labels, and refreshed the internationalisation guide with guidance for module-supplied role translations.
 - Harmonised phrasing in English and German catalogues (shorter labels, clearer help text) and introduced shared keys for “not applicable” values; PHPUnit suite remains green.
 
-#### Follow-up
-- Let `SetupConfigurator`/`SystemSettings` consume the installer session payload before `bin/init` and reload default project metadata afterward.
-- Add end-to-end coverage for the installer (forms → action → `bin/init`) and document the manual verification steps in user/dev manuals.
-- Introduce field-aware tooltip binding (Stimulus/Twig helper) so contextual help attaches directly to each field without manual duplication.
+### 2025-11-04 (Session 3)
+- Added `InstallerPipelineTest` covering the full action pipeline (env write → payload → configure → lock) and seeded the test session/configuration so system settings persist without running `bin/init`.
+- Documented manual verification steps in `docs/dev/MANUAL.md` (new subsection under onboarding) and marked the installer coverage TODO as complete.
+- Tests: `php bin/phpunit`, `php bin/phpunit --filter InstallerPipelineTest`.
+
+### 2025-11-04 (Session 4)
+- Detached the installer runtime from the HTTP session by snapshotting `SetupConfiguration`, invalidating the action token, and swapping in an in-memory session before streaming to remove “headers already sent” failures during the lock step.
+- Added the `ActionExecutorInterface` contract, wired the controller to honour the `INSTALLER_ACTION_MODE` parameter, and expanded controller tests to cover both streaming and buffered execution with the new session lifecycle.
+- Extended `SetupConfiguration` with `freeze()`/snapshot support so action steps can read wizard data without touching the persisted session payload, and added a lightweight NDJSON error logger for streamed failures.
+- Updated developer documentation (manual + class map) to describe the session strategy and new configuration hooks.
+- Tests: `php bin/phpunit`, `php bin/phpunit tests/Controller/Installer/ActionControllerTest.php`.
+- Rewired the env writer/bin.init pipeline so `.env.local` only stores immutable runtime variables (APP_ENV/APP_DEBUG/APP_SECRET, DATABASE_URL, DSNs, storage root, release metadata) while the payload now carries only storage/admin/system-setting/project data for `app:setup:seed`; computed SQLite locations from the chosen storage root and ensured required directories are created.
+- Added a router context subscriber so CLI URL generation prefers the stored system setting (`core.url`) and falls back to `DEFAULT_URI` when unset.
+- Hardened test isolation: installer pipeline tests and lint helpers now operate exclusively on `var/test` artefacts, preventing accidental deletion of the real `.env.local` during the suite.
+- Tests: `php bin/phpunit`.
+
+#### Side-Notes (2025-11-04)
+- We need to make sure, that help.json gets moved out of docs/ since releases do not include docs/.
+- We need to adjust the migrations: app_projects, app_project_user, app_schema & app_templates belong into user space. Consumers have to be edited accordingly.
+- Additionally we'll need app_presets (system.brain, to manage export presets) and app_schema_versions (user.brain to manage different versions of a schema, so that editing a schema doesn't automatically invalidate existing entities). -- Note: Schema is referenced by entity_type to determine, what fields the payload should include and how they are rendered. Also a Schema links to a template (database stored TWIG, not a template path!) that can override the default template an entity payload using this schema is rendered in frontend ({% block payload %}) - our entity renderer should fill this block either with a default logic, or with the provided template if exists. We'll need to specify a base-template that extends templates/layouts/entity.html.twig to use this block.

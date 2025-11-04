@@ -21,6 +21,7 @@ final class StorageSettingsType extends AbstractType
             ],
             'attr' => [
                 'placeholder' => 'installer.storage.form.root_placeholder',
+                'data-help-key' => 'storage.root',
             ],
         ]);
     }

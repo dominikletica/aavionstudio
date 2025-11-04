@@ -23,7 +23,7 @@ use Symfony\Contracts\Cache\ItemInterface;
 final class CatalogueManager
 {
     /**
-     * @var array<string, bool>
+     * @var array<string, string> keyed by locale => fingerprint
      */
     private array $loaded = [];
 
@@ -53,13 +53,13 @@ final class CatalogueManager
 
     public function ensureLocale(string $locale): void
     {
-        if (isset($this->loaded[$locale])) {
-            return;
-        }
-
         $resources = $this->collectResources($locale);
         $fingerprint = $this->computeFingerprint($resources);
         $cacheKey = 'translations.catalogue.'.sha1($locale.'|'.$fingerprint);
+
+        if (($this->loaded[$locale] ?? null) === $fingerprint) {
+            return;
+        }
 
         $catalogue = $this->cache->get($cacheKey, function (ItemInterface $item) use ($resources, $locale) {
             return $this->mergeResources($resources, $locale);
@@ -73,7 +73,7 @@ final class CatalogueManager
             $this->translator->addResource('array', $messages, $locale, (string) $domain);
         }
 
-        $this->loaded[$locale] = true;
+        $this->loaded[$locale] = $fingerprint;
     }
 
     public function getFallbackLocale(): string

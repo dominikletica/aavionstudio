@@ -13,7 +13,7 @@
                 <p class="text-sm text-text-muted">
                     {{ 'installer.storage.instructions'|trans|raw }}
                 </p>
-                {{ ui.form_row_with_tooltip(storage_form.root, help_tooltips['storage.root'] ?? null) }}
+                {{ ui.form_row_with_help(storage_form.root, help_tooltips) }}
                 <div class="flex justify-end">
                     {{ include('partials/components/button.html.twig', {
                         label: 'installer.storage.actions.save'|trans,

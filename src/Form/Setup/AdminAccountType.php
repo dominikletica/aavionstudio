@@ -34,21 +34,31 @@ final class AdminAccountType extends AbstractType
                     new Assert\NotBlank(),
                     new Assert\Email(),
                 ],
+                'attr' => [
+                    'data-help-key' => 'admin.email',
+                ],
             ])
             ->add('display_name', TextType::class, [
                 'label' => 'installer.admin.form.display_name',
                 'constraints' => [
                     new Assert\NotBlank(),
                 ],
+                'attr' => [
+                    'data-help-key' => 'admin.display_name',
+                ],
             ])
             ->add('password', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'invalid_message' => 'installer.admin.form.password_mismatch',
                 'required' => true,
+                'attr' => [
+                    'data-help-key' => 'admin.password',
+                ],
                 'first_options' => [
                     'label' => 'installer.admin.form.password',
                     'attr' => [
                         'autocomplete' => 'new-password',
+                        'data-help-key' => 'admin.password',
                     ],
                     'label_attr' => $passwordLabelAttr,
                 ],
@@ -72,6 +82,9 @@ final class AdminAccountType extends AbstractType
                 'choices' => $localeChoices,
                 'placeholder' => 'installer.admin.form.locale_placeholder',
                 'choice_translation_domain' => false,
+                'attr' => [
+                    'data-help-key' => 'admin.locale',
+                ],
             ])
             ->add('timezone', ChoiceType::class, [
                 'label' => 'installer.admin.form.timezone',
@@ -81,18 +94,30 @@ final class AdminAccountType extends AbstractType
                 'choices' => $timezoneChoices,
                 'placeholder' => 'installer.admin.form.timezone_placeholder',
                 'choice_translation_domain' => false,
+                'attr' => [
+                    'data-help-key' => 'admin.timezone',
+                ],
             ])
             ->add('require_mfa', CheckboxType::class, [
                 'label' => 'installer.admin.form.require_mfa',
                 'required' => false,
+                'attr' => [
+                    'data-help-key' => 'admin.require_mfa',
+                ],
             ])
             ->add('recovery_email', EmailType::class, [
                 'label' => 'installer.admin.form.recovery_email',
                 'required' => false,
+                'attr' => [
+                    'data-help-key' => 'admin.recovery_email',
+                ],
             ])
             ->add('recovery_phone', TextType::class, [
                 'label' => 'installer.admin.form.recovery_phone',
                 'required' => false,
+                'attr' => [
+                    'data-help-key' => 'admin.recovery_phone',
+                ],
             ]);
     }
 

@@ -63,6 +63,45 @@ final class SetupConfigurationTest extends TestCase
         self::assertTrue($admin['require_mfa']);
     }
 
+    public function testFreezeDetachesSessionDataForStreaming(): void
+    {
+        $session = new Session(new MockArraySessionStorage());
+        $session->start();
+
+        $request = new Request();
+        $request->setSession($session);
+
+        $stack = new RequestStack();
+        $stack->push($request);
+
+        $configuration = new SetupConfiguration($stack);
+        $configuration->rememberEnvironmentOverrides([
+            'APP_ENV' => 'prod',
+            'APP_DEBUG' => '0',
+        ]);
+        $configuration->rememberAdminAccount([
+            'email' => 'freeze@example.com',
+            'display_name' => 'Frozen Admin',
+            'password' => 'FrozenPass123!',
+            'locale' => 'en',
+            'timezone' => 'UTC',
+            'require_mfa' => false,
+        ]);
+
+        self::assertNotNull($session->get('_app.setup.configuration'));
+
+        $configuration->freeze();
+
+        self::assertNull($session->get('_app.setup.configuration'), 'Freeze should remove payload from the persisted session.');
+        self::assertSame('prod', $configuration->getEnvironmentOverrides()['APP_ENV']);
+        self::assertSame('freeze@example.com', $configuration->getAdminAccount()['email']);
+
+        $configuration->clear();
+
+        self::assertFalse($configuration->hasEnvironmentOverrides(), 'Clearing after freeze should drop the snapshot.');
+        self::assertFalse($configuration->hasAdminAccount());
+    }
+
     private function createConfiguration(): SetupConfiguration
     {
         $session = new Session(new MockArraySessionStorage());

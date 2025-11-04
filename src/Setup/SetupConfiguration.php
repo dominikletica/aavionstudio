@@ -21,11 +21,38 @@ final class SetupConfiguration
     private const KEY_ENVIRONMENT_OVERRIDES = 'environment_overrides';
     private const KEY_STORAGE = 'storage';
     private const KEY_ADMIN = 'admin';
-    private const DEFAULT_STORAGE_ROOT = 'var/storage';
+    public const DEFAULT_STORAGE_ROOT = 'var/storage';
+    /** @var array<string, mixed>|null */
+    private ?array $snapshot = null;
+    private bool $snapshotActive = false;
 
     public function __construct(
         private readonly RequestStack $requestStack,
     ) {
+    }
+
+    public function freeze(): void
+    {
+        if ($this->snapshotActive) {
+            return;
+        }
+
+        $session = $this->getSession(false);
+        if ($session === null) {
+            $this->snapshot = [];
+            $this->snapshotActive = true;
+
+            return;
+        }
+
+        if (! $session->isStarted()) {
+            $session->start();
+        }
+
+        $data = $session->get(self::SESSION_KEY);
+        $this->snapshot = \is_array($data) ? $data : [];
+        $session->remove(self::SESSION_KEY);
+        $this->snapshotActive = true;
     }
 
     /**
@@ -290,14 +317,28 @@ final class SetupConfiguration
 
     public function clear(): void
     {
+        if ($this->snapshotActive) {
+            $this->snapshot = null;
+            $this->snapshotActive = false;
+
+            return;
+        }
+
         $session = $this->getSession(false);
         if ($session !== null) {
             $session->remove(self::SESSION_KEY);
         }
+
+        $this->snapshot = null;
+        $this->snapshotActive = false;
     }
 
     private function getSessionValue(string $key): mixed
     {
+        if ($this->snapshotActive) {
+            return $this->snapshot[$key] ?? null;
+        }
+
         $session = $this->getSession(false);
         if ($session === null) {
             return null;
@@ -313,6 +354,16 @@ final class SetupConfiguration
 
     private function setSessionValue(string $key, array $value): void
     {
+        if ($this->snapshotActive) {
+            if ($this->snapshot === null) {
+                $this->snapshot = [];
+            }
+
+            $this->snapshot[$key] = $value;
+
+            return;
+        }
+
         $session = $this->getSession(true);
         if ($session === null) {
             return;

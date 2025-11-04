@@ -37,14 +37,14 @@
                 {% endif %}
 
                 <div class="grid gap-4 md:grid-cols-2">
-                    {{ ui.form_row_with_tooltip(admin_form.email, help_tooltips['admin.email'] ?? null) }}
-                    {{ ui.form_row_with_tooltip(admin_form.display_name, help_tooltips['admin.display_name'] ?? null) }}
-                    {{ ui.form_row_with_tooltip(admin_form.password, help_tooltips['admin.password'] ?? null) }}
-                    {{ ui.form_row_with_tooltip(admin_form.locale, help_tooltips['admin.locale'] ?? null) }}
-                    {{ ui.form_row_with_tooltip(admin_form.timezone, help_tooltips['admin.timezone'] ?? null) }}
-                    {{ ui.form_row_with_tooltip(admin_form.require_mfa, help_tooltips['admin.require_mfa'] ?? null) }}
-                    {{ ui.form_row_with_tooltip(admin_form.recovery_email, help_tooltips['admin.recovery_email'] ?? null) }}
-                    {{ ui.form_row_with_tooltip(admin_form.recovery_phone, help_tooltips['admin.recovery_phone'] ?? null) }}
+                    {{ ui.form_row_with_help(admin_form.email, help_tooltips) }}
+                    {{ ui.form_row_with_help(admin_form.display_name, help_tooltips) }}
+                    {{ ui.form_row_with_help(admin_form.password, help_tooltips) }}
+                    {{ ui.form_row_with_help(admin_form.locale, help_tooltips) }}
+                    {{ ui.form_row_with_help(admin_form.timezone, help_tooltips) }}
+                    {{ ui.form_row_with_help(admin_form.require_mfa, help_tooltips) }}
+                    {{ ui.form_row_with_help(admin_form.recovery_email, help_tooltips) }}
+                    {{ ui.form_row_with_help(admin_form.recovery_phone, help_tooltips) }}
                 </div>
                 <div class="flex justify-end">
                     {{ include('partials/components/button.html.twig', {
