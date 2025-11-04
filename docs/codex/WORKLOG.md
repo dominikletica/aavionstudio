@@ -377,3 +377,8 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Converted security login/password pages, the admin security audit log, and demo tip partials to deterministic translation keys; added matching EN/DE catalogue entries and audit action labels.
 - Localised built-in role names through the translator, simplified installer/admin field labels, and refreshed the internationalisation guide with guidance for module-supplied role translations.
 - Harmonised phrasing in English and German catalogues (shorter labels, clearer help text) and introduced shared keys for “not applicable” values; PHPUnit suite remains green.
+
+#### Follow-up
+- Let `SetupConfigurator`/`SystemSettings` consume the installer session payload before `bin/init` and reload default project metadata afterward.
+- Add end-to-end coverage for the installer (forms → action → `bin/init`) and document the manual verification steps in user/dev manuals.
+- Introduce field-aware tooltip binding (Stimulus/Twig helper) so contextual help attaches directly to each field without manual duplication.
