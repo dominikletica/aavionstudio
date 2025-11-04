@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Security\Authorization;
 
 use Doctrine\DBAL\Connection;
-use Symfony\Component\Uid\Ulid;
 
 final class ProjectMembershipRepository
 {
@@ -28,7 +27,7 @@ final class ProjectMembershipRepository
         $encodedPermissions = json_encode($permissions, JSON_THROW_ON_ERROR);
 
         $this->connection->executeStatement(
-            'INSERT INTO app_project_user (project_id, user_id, role_name, permissions, created_at, created_by)
+            'INSERT INTO user_brain.app_project_user (project_id, user_id, role_name, permissions, created_at, created_by)
              VALUES (:project_id, :user_id, :role_name, :permissions, :created_at, :created_by)
              ON CONFLICT(project_id, user_id) DO UPDATE SET role_name = :role_name_u, permissions = :permissions_u, created_by = :created_by_u',
             [
@@ -47,16 +46,19 @@ final class ProjectMembershipRepository
 
     public function revoke(string $projectId, string $userId): void
     {
-        $this->connection->delete('app_project_user', [
-            'project_id' => $projectId,
-            'user_id' => $userId,
-        ]);
+        $this->connection->executeStatement(
+            'DELETE FROM user_brain.app_project_user WHERE project_id = :project_id AND user_id = :user_id',
+            [
+                'project_id' => $projectId,
+                'user_id' => $userId,
+            ]
+        );
     }
 
     public function find(string $projectId, string $userId): ?ProjectMembership
     {
         $row = $this->connection->fetchAssociative(
-            'SELECT project_id, user_id, role_name, permissions, created_at, created_by FROM app_project_user WHERE project_id = :project_id AND user_id = :user_id',
+            'SELECT project_id, user_id, role_name, permissions, created_at, created_by FROM user_brain.app_project_user WHERE project_id = :project_id AND user_id = :user_id',
             [
                 'project_id' => $projectId,
                 'user_id' => $userId,
@@ -76,7 +78,7 @@ final class ProjectMembershipRepository
     public function forUser(string $userId): array
     {
         $rows = $this->connection->fetchAllAssociative(
-            'SELECT project_id, user_id, role_name, permissions, created_at, created_by FROM app_project_user WHERE user_id = :user_id ORDER BY created_at DESC',
+            'SELECT project_id, user_id, role_name, permissions, created_at, created_by FROM user_brain.app_project_user WHERE user_id = :user_id ORDER BY created_at DESC',
             [
                 'user_id' => $userId,
             ]
@@ -91,7 +93,7 @@ final class ProjectMembershipRepository
     public function forProject(string $projectId): array
     {
         $rows = $this->connection->fetchAllAssociative(
-            'SELECT project_id, user_id, role_name, permissions, created_at, created_by FROM app_project_user WHERE project_id = :project_id ORDER BY created_at DESC',
+            'SELECT project_id, user_id, role_name, permissions, created_at, created_by FROM user_brain.app_project_user WHERE project_id = :project_id ORDER BY created_at DESC',
             [
                 'project_id' => $projectId,
             ]
@@ -103,7 +105,7 @@ final class ProjectMembershipRepository
     public function userHasRole(string $projectId, string $userId, string $roleName): bool
     {
         $value = $this->connection->fetchOne(
-            'SELECT 1 FROM app_project_user WHERE project_id = :project_id AND user_id = :user_id AND role_name = :role_name',
+            'SELECT 1 FROM user_brain.app_project_user WHERE project_id = :project_id AND user_id = :user_id AND role_name = :role_name',
             [
                 'project_id' => $projectId,
                 'user_id' => $userId,

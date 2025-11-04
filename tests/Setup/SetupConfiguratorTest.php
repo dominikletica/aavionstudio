@@ -29,7 +29,7 @@ final class SetupConfiguratorTest extends KernelTestCase
             updated_at TEXT NOT NULL
         )');
 
-        $this->connection->executeStatement('CREATE TABLE IF NOT EXISTS app_project (
+        $this->connection->executeStatement('CREATE TABLE IF NOT EXISTS user_brain.app_project (
             id TEXT PRIMARY KEY,
             slug TEXT NOT NULL,
             name TEXT NOT NULL,
@@ -41,14 +41,14 @@ final class SetupConfiguratorTest extends KernelTestCase
         )');
 
         $this->connection->executeStatement('DELETE FROM app_system_setting');
-        $this->connection->executeStatement('DELETE FROM app_project');
+        $this->connection->executeStatement('DELETE FROM user_brain.app_project');
     }
 
     protected function tearDown(): void
     {
         if (self::$kernel !== null) {
             $this->connection->executeStatement('DELETE FROM app_system_setting');
-            $this->connection->executeStatement('DELETE FROM app_project');
+            $this->connection->executeStatement('DELETE FROM user_brain.app_project');
         }
 
         parent::tearDown();
@@ -88,7 +88,7 @@ final class SetupConfiguratorTest extends KernelTestCase
         self::assertNotFalse($storedSetting);
         self::assertSame('"Configurator Test"', $storedSetting['value']);
 
-        $storedProject = $this->connection->fetchAssociative('SELECT slug, name FROM app_project WHERE slug = :slug', [
+        $storedProject = $this->connection->fetchAssociative('SELECT slug, name FROM user_brain.app_project WHERE slug = :slug', [
             'slug' => 'demo',
         ]);
         self::assertNotFalse($storedProject);

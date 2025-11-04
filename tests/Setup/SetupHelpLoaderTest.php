@@ -17,7 +17,7 @@ final class SetupHelpLoaderTest extends TestCase
     {
         $this->filesystem = new Filesystem();
         $this->projectDir = sys_get_temp_dir().'/aavion_help_'.bin2hex(random_bytes(4));
-        $this->filesystem->mkdir($this->projectDir.'/docs/setup');
+        $this->filesystem->mkdir($this->projectDir);
     }
 
     protected function tearDown(): void
@@ -40,7 +40,7 @@ final class SetupHelpLoaderTest extends TestCase
         ];
 
         $this->filesystem->dumpFile(
-            $this->projectDir.'/docs/setup/help.json',
+            $this->projectDir.'/help.json',
             json_encode($entries, JSON_THROW_ON_ERROR)
         );
 
@@ -56,14 +56,14 @@ final class SetupHelpLoaderTest extends TestCase
     public function testLocaleSpecificEntriesExtendFallback(): void
     {
         $this->filesystem->dumpFile(
-            $this->projectDir.'/docs/setup/help.json',
+            $this->projectDir.'/help.json',
             json_encode([
                 ['section' => 'setup.general', 'type' => 'inline_help', 'title' => 'Default', 'body' => 'Fallback']
             ], JSON_THROW_ON_ERROR)
         );
 
         $this->filesystem->dumpFile(
-            $this->projectDir.'/docs/setup/help.de.json',
+            $this->projectDir.'/help.de.json',
             json_encode([
                 ['section' => 'setup.general', 'type' => 'inline_help', 'title' => 'Deutsch', 'body' => 'Inhalt']
             ], JSON_THROW_ON_ERROR)
@@ -80,7 +80,7 @@ final class SetupHelpLoaderTest extends TestCase
     public function testTooltipTargetsArePreserved(): void
     {
         $this->filesystem->dumpFile(
-            $this->projectDir.'/docs/setup/help.json',
+            $this->projectDir.'/help.json',
             json_encode([
                 [
                     'section' => 'setup.environment',

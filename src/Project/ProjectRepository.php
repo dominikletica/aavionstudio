@@ -22,7 +22,7 @@ final class ProjectRepository
     public function listProjects(): array
     {
         $rows = $this->connection->fetchAllAssociative(
-            'SELECT id, slug, name FROM app_project ORDER BY name ASC'
+            'SELECT id, slug, name FROM user_brain.app_project ORDER BY name ASC'
         );
 
         return array_map(static fn (array $row): array => [
@@ -39,7 +39,7 @@ final class ProjectRepository
     {
         try {
             $row = $this->connection->fetchAssociative(
-                'SELECT id, slug, name, settings FROM app_project WHERE id = :id',
+                'SELECT id, slug, name, settings FROM user_brain.app_project WHERE id = :id',
                 ['id' => $projectId]
             );
         } catch (\Doctrine\DBAL\Exception) {
@@ -62,7 +62,7 @@ final class ProjectRepository
     {
         try {
             $row = $this->connection->fetchAssociative(
-                'SELECT id, slug, name, locale, timezone, settings FROM app_project WHERE slug = :slug',
+                'SELECT id, slug, name, locale, timezone, settings FROM user_brain.app_project WHERE slug = :slug',
                 ['slug' => $slug]
             );
         } catch (\Doctrine\DBAL\Exception) {

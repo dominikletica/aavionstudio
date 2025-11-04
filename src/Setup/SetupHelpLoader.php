@@ -10,7 +10,7 @@ use Symfony\Component\Filesystem\Filesystem;
 final class SetupHelpLoader
 {
     private const DEFAULT_LOCALE = 'en';
-    private const HELP_DIR = '/docs/setup';
+    private const HELP_DIR = '/';
 
     public function __construct(
         #[Autowire('%kernel.project_dir%')]
@@ -46,14 +46,14 @@ final class SetupHelpLoader
     {
         $paths = [];
 
-        $paths[] = $this->projectDir.self::HELP_DIR.'/help.json';
+        $paths[] = $this->projectDir.self::HELP_DIR.'help.json';
 
         if ($locale !== '' && $locale !== self::DEFAULT_LOCALE) {
-            $paths[] = $this->projectDir.self::HELP_DIR.sprintf('/help.%s.json', self::DEFAULT_LOCALE);
+            $paths[] = $this->projectDir.self::HELP_DIR.sprintf('help.%s.json', self::DEFAULT_LOCALE);
         }
 
         if ($locale !== '') {
-            $paths[] = $this->projectDir.self::HELP_DIR.sprintf('/help.%s.json', $locale);
+            $paths[] = $this->projectDir.self::HELP_DIR.sprintf('help.%s.json', $locale);
         }
 
         $merged = [];

@@ -120,9 +120,9 @@ final class InstallerPipelineTest extends KernelTestCase
         /** @var Connection $connection */
         $connection = self::getContainer()->get(Connection::class);
         $connection->executeStatement('CREATE TABLE IF NOT EXISTS app_system_setting (key TEXT PRIMARY KEY, value TEXT NOT NULL, type TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)');
-        $connection->executeStatement('CREATE TABLE IF NOT EXISTS app_project (id TEXT PRIMARY KEY, slug TEXT NOT NULL, name TEXT NOT NULL, locale TEXT NOT NULL, timezone TEXT NOT NULL, settings TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)');
+        $connection->executeStatement('CREATE TABLE IF NOT EXISTS user_brain.app_project (id TEXT PRIMARY KEY, slug TEXT NOT NULL, name TEXT NOT NULL, locale TEXT NOT NULL, timezone TEXT NOT NULL, settings TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)');
         $connection->executeStatement('DELETE FROM app_system_setting');
-        $connection->executeStatement('DELETE FROM app_project');
+        $connection->executeStatement('DELETE FROM user_brain.app_project');
         $connection->executeStatement('DELETE FROM app_user WHERE email = :email', ['email' => 'pipeline@example.com']);
         $connection->executeStatement('DELETE FROM app_user_role WHERE user_id NOT IN (SELECT id FROM app_user)');
     }
@@ -143,7 +143,7 @@ final class InstallerPipelineTest extends KernelTestCase
         /** @var Connection $connection */
         $connection = self::getContainer()->get(Connection::class);
         $connection->executeStatement('DELETE FROM app_system_setting');
-        $connection->executeStatement('DELETE FROM app_project');
+        $connection->executeStatement('DELETE FROM user_brain.app_project');
         $connection->executeStatement('DELETE FROM app_user WHERE email = :email', ['email' => 'pipeline@example.com']);
 
         parent::tearDown();
@@ -179,7 +179,7 @@ final class InstallerPipelineTest extends KernelTestCase
         self::assertNotFalse($setting);
         self::assertSame('"Pipeline Instance"', $setting['value']);
 
-        $entry = $connection->fetchAssociative('SELECT name FROM app_project WHERE slug = :slug', ['slug' => 'default']);
+        $entry = $connection->fetchAssociative('SELECT name FROM user_brain.app_project WHERE slug = :slug', ['slug' => 'default']);
         self::assertNotFalse($entry);
         self::assertSame('Default Project', $entry['name']);
 
