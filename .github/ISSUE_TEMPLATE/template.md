@@ -3,7 +3,7 @@ name: Template
 about: Create a report or a feature request
 title: ''
 labels: ''
-assignees: ''
+assignees: dominikletica
 
 ---
 
@@ -20,8 +20,9 @@ Describe the problem, feature request, or question. Include context, goals, and 
 - **Actual:**
 
 ## Environment
-- aavion Studio version / commit:
+- aavion Studio version + APP_ENV (if known):
 - PHP version:
+- HTTP server (e.g. Apache2): 
 - Hosting setup (local, shared, container):
 - Browser (if UI related):
 
@@ -29,3 +30,4 @@ Describe the problem, feature request, or question. Include context, goals, and 
 - Logs, stack traces, or screenshots
 - Related docs/drafts or Worklog entries
 - Suggested solutions or workarounds
+- Other details that may help understand why this issue is important for you
