@@ -1,4 +1,12 @@
-<div data-action-overlay class="action-overlay hidden fixed inset-0 z-50">
+<div
+    data-action-overlay
+    data-trans-no-steps="{{ 'Action steps missing'|trans }}"
+    data-trans-missing-token="{{ 'Missing session token. Refresh the page to continue.'|trans }}"
+    data-trans-error-label="{{ 'Error'|trans }}"
+    data-trans-unknown-error="{{ 'Unknown error'|trans }}"
+    data-trans-network-error="{{ 'Network error'|trans }}"
+    class="action-overlay hidden fixed inset-0 z-50"
+>
     <div class="absolute inset-0 bg-black/60"></div>
     <div class="relative mx-auto mt-16 max-w-3xl rounded-lg bg-surface p-6 shadow-lg layout-stack layout-stack--loose">
         <div class="flex items-center justify-between gap-4">
@@ -57,7 +65,7 @@
     };
 
     const appendLog = (message, isError = false) => {
-        const prefix = isError ? '[ERROR] ' : '';
+        const prefix = isError ? `[${translations.errorLabel}] ` : '';
         logElement.textContent += prefix + message + '\n';
         logElement.scrollTop = logElement.scrollHeight;
     };
@@ -75,16 +83,24 @@
         }
     };
 
+    const translations = {
+        noSteps: overlay.dataset.transNoSteps ?? 'No valid steps provided.',
+        missingToken: overlay.dataset.transMissingToken ?? 'Missing installer session token. Refresh the page to continue.',
+        errorLabel: overlay.dataset.transErrorLabel ?? 'Error',
+        unknownError: overlay.dataset.transUnknownError ?? 'Unknown error',
+        networkError: overlay.dataset.transNetworkError ?? 'Network error',
+    };
+
     const runAction = async (trigger) => {
         const steps = trigger.dataset.actionSteps ? JSON.parse(trigger.dataset.actionSteps) : [];
         const context = trigger.dataset.actionContext ?? 'generic';
         if (!Array.isArray(steps) || steps.length === 0) {
-            console.error('No valid steps provided.');
+            console.error(translations.noSteps);
             return;
         }
 
         if (!actionToken) {
-            console.error('Missing installer session token. Refresh the page to continue.');
+            console.error(translations.missingToken);
             return;
         }
 
@@ -113,7 +129,7 @@
             });
 
             if (!response.ok || !response.body) {
-                appendLog(`Error: ${response.status} ${response.statusText}`, true);
+                appendLog(`${translations.errorLabel}: ${response.status} ${response.statusText}`, true);
                 handleCompletion('error');
                 return;
             }
@@ -146,7 +162,7 @@
                                 appendLog(message);
                                 break;
                             case 'error':
-                                appendLog(message || 'Unknown error', true);
+                                appendLog(message || translations.unknownError, true);
                                 resultStatus = 'error';
                                 break;
                             case 'done':
@@ -165,7 +181,8 @@
 
             handleCompletion(resultStatus);
         } catch (error) {
-            appendLog(`Netzwerkfehler: ${error instanceof Error ? error.message : String(error)}`, true);
+            const details = error instanceof Error ? error.message : String(error);
+            appendLog(`${translations.networkError}: ${details}`, true);
             handleCompletion('error');
         }
     };

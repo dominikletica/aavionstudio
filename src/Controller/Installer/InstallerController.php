@@ -10,6 +10,7 @@ use App\Form\Setup\EnvironmentSettingsType;
 use App\Form\Setup\StorageSettingsType;
 use App\Installer\DefaultProjects;
 use App\Installer\DefaultSystemSettings;
+use App\Internationalization\LocaleProvider;
 use App\Setup\SetupConfiguration;
 use App\Setup\SetupAccessToken;
 use App\Setup\SetupHelpLoader;
@@ -38,6 +39,7 @@ final class InstallerController extends AbstractController
         private readonly SetupAccessToken $setupAccessToken,
         private readonly SetupConfiguration $setupConfiguration,
         private readonly SetupHelpLoader $helpLoader,
+        private readonly LocaleProvider $localeProvider,
     ) {
     }
 
@@ -263,36 +265,14 @@ final class InstallerController extends AbstractController
     {
         $choices = [];
 
-        $translationDir = $this->projectDir.'/translations';
-        if (is_dir($translationDir)) {
-            foreach (scandir($translationDir) ?: [] as $file) {
-                if ($file === '.' || $file === '..') {
-                    continue;
-                }
-
-                if (!is_file($translationDir.'/'.$file)) {
-                    continue;
-                }
-
-                $parts = explode('.', $file);
-                if (count($parts) < 3) {
-                    continue;
-                }
-
-                $locale = $parts[count($parts) - 2] ?? '';
-                if (!is_string($locale) || $locale === '') {
-                    continue;
-                }
-
-                $choices[$locale] = $locale;
-            }
+        foreach ($this->localeProvider->available() as $locale) {
+            $choices[$locale] = $locale;
         }
 
         if ($choices === []) {
-            $choices['en'] = 'en';
+            $fallback = $this->localeProvider->fallback();
+            $choices[$fallback] = $fallback;
         }
-
-        ksort($choices);
 
         return $choices;
     }

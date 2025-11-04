@@ -13,7 +13,23 @@
                 <div class="grid gap-4 md:grid-cols-2">
                     {{ ui.form_row_with_tooltip(environment_form.environment, help_tooltips['environment.environment'] ?? null) }}
                     {{ ui.form_row_with_tooltip(environment_form.debug, help_tooltips['environment.debug'] ?? null) }}
-                    {{ ui.form_row_with_tooltip(environment_form.secret, help_tooltips['environment.secret'] ?? null) }}
+                    <div data-controller="setup-secret" data-setup-secret-message-value="{{ 'Secret generated'|trans }}" class="layout-stack layout-stack--tight">
+                        {{ ui.form_row_with_tooltip(environment_form.secret, help_tooltips['environment.secret'] ?? null, {
+                            attr: { 'data-setup-secret-target': 'input', autocomplete: 'off' }
+                        }) }}
+                        <div class="flex items-center gap-3">
+                            {{ include('partials/components/button.html.twig', {
+                                label: 'Generate secret'|trans,
+                                attributes: {
+                                    class: 'btn btn-secondary',
+                                    'data-action': 'setup-secret#generate'
+                                }
+                            }) }}
+                            <span data-setup-secret-target="feedback" class="hidden text-xs text-success font-medium" aria-live="polite">
+                                {{ 'Secret generated'|trans }}
+                            </span>
+                        </div>
+                    </div>
                     {{ ui.form_row_with_tooltip(environment_form.base_url, help_tooltips['environment.base_url'] ?? null) }}
                     {{ ui.form_row_with_tooltip(environment_form.instance_name, help_tooltips['environment.instance_name'] ?? null) }}
                     {{ ui.form_row_with_tooltip(environment_form.tagline, help_tooltips['environment.tagline'] ?? null) }}

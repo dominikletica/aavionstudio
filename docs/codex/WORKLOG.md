@@ -345,3 +345,5 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Added persistent setup logging (`var/log/setup/*.ndjson`), JSON payload builder/cleanup, seeded admin command, and contextual handler diagnostics tests.
 - Introduced help-content loader + JSON catalogue with inline/tooltip cards rendered across installer steps.
 - Polished installer UX: wider/delayed tooltips mapped to form labels (including password confirmation), ensured button components honour submit types, and extended functional coverage to guard the new hints.
+- Added Stimulus-powered “Generate secret” control to the environment step so operators can mint secure APP_SECRET values in-browser, including tests and feedback messaging.
+- Localisation pass: wired JS/UI strings through the translator, added Accept-Language/user-profile locale resolution, and covered locale provider/subscriber behaviour with tests.

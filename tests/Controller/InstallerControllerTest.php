@@ -230,6 +230,7 @@ final class InstallerControllerTest extends WebTestCase
         $this->assertSelectorExists('label.tooltip[for="environment_settings_secret"][data-tooltip]');
         $this->assertSelectorExists('label.tooltip[for="environment_settings_timezone"][data-tooltip]');
         $this->assertSelectorExists('label.tooltip[for="environment_settings_user_registration"][data-tooltip]');
+        $this->assertSelectorExists('[data-controller="setup-secret"] button[data-action="setup-secret#generate"]');
 
         $this->completeEnvironmentStep($client);
         $this->completeStorageStep($client);
