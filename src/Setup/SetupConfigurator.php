@@ -72,7 +72,9 @@ final class SetupConfigurator
 
     private function persistProjects(Connection $connection, array $projects, array $settings): void
     {
-        if (! $this->tableExists('app_project')) {
+        $projectTable = 'user_brain.app_project';
+
+        if (! $this->tableExists($projectTable)) {
             return;
         }
 
@@ -97,39 +99,27 @@ final class SetupConfigurator
 
             $settingsJson = $this->encodeValue($projectSettings);
 
-            try {
-                $row = $connection->fetchAssociative('SELECT id FROM app_project WHERE slug = :slug', ['slug' => $slug]);
-            } catch (DBALException) {
-                $row = false;
-            }
+            $row = $this->fetchUserProjectBySlug($connection, $slug);
 
             if ($row === false) {
-                try {
-                    $connection->insert('app_project', [
-                        'id' => (new Ulid())->toBase32(),
-                        'slug' => $slug,
-                        'name' => $name,
-                        'locale' => $locale,
-                        'timezone' => $timezone,
-                        'settings' => $settingsJson,
-                        'created_at' => $timestamp,
-                        'updated_at' => $timestamp,
-                    ]);
-                } catch (DBALException) {
-                    // schema not yet ready
-                }
+                $this->insertUserProject($connection, [
+                    'id' => (new Ulid())->toBase32(),
+                    'slug' => $slug,
+                    'name' => $name,
+                    'locale' => $locale,
+                    'timezone' => $timezone,
+                    'settings' => $settingsJson,
+                    'created_at' => $timestamp,
+                    'updated_at' => $timestamp,
+                ]);
             } else {
-                try {
-                    $connection->update('app_project', [
-                        'name' => $name,
-                        'locale' => $locale,
-                        'timezone' => $timezone,
-                        'settings' => $settingsJson,
-                        'updated_at' => $timestamp,
-                    ], ['id' => (string) $row['id']]);
-                } catch (DBALException) {
-                    // schema not yet ready
-                }
+                $this->updateUserProject($connection, (string) $row['id'], [
+                    'name' => $name,
+                    'locale' => $locale,
+                    'timezone' => $timezone,
+                    'settings' => $settingsJson,
+                    'updated_at' => $timestamp,
+                ]);
             }
         }
     }
@@ -184,10 +174,81 @@ final class SetupConfigurator
 
     private function tableExists(string $table): bool
     {
+        if (str_contains($table, '.')) {
+            return $this->attachedTableExists($table);
+        }
+
         try {
             return $this->connection->createSchemaManager()->tablesExist([$table]);
         } catch (\Throwable) {
             return false;
+        }
+    }
+
+    private function attachedTableExists(string $table): bool
+    {
+        [$schema, $name] = explode('.', $table, 2);
+
+        try {
+            $result = $this->connection->fetchOne(sprintf(
+                "SELECT name FROM %s.sqlite_master WHERE type = 'table' AND name = :name",
+                $schema
+            ), ['name' => $name]);
+        } catch (DBALException) {
+            return false;
+        }
+
+        return $result !== false && $result !== null;
+    }
+
+    private function fetchUserProjectBySlug(Connection $connection, string $slug): array|false
+    {
+        try {
+            return $connection->fetchAssociative(
+                'SELECT id FROM user_brain.app_project WHERE slug = :slug',
+                ['slug' => $slug]
+            );
+        } catch (DBALException) {
+            return false;
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function insertUserProject(Connection $connection, array $data): void
+    {
+        try {
+            $connection->executeStatement(
+                'INSERT INTO user_brain.app_project (id, slug, name, locale, timezone, settings, created_at, updated_at)
+                 VALUES (:id, :slug, :name, :locale, :timezone, :settings, :created_at, :updated_at)',
+                $data
+            );
+        } catch (DBALException) {
+            // schema not yet ready
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function updateUserProject(Connection $connection, string $projectId, array $data): void
+    {
+        $data['id'] = $projectId;
+
+        try {
+            $connection->executeStatement(
+                'UPDATE user_brain.app_project
+                 SET name = :name,
+                     locale = :locale,
+                     timezone = :timezone,
+                     settings = :settings,
+                     updated_at = :updated_at
+                 WHERE id = :id',
+                $data
+            );
+        } catch (DBALException) {
+            // schema not yet ready
         }
     }
 }

@@ -25,17 +25,19 @@ final class UserControllerTest extends WebTestCase
 
         $this->connection->executeStatement('PRAGMA foreign_keys = OFF');
 
-        foreach (['app_password_reset_token', 'app_api_key', 'app_project_user', 'app_project', 'app_user_role', 'app_role', 'app_user', 'app_audit_log'] as $table) {
+        foreach (['app_password_reset_token', 'app_api_key', 'app_user_role', 'app_role', 'app_user', 'app_audit_log'] as $table) {
             $this->connection->executeStatement('DROP TABLE IF EXISTS '.$table);
         }
+        $this->connection->executeStatement('DROP TABLE IF EXISTS user_brain.app_project_user');
+        $this->connection->executeStatement('DROP TABLE IF EXISTS user_brain.app_project');
 
         $this->connection->executeStatement('CREATE TABLE app_user (id CHAR(26) PRIMARY KEY, email VARCHAR(190) NOT NULL UNIQUE, password_hash VARCHAR(255) NOT NULL, display_name VARCHAR(190) NOT NULL, locale VARCHAR(12) NOT NULL, timezone VARCHAR(64) NOT NULL, status VARCHAR(16) NOT NULL DEFAULT "active", flags TEXT NOT NULL DEFAULT "{}", created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, last_login_at DATETIME DEFAULT NULL)');
         $this->connection->executeStatement('CREATE TABLE app_role (name VARCHAR(64) PRIMARY KEY, label VARCHAR(190) NOT NULL, is_system INTEGER NOT NULL DEFAULT 1, metadata TEXT NOT NULL DEFAULT "{}")');
         $this->connection->executeStatement('CREATE TABLE app_user_role (user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, assigned_at DATETIME NOT NULL, assigned_by CHAR(26), PRIMARY KEY (user_id, role_name))');
         $this->connection->executeStatement('CREATE TABLE app_audit_log (id CHAR(26) PRIMARY KEY, actor_id CHAR(26), action VARCHAR(128) NOT NULL, subject_id CHAR(26), context TEXT NOT NULL, ip_hash VARCHAR(128), occurred_at DATETIME NOT NULL)');
         $this->connection->executeStatement('CREATE TABLE app_api_key (id CHAR(26) PRIMARY KEY, user_id CHAR(26) NOT NULL, label VARCHAR(190) NOT NULL, hashed_key VARCHAR(128) NOT NULL, scopes TEXT NOT NULL, last_used_at DATETIME DEFAULT NULL, created_at DATETIME NOT NULL, revoked_at DATETIME DEFAULT NULL, expires_at DATETIME DEFAULT NULL)');
-        $this->connection->executeStatement('CREATE TABLE app_project (id CHAR(26) PRIMARY KEY, slug VARCHAR(190) NOT NULL, name VARCHAR(190) NOT NULL)');
-        $this->connection->executeStatement('CREATE TABLE app_project_user (project_id CHAR(26) NOT NULL, user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, permissions TEXT NOT NULL, created_at DATETIME NOT NULL, created_by CHAR(26), PRIMARY KEY (project_id, user_id))');
+        $this->connection->executeStatement('CREATE TABLE user_brain.app_project (id CHAR(26) PRIMARY KEY, slug VARCHAR(190) NOT NULL, name VARCHAR(190) NOT NULL)');
+        $this->connection->executeStatement('CREATE TABLE user_brain.app_project_user (project_id CHAR(26) NOT NULL, user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, permissions TEXT NOT NULL, created_at DATETIME NOT NULL, created_by CHAR(26), PRIMARY KEY (project_id, user_id))');
         $this->connection->executeStatement('CREATE TABLE app_password_reset_token (id CHAR(26) PRIMARY KEY, user_id CHAR(26) NOT NULL, selector VARCHAR(24) NOT NULL UNIQUE, verifier_hash VARCHAR(128) NOT NULL, requested_at DATETIME NOT NULL, expires_at DATETIME NOT NULL, consumed_at DATETIME DEFAULT NULL, metadata TEXT NOT NULL)');
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
@@ -95,7 +97,7 @@ final class UserControllerTest extends WebTestCase
             'assigned_by' => '01HXADMINUSER0000000000000',
         ]);
 
-        $this->connection->insert('app_project', [
+        $this->connection->insert('user_brain.app_project', [
             'id' => '01HXPROJECT0000000000000000',
             'slug' => 'default',
             'name' => 'Default Project',
@@ -233,7 +235,7 @@ final class UserControllerTest extends WebTestCase
         self::assertResponseRedirects('/admin/users/01HXUSER000000000000000000');
         $this->client->followRedirect();
 
-        $membershipRow = $this->connection->fetchAssociative('SELECT role_name, permissions FROM app_project_user WHERE project_id = ? AND user_id = ?', ['01HXPROJECT0000000000000000', '01HXUSER000000000000000000']);
+        $membershipRow = $this->connection->fetchAssociative('SELECT role_name, permissions FROM user_brain.app_project_user WHERE project_id = ? AND user_id = ?', ['01HXPROJECT0000000000000000', '01HXUSER000000000000000000']);
         self::assertNotFalse($membershipRow);
         self::assertSame('ROLE_EDITOR', $membershipRow['role_name']);
         $permissions = json_decode((string) $membershipRow['permissions'], true, flags: JSON_THROW_ON_ERROR);
@@ -249,7 +251,7 @@ final class UserControllerTest extends WebTestCase
         self::assertResponseRedirects('/admin/users/01HXUSER000000000000000000');
         $this->client->followRedirect();
 
-        $exists = $this->connection->fetchOne('SELECT COUNT(*) FROM app_project_user WHERE project_id = ? AND user_id = ?', ['01HXPROJECT0000000000000000', '01HXUSER000000000000000000']);
+        $exists = $this->connection->fetchOne('SELECT COUNT(*) FROM user_brain.app_project_user WHERE project_id = ? AND user_id = ?', ['01HXPROJECT0000000000000000', '01HXUSER000000000000000000']);
         self::assertSame(0, (int) $exists);
     }
 

@@ -21,12 +21,14 @@ final class ProjectMembershipRepositoryTest extends TestCase
             'memory' => true,
         ]);
 
-        $this->connection->executeStatement('CREATE TABLE app_project (id CHAR(26) PRIMARY KEY, slug VARCHAR(190) NOT NULL, name VARCHAR(190) NOT NULL, locale VARCHAR(12) NOT NULL, timezone VARCHAR(64) NOT NULL, settings TEXT NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL)');
+        $this->connection->executeStatement("ATTACH DATABASE ':memory:' AS user_brain");
+
+        $this->connection->executeStatement('CREATE TABLE user_brain.app_project (id CHAR(26) PRIMARY KEY, slug VARCHAR(190) NOT NULL, name VARCHAR(190) NOT NULL, locale VARCHAR(12) NOT NULL, timezone VARCHAR(64) NOT NULL, settings TEXT NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL)');
         $this->connection->executeStatement('CREATE TABLE app_role (name VARCHAR(64) PRIMARY KEY, label VARCHAR(190) NOT NULL, is_system INTEGER NOT NULL DEFAULT 1, metadata TEXT NOT NULL DEFAULT "{}")');
-        $this->connection->executeStatement('CREATE TABLE app_project_user (project_id CHAR(26) NOT NULL, user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, permissions TEXT NOT NULL DEFAULT "{}", created_at DATETIME NOT NULL, created_by CHAR(26), PRIMARY KEY (project_id, user_id))');
+        $this->connection->executeStatement('CREATE TABLE user_brain.app_project_user (project_id CHAR(26) NOT NULL, user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, permissions TEXT NOT NULL DEFAULT "{}", created_at DATETIME NOT NULL, created_by CHAR(26), PRIMARY KEY (project_id, user_id))');
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
-        $this->connection->insert('app_project', [
+        $this->connection->insert('user_brain.app_project', [
             'id' => '01HXPROJECT0000000000000000',
             'slug' => 'default',
             'name' => 'Default Project',

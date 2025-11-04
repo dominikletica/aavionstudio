@@ -25,16 +25,18 @@ final class ProjectCapabilityProbeControllerTest extends WebTestCase
 
         $this->connection->executeStatement('PRAGMA foreign_keys = OFF');
 
-        foreach (['app_project_user', 'app_role_capability', 'app_project', 'app_user_role', 'app_role', 'app_user'] as $table) {
+        foreach (['app_role_capability', 'app_user_role', 'app_role', 'app_user'] as $table) {
             $this->connection->executeStatement('DROP TABLE IF EXISTS '.$table);
         }
+        $this->connection->executeStatement('DROP TABLE IF EXISTS user_brain.app_project_user');
+        $this->connection->executeStatement('DROP TABLE IF EXISTS user_brain.app_project');
 
         $this->connection->executeStatement('CREATE TABLE app_user (id CHAR(26) PRIMARY KEY, email VARCHAR(190) NOT NULL UNIQUE, password_hash VARCHAR(255) NOT NULL, display_name VARCHAR(190) NOT NULL, locale VARCHAR(12) NOT NULL, timezone VARCHAR(64) NOT NULL, status VARCHAR(16) NOT NULL DEFAULT "active", flags TEXT NOT NULL DEFAULT "{}", created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, last_login_at DATETIME DEFAULT NULL)');
         $this->connection->executeStatement('CREATE TABLE app_role (name VARCHAR(64) PRIMARY KEY, label VARCHAR(190) NOT NULL, is_system INTEGER NOT NULL DEFAULT 1, metadata TEXT NOT NULL DEFAULT "{}")');
         $this->connection->executeStatement('CREATE TABLE app_user_role (user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, assigned_at DATETIME NOT NULL, assigned_by CHAR(26), PRIMARY KEY (user_id, role_name))');
         $this->connection->executeStatement('CREATE TABLE app_role_capability (role_name VARCHAR(64) NOT NULL, capability VARCHAR(190) NOT NULL, PRIMARY KEY (role_name, capability))');
-        $this->connection->executeStatement('CREATE TABLE app_project (id CHAR(26) PRIMARY KEY, slug VARCHAR(190) NOT NULL, name VARCHAR(190) NOT NULL)');
-        $this->connection->executeStatement('CREATE TABLE app_project_user (project_id CHAR(26) NOT NULL, user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, permissions TEXT NOT NULL DEFAULT "{}", created_at DATETIME NOT NULL, created_by CHAR(26), PRIMARY KEY (project_id, user_id))');
+        $this->connection->executeStatement('CREATE TABLE user_brain.app_project (id CHAR(26) PRIMARY KEY, slug VARCHAR(190) NOT NULL, name VARCHAR(190) NOT NULL)');
+        $this->connection->executeStatement('CREATE TABLE user_brain.app_project_user (project_id CHAR(26) NOT NULL, user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, permissions TEXT NOT NULL DEFAULT "{}", created_at DATETIME NOT NULL, created_by CHAR(26), PRIMARY KEY (project_id, user_id))');
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
@@ -56,7 +58,7 @@ final class ProjectCapabilityProbeControllerTest extends WebTestCase
             'capability' => 'project.manage',
         ]);
 
-        $this->connection->insert('app_project', [
+        $this->connection->insert('user_brain.app_project', [
             'id' => '01HXPROJECT0000000000000000',
             'slug' => 'default',
             'name' => 'Default Project',
@@ -97,7 +99,7 @@ final class ProjectCapabilityProbeControllerTest extends WebTestCase
             'last_login_at' => null,
         ]);
 
-        $this->connection->insert('app_project_user', [
+        $this->connection->insert('user_brain.app_project_user', [
             'project_id' => '01HXPROJECT0000000000000000',
             'user_id' => '01HXMEMBER0000000000000000',
             'role_name' => 'ROLE_VIEWER',

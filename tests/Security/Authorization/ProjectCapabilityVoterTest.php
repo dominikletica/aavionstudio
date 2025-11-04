@@ -26,8 +26,10 @@ final class ProjectCapabilityVoterTest extends TestCase
             'memory' => true,
         ]);
 
+        $this->connection->executeStatement("ATTACH DATABASE ':memory:' AS user_brain");
+
         $this->connection->executeStatement('CREATE TABLE app_role_capability (role_name VARCHAR(64) NOT NULL, capability VARCHAR(190) NOT NULL, PRIMARY KEY (role_name, capability))');
-        $this->connection->executeStatement('CREATE TABLE app_project_user (project_id CHAR(26) NOT NULL, user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, permissions TEXT NOT NULL DEFAULT "{}", created_at DATETIME NOT NULL, created_by CHAR(26), PRIMARY KEY (project_id, user_id))');
+        $this->connection->executeStatement('CREATE TABLE user_brain.app_project_user (project_id CHAR(26) NOT NULL, user_id CHAR(26) NOT NULL, role_name VARCHAR(64) NOT NULL, permissions TEXT NOT NULL DEFAULT "{}", created_at DATETIME NOT NULL, created_by CHAR(26), PRIMARY KEY (project_id, user_id))');
 
         $resolver = new RoleCapabilityResolver($this->connection);
         $repository = new ProjectMembershipRepository($this->connection);
@@ -56,7 +58,7 @@ final class ProjectCapabilityVoterTest extends TestCase
             'capability' => 'content.publish',
         ]);
 
-        $this->connection->insert('app_project_user', [
+        $this->connection->insert('user_brain.app_project_user', [
             'project_id' => '01HXPROJECT0000000000000000',
             'user_id' => '01HXUSER000000000000000002',
             'role_name' => 'ROLE_EDITOR',
@@ -75,7 +77,7 @@ final class ProjectCapabilityVoterTest extends TestCase
 
     public function testMembershipExplicitPermissionGrantsCapability(): void
     {
-        $this->connection->insert('app_project_user', [
+        $this->connection->insert('user_brain.app_project_user', [
             'project_id' => '01HXPROJECT0000000000000000',
             'user_id' => '01HXUSER000000000000000003',
             'role_name' => 'ROLE_VIEWER',
@@ -104,7 +106,7 @@ final class ProjectCapabilityVoterTest extends TestCase
 
     public function testLegacyPermissionsMapStillSupported(): void
     {
-        $this->connection->insert('app_project_user', [
+        $this->connection->insert('user_brain.app_project_user', [
             'project_id' => '01HXPROJECT0000000000000001',
             'user_id' => '01HXUSER000000000000000005',
             'role_name' => 'ROLE_VIEWER',

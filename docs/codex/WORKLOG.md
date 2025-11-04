@@ -395,7 +395,15 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - Hardened test isolation: installer pipeline tests and lint helpers now operate exclusively on `var/test` artefacts, preventing accidental deletion of the real `.env.local` during the suite.
 - Tests: `php bin/phpunit`.
 
+### 2025-11-04 (Session 5)
+- Relocated installer help catalogues to the project root (shipping with releases), updated loader/tests, and refreshed class map references.
+- Replaced legacy migrations with `Version20251105000100`, ensuring project/schema/template data live in `user_brain.*` while system tables stay in `system.brain`; repositories, configurator, and tests now target the attached database.
+- Added `app_preset` scaffolding plus reversed schema ↔ template FK relationships to match the planned entity renderer/exporter model.
+- Documented the router default URI subscriber and ran the full test suite after schema/help adjustments (`php bin/phpunit`).
+- Follow-up deferred: preserving non-SQLite DSNs remains on the roadmap once multi-engine support is scoped.
+
 #### Side-Notes (2025-11-04)
-- We need to make sure, that help.json gets moved out of docs/ since releases do not include docs/.
-- We need to adjust the migrations: app_projects, app_project_user, app_schema & app_templates belong into user space. Consumers have to be edited accordingly.
-- Additionally we'll need app_presets (system.brain, to manage export presets) and app_schema_versions (user.brain to manage different versions of a schema, so that editing a schema doesn't automatically invalidate existing entities). -- Note: Schema is referenced by entity_type to determine, what fields the payload should include and how they are rendered. Also a Schema links to a template (database stored TWIG, not a template path!) that can override the default template an entity payload using this schema is rendered in frontend ({% block payload %}) - our entity renderer should fill this block either with a default logic, or with the provided template if exists. We'll need to specify a base-template that extends templates/layouts/entity.html.twig to use this block.
+- [x] Move installer help catalogues out of `docs/` so release packages include them.
+- [x] Adjust migrations so `app_project`, `app_project_user`, `app_schema`, and `app_template` live in the user database with updated consumers.
+- [x] Introduce `app_preset` (system database) to prepare export preset management.
+- [x] Reverse schema ↔ template FK direction and document renderer expectations for future entity templating.

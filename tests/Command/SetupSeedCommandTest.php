@@ -51,7 +51,7 @@ final class SetupSeedCommandTest extends KernelTestCase
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
         )');
-        $connection->executeStatement('CREATE TABLE IF NOT EXISTS app_project (
+        $connection->executeStatement('CREATE TABLE IF NOT EXISTS user_brain.app_project (
             id TEXT PRIMARY KEY,
             slug TEXT NOT NULL,
             name TEXT NOT NULL,
@@ -78,7 +78,7 @@ final class SetupSeedCommandTest extends KernelTestCase
             ]);
             $connection->executeStatement('DELETE FROM app_user_role WHERE user_id NOT IN (SELECT id FROM app_user)');
             $connection->executeStatement('DELETE FROM app_system_setting');
-            $connection->executeStatement('DELETE FROM app_project');
+            $connection->executeStatement('DELETE FROM user_brain.app_project');
         }
 
         $this->filesystem->remove($this->projectDir.'/var/setup');
@@ -133,7 +133,7 @@ final class SetupSeedCommandTest extends KernelTestCase
         self::assertNotFalse($setting, 'System settings should be saved');
         self::assertSame('"Installer QA"', $setting['value']);
 
-        $projectRow = $connection->fetchAssociative('SELECT slug, name FROM app_project WHERE slug = :slug', [
+        $projectRow = $connection->fetchAssociative('SELECT slug, name FROM user_brain.app_project WHERE slug = :slug', [
             'slug' => $projects[0]['slug'],
         ]);
         self::assertNotFalse($projectRow, 'Default project should be persisted');
