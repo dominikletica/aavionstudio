@@ -4,66 +4,26 @@
 > Purpose: Track implementation decisions, open questions, and follow-up tasks during development.
 
 ## TODO
-### Core Platform (P0 | XL)
-#### Hosting & Installer
-- [x] Finalise rewrite-first vs root fallback handling, including installer warnings and documentation hooks
-- [x] Build installer wizard steps (diagnostics → environment → storage/db → admin account → summary) with `.env.local.php` generator
-- [x] Implement health checks for PHP extensions, writable `var/*` directories, and SQLite availability with actionable remediation hints
-- [x] Deliver root-level `index.php` compatibility loader plus hardening (`Options -Indexes`, deny sensitive paths) and banner logic
-
-#### Module System
-- [x] Implement module manifest contract & registry (services, routes, navigation, theme slots, scheduler hooks)
-- [x] Persist module metadata in `system.brain` for future enable/disable flows; load manifests during cache warmup with validation errors surfaced (installer does not manage modules yet)
-- [x] Integrate module-provided capabilities into the central registry for later features (user access, admin navigation)
-
-#### Database & Migrations
-- [x] Prepare initial Doctrine migrations for core tables (`app_project`, `app_entity`, `app_entity_version`, `app_draft`, `app_schema`, `app_template`, `app_relation`, `app_user`, `app_api_key`, `app_log`)
-- [x] Configure dual SQLite connections with attach listener, busy timeout, and connection health checks
-- [x] Seed baseline configuration records (system settings, installer state) via a hybrid approach (lightweight fixtures/config files plus installer overrides) to keep defaults easy to evolve
-
-#### Testing & Tooling
-- [x] Create unit/integration test harness covering installer flow, module loader bootstrap, and database attachment
-- [x] Add smoke tests for root loader rewrite detection and installer diagnostics endpoints
-- [x] Review `bin/release` workflow so new core-platform steps (manifest cache, installer assets) remain compatible with the existing prebuild process; adjust only if gaps emerge
-
-### Feat: User Management & Access Control (P0 | L)
-#### Authentication & Core Entities
-- [x] Add migration(s) to extend `app_user` (rename `password` → `password_hash`, add status/last login) and create supporting tables (`app_role`, `app_user_role`, `app_project_user`, `app_password_reset_token`, `app_remember_me_token`, `app_audit_log`, `app_user_invitation`).
-- [x] Implement DB-backed user provider, user model, password hasher config, login/logout/remember-me controllers, and rate limiting for authentication attempts.
-- [x] Wire password reset flow (token storage, email delivery, controllers) and record audit events for credential changes.
-- [x] Provide invitation backend (tokens, persistence, audit logging) for administrators.
-- [x] Implement invitation management UI and activation onboarding for administrators.
-
-#### Roles, Capabilities & Project Memberships
-- [x] Materialise global role hierarchy + default seeds; expose capability registry service that hydrates from module manifests and persists defaults in the database.
-- [x] Implement project membership repository (`app_project_user`) abstraction to supply voters/admin UI.
-- [x] Build project membership voters that combine global roles, project overrides, and capability requirements.
-
-#### Admin UI & API Keys
-- [x] Add invitation management screen (listing/create/cancel) under `/admin/users/invitations` with email delivery and audit logging.
-- [x] Build `/admin/users` management interface (listing, filters, detail view) with forms for profile edits, role assignments, project overrides, invitations, and password resets. *(Project overrides complete; password reset trigger still pending.)*
-- [x] Implement API key issuance/revocation (UI + CLI) with scoped capability enforcement and hashed storage. *(Scopes + expiry captured; capability enforcement middleware still pending once API surface lands.)*
-- [x] Surface audit log viewer for security events (auth attempts, role changes, API key updates) with filters.
-
-#### Testing & Tooling
-- [x] Add unit/functional tests covering voter decisions and API key HTTP endpoints (login + admin flows + voter probe + API key REST endpoints are now covered; remaining HTTP API auth enforcement will land with the write API).
-- [x] Provide documentation updates (developer + user manuals) for login, roles, project membership, API keys, and troubleshooting; schedule follow-up smoke tests in release workflow. *(Docs updated alongside recent features; smoke-test automation still a later task.)*
 
 ### Feat: Admin Studio UI (P0 | L)
-- [ ] Scaffold layout (sidebar, header, notifications) with Tailwind components
-- [ ] Wire navigation builder consuming module manifests + capability checks
-- [ ] Implement search palette and contextual help drawer
-- [ ] Add Cypress/Stimulus integration tests (or Symfony Panther) for core navigation UX
-
-### Localization & Translation (P0 | M)
-- [x] Switch installer environment/storage/admin forms to deterministic translation keys with updated session writers.
-- [x] Add debug footer locale selector + translator decorator with PHPUnit coverage.
-- [x] Implement translation catalogue manager to cascade theme/module/system resources with caching + tests.
-- [x] Migrate remaining Twig templates (security/auth flows, admin audit/system screens, demo) to deterministic translation keys.
-- [x] Extend German `messages.*` catalogue for outstanding UI strings beyond installer/admin steps.
-- [x] Audit validator error messages to ensure every constraint surfaces localized keys.
-- [x] Localize UI timestamps via translation-driven date/time formats.
-- [x] Normalise built-in/admin role labels to translation keys and document how module-defined roles should supply translated display names.
+- [ ] Update `base.html.twig` to accept `html_classes` and append the `admin` class; refactor `layouts/default.html.twig` / `layouts/admin.html.twig` to share the shell.
+- [ ] Keep header/footer shared by default; rely on the `admin` class + data injections for admin-specific tweaks.
+- [ ] Extend `assets/styles/base/{layout,navigation,utilities}.css` and `theme.css` tokens to cover dashboard grid, sidebar stacking, palette transitions, toast animations.
+- [ ] Restructure Twig partials (`partials/components/`, `partials/ui/`, `partials/admin/`) for reusable atoms vs. admin-only composites.
+- [ ] Implement manifest-driven navigation builder with capability filters, caching, and header/sidebar integration.
+- [ ] Surface workspace sidebar panels via `sidebar_top` / `sidebar_bottom` blocks (quick actions, module cards).
+- [ ] Scaffold `/admin` dashboard controller + Twig template with cards for snapshot status, draft throughput, activity timeline, quick links, and system health.
+- [ ] Seed `var/mock/dashboard-placeholder.json` and wire the controller to use placeholders until live telemetry lands.
+- [ ] Add ApexCharts visualisation to the dashboard and render a capability-aware quick-action bar (cache rebuild, asset rebuild, commit draft) + tooltips.
+- [ ] Implement Stimulus command palette (⌘K/CTRL+K + `/`) with route, recent entity, and system action providers backed by a JSON endpoint.
+- [ ] Build animated toast/notification system extending `partials/alerts/alerts.html.twig`.
+- [ ] Extend help provider auto-discovery so active modules/themes contribute `help.json` entries; enforce `data-help-key` hooks in the admin UI.
+- [ ] Introduce shared modal/drawer partials with Stimulus controllers covering focus trapping and ARIA roles.
+- [ ] Aggregate snapshot, draft, audit-log, and asset-rebuild metrics for the dashboard service; ensure Messenger queue state surfaces in UI.
+- [ ] Guarantee accessibility & localisation (keyboard nav, ARIA, translations, debug locale toggle) across new admin components.
+- [ ] Add functional coverage for `/admin` dashboard rendering, navigation visibility per capability, and command palette endpoint.
+- [ ] Add Stimulus/Turbo integration tests for command palette flows, help drawer, toast lifecycle (Panther or equivalent).
+- [ ] Update docs (`docs/dev/classmap.md`, `docs/dev/MANUAL.md`, forthcoming user admin guide) and record progress in this worklog.
 
 ### Feat: Schema & Template System (P0 | L)
 - [ ] Implement schema/template persistence with versioning
@@ -83,25 +43,6 @@
 - [ ] Expose read-only API endpoints with caching headers and rate limiting
 - [ ] Add CLI commands for snapshot rebuild and pruning
 - [ ] Provide integration tests validating snapshot generation and API responses
-
-### Installer Completion Tasks (P0 | XL)
-- [x] Build installer forms + POST controllers for environment, storage, and admin steps (persist data via `SetupConfiguration`, add diagnostics refresh endpoint, update Twig templates to consume live session data).
-- [x] Extend `SetupConfiguration` with new getters/setters (environment overrides, storage root, admin payload, warning acknowledgements) and add integration tests for session persistence.
-- [x] Implement `SetupEnvironmentWriter` to merge validated overrides into `.env.local` atomically (preserve existing keys, provide safe fallbacks, unit tests).
-- [x] Introduce JSON payload hand-off (`var/setup/runtime.json`), update action steps (`prepare_payload`, `write_env`), add payload builder & cleanup, and extend `bin/init` with `--setup/--payload` wiring plus dedicated tests.
-- [x] Enhance `bin/init` with `--setup/--payload` support and create `app:setup:seed` console command to hash/persist the admin user, clear payload secrets, and log outcomes.
-- [x] Add persistent setup log writer (stream to `var/log/setup/*.ndjson`) within `ActionExecutor`.
-- [x] Wire new help-content JSON loader and replace inline doc links in installer templates.
-- [x] Harden `/setup/action` streaming response by starting/saving the session before flushing NDJSON output (prevents "headers already sent" errors reported on step 2).
-- [x] Introduce configurable installer action session strategy (`INSTALLER_ACTION_MODE`) to choose between streaming with an open session or buffered JSON output; add controller tests and developer manual updates covering both options.
-- [x] Split help JSON entries into inline panels vs. targeted tooltips; update installer templates/macros to attach tooltips to environment/storage/admin fields and to surface summary actions as hoverable badges.
-- [x] Polish tooltip UX (0.5s hover delay, wider responsive container, label-level wiring for password confirmation) to keep wizard copy readable without layout jitter.
-- [x] Correct button component defaults so installer forms submit properly without passing explicit `type` parameters hook-ups.
-- [x] Tighten wizard navigation gating (disable future steps, redirect invalid `step` query selections) and add accessibility metadata (`aria-disabled`).
-- [x] Expand installer functional coverage (tooltip rendering, summary action badges, step gating) and add unit tests for `SetupConfiguration` boolean helpers + `SetupHelpLoader` target propagation.
-- [x] Update `SetupConfigurator` + `SystemSettings` reload flow to consume session data safely prior to `bin/init`, including default project metadata handling.
-- [x] Add unit/integration/functional coverage for the full installer pipeline (forms, env writer, action executor, bin/init seeding) and document manual verification steps in developer/user manuals.
-- [x] Introduce field-aware tooltip binding (Stimulus helper or Twig extensions) so targeted help entries decorate the precise form controls without manual badge duplication.
 
 ### Feat: Frontend Delivery & Rendering (P0 | L)
 - [ ] Implement catch-all frontend controller backed by snapshots and schema templates
@@ -199,11 +140,12 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 ## Planned Implementations, Outlined Ideas
 > Concept drafts live in `docs/codex/notes/*.md`
 
-- [Project Outline](./notes/OUTLINE.md)
+- [Project Outline](./notes/OUTLINE.md) ! Must read !
 - [Feat: Core Platform](./notes/feat-core-platform.md)
 - [Feat: Draft & Commit Workflow](./notes/feat-draft-commit.md)
 - [Feat: Resolver Pipeline](./notes/feat-resolver-pipeline.md)
 - [Feat: Snapshot & API Delivery](./notes/feat-snapshot-api.md)
+- [Feat: Admin Assets](./notes/feat-admin-assets.md)
 - [Feat: Theming & Templating](./notes/feat-theming-templating.md)
 - [Feat: Frontend Delivery & Rendering](./notes/feat-frontend-delivery.md)
 - [Feat: User Management & Access Control](./notes/feat-user-access.md)
@@ -407,3 +349,7 @@ Vision: Create a fully functional prototype (MVP+) as 0.1.0 dev-release:
 - [x] Adjust migrations so `app_project`, `app_project_user`, `app_schema`, and `app_template` live in the user database with updated consumers.
 - [x] Introduce `app_preset` (system database) to prepare export preset management.
 - [x] Reverse schema ↔ template FK direction and document renderer expectations for future entity templating.
+
+### 2025-11-04 (Session 6)
+- Kickoff: Cleared completed Todo-sections from worklog for better readability.
+- Outlined [concept for roadmap step 4](./notes/feat-admin-studio.md) and expanded corresponding todo section to mirror open tasks.

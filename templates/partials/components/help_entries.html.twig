@@ -1,4 +1,4 @@
-{# Renders installer help entries, splitting inline content from freestanding tooltips. #}
+{# Renders help entries, splitting inline content from freestanding tooltips. #}
 {% set entries = entries|default([]) %}
 {% if entries is iterable %}
     {% set inline_entries = entries|filter(e => (e.type ?? 'inline_help') != 'tooltip') %}
